@@ -1763,6 +1763,33 @@
     display: none !important;
   }
 
+  /* Compact Initials Avatar on Mobile Screens */
+  .merchant-profile-text-wrap {
+    display: none !important;
+  }
+
+  .merchant-profile-btn {
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+  }
+
+  .merchant-avatar {
+    width: 38px !important;
+    height: 38px !important;
+    font-size: 0.95rem !important;
+    font-weight: 800 !important;
+    cursor: pointer !important;
+    box-shadow: 0 2px 10px rgba(0, 41, 112, 0.3) !important;
+    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .merchant-avatar:active {
+    transform: scale(0.92);
+  }
+
   .cockpit-view-section {
     padding: 8px 10px 88px 10px !important;
   }
