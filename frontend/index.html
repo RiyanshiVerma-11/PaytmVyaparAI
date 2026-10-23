@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paytm Vyapar Saathi — Autonomous AI Business Copilot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/variables.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+</head>
+<body>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="brand-section">
+      <div style="font-size: 1.4rem; font-weight: 800; display: flex; align-items: center; gap: 6px;">
+        <span style="color: var(--paytm-cyan);">Paytm</span>
+        <span style="color: #ffffff;">Vyapar Saathi</span>
+      </div>
+      <span class="brand-badge">AI Business Copilot</span>
+    </div>
+
+    <div class="merchant-pill">
+      <span style="font-size: 1.1rem;">🏪</span>
+      <div>
+        <div style="font-size: 0.85rem; font-weight: 700;">Sharma Kirana & General Store</div>
+        <div style="font-size: 0.7rem; opacity: 0.8;">Chandni Chowk, Delhi • UPI: paytm@sharmakirana</div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Cockpit Container -->
+  <div class="cockpit-container">
+
+    <!-- 1. Left Navigation -->
+    <aside class="cockpit-nav">
+      <div class="nav-item active" data-tab="tab-copilot">
+        <span>🎙️</span> Vyapar Copilot
+      </div>
+      <div class="nav-item" data-tab="tab-khata">
+        <span>📖</span> Bahi-Khata (Udhaar)
+      </div>
+      <div class="nav-item" data-tab="tab-inventory">
+        <span>📦</span> Stock & Supplier PO
+      </div>
+      <div class="nav-item" data-tab="tab-growth">
+        <span>🚀</span> Merchant Growth & Loan
+      </div>
+    </aside>
+
+    <!-- 2. Center Content Area -->
+    <main class="cockpit-main">
+
+      <!-- TAB 1: Copilot (Live Voice & ReAct Agent) -->
+      <section id="tab-copilot" class="tab-panel active">
+        <!-- Voice Action Hero Card -->
+        <div class="card" style="background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);">
+          <div style="display: flex; align-items: center; gap: 1.5rem;">
+            <button id="micBtn" class="mic-btn" title="Tap to speak in Hindi/Hinglish">
+              <span>🎤</span>
+            </button>
+            <div style="flex: 1;">
+              <div id="voiceStatus" style="font-weight: 700; color: var(--paytm-blue); font-size: 1.05rem;">
+                Tap Mic or Type below (Speaks Hindi & Hinglish)
+              </div>
+              <div style="display: flex; gap: 0.5rem; margin-top: 0.6rem;">
+                <input type="text" id="queryInput" placeholder="e.g. Ramesh bhai ko ₹450 ka refine tel udhaar diya, note karlo..." style="flex:1; padding:0.6rem 1rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); font-size:0.9rem;">
+                <button id="sendBtn" class="btn-sm btn-primary" style="padding:0.6rem 1.2rem;">Execute</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Query Chips -->
+          <div style="display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap;">
+            <span class="badge badge-paytm quick-chip" data-query="Ramesh bhai ko ₹450 ka refine tel udhaar diya, note karlo" style="cursor:pointer;">
+              🗣️ "Ramesh bhai ko ₹450 tel udhaar diya"
+            </span>
+            <span class="badge badge-warning quick-chip" data-query="Amul butter kitna bacha hai aur restock kar do" style="cursor:pointer;">
+              📦 "Amul butter restock PO bhejo"
+            </span>
+            <span class="badge badge-success quick-chip" data-query="Puraane grahak ko discount offer bhejo" style="cursor:pointer;">
+              🎁 "Puraane grahak ko discount offer bhejo"
+            </span>
+            <span class="badge badge-paytm quick-chip" data-query="Mera credit score aur loan eligibility kya hai" style="cursor:pointer;">
+              💳 "Mera credit score & loan check karo"
+            </span>
+          </div>
+        </div>
+
+        <!-- ReAct Agent Cognitive Stream -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">
+              <span>🧠</span> Autonomous ReAct Agent Thought Stream
+            </div>
+            <span class="badge badge-paytm">Live Tool Execution Telemetry</span>
+          </div>
+          <div id="thoughtStream" class="thought-stream">
+            <div class="thought-entry">> Paytm Vyapar Saathi ReAct Engine initialized. Ready for voice & ledger actions.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: Khata (Udhaar Ledger) -->
+      <section id="tab-khata" class="tab-panel">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><span>📖</span> Digital Bahi-Khata (Udhaar Ledger)</div>
+              <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.2rem;">Zero-touch verbal ledger with 1-tap native SMS reminders</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.75rem; color:var(--text-secondary);">Total Pending Receivables</div>
+              <div id="totalPendingUdhaar" style="font-size:1.4rem; font-weight:800; color:var(--color-danger);">₹3,100</div>
+            </div>
+          </div>
+          <table class="vyapar-table">
+            <thead>
+              <tr>
+                <th>Customer</th>
+                <th>Pending Udhaar</th>
+                <th>Churn Risk</th>
+                <th>Last Visit</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="khataTableBody">
+              <!-- Dynamically Loaded -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 3: Stock & Supplier PO -->
+      <section id="tab-inventory" class="tab-panel">
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem;"><span>⚠️</span> Low Stock Guardian (Restock Alerts)</div>
+          <div id="lowStockList">
+            <!-- Dynamically Loaded -->
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="margin-bottom:1rem;"><span>📦</span> Store Master Inventory (Zero-Setup FMCG)</div>
+          <table class="vyapar-table">
+            <thead>
+              <tr>
+                <th>Item Name</th>
+                <th>Category</th>
+                <th>Stock</th>
+                <th>Retail Price</th>
+                <th>Wholesale Supplier</th>
+              </tr>
+            </thead>
+            <tbody id="allInventoryList">
+              <!-- Dynamically Loaded -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- TAB 4: Growth & Loan -->
+      <section id="tab-growth" class="tab-panel">
+        <!-- Churn Prevention & Customer Win-Back -->
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-title"><span>🚀</span> Merchant Growth Engine (Customer Win-Back)</div>
+              <div style="font-size:0.85rem; color:var(--text-secondary);">Automated QR telemetry CRM detects dormant neighborhood regulars</div>
+            </div>
+            <span class="badge badge-danger">High Retention Value</span>
+          </div>
+          <div id="churnCampaignsContainer">
+            <!-- Dynamically Loaded -->
+          </div>
+        </div>
+
+        <!-- Working Capital Loan Health -->
+        <div class="card" style="background: linear-gradient(135deg, #0a192f 0%, #002970 100%); color: white;">
+          <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 1rem;">
+            <div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: var(--paytm-cyan);">💳 Paytm Pre-Approved Merchant Loan</div>
+              <div style="font-size: 0.8rem; opacity: 0.8;">Underwritten by daily Soundbox UPI velocity & Khata repayment consistency</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 0.75rem; opacity: 0.8;">Credit Health Score</div>
+              <div id="creditScoreValue" style="font-size: 1.6rem; font-weight: 800; color: #00d26a;">88/100</div>
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-top: 1.2rem;">
+            <div>
+              <div style="font-size: 0.75rem; opacity: 0.8;">Pre-Approved Capital</div>
+              <div id="preApprovedAmount" style="font-size: 1.3rem; font-weight: 800; color: var(--paytm-cyan);">₹75,000</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; opacity: 0.8;">Working Capital Runway</div>
+              <div id="capitalRunway" style="font-size: 1.3rem; font-weight: 800; color: white;">45 Days</div>
+            </div>
+            <div>
+              <div style="font-size: 0.75rem; opacity: 0.8;">Disbursement Status</div>
+              <div style="font-size: 1.1rem; font-weight: 700; color: #00d26a;">Instant (1-Click)</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- 3. Right Sidebar: Paytm Soundbox Hardware Simulator -->
+    <aside class="soundbox-sidebar">
+      <div class="soundbox-widget">
+        <div style="font-size: 0.8rem; font-weight: 700; letter-spacing: 0.5px; opacity: 0.9; text-transform: uppercase;">
+          Paytm Soundbox 3.0
+        </div>
+        <div style="font-size: 0.7rem; color: var(--paytm-cyan); margin-top: 2px;">
+          Hardware Audio Simulator (Zero Capex)
+        </div>
+
+        <!-- Hardware Device Visualizer -->
+        <div id="soundboxHardware" class="soundbox-hardware">
+          <div style="font-size: 1.2rem; font-weight: 900; color: white; letter-spacing: 1px;">
+            <span style="color: var(--paytm-cyan);">Pay</span>tm
+          </div>
+          <div style="font-size: 0.6rem; color: #8ed0ff; margin-top: 2px;">Smart Soundbox</div>
+          
+          <div class="sound-waves">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+
+          <div style="font-size: 0.65rem; color: #00d26a; display: flex; align-items: center; gap: 4px;">
+            <span style="width: 6px; height: 6px; background: #00d26a; border-radius: 50%; display: inline-block;"></span> 4G Connected
+          </div>
+        </div>
+
+        <!-- Test Chime Button -->
+        <button class="btn-sm btn-cyan" style="width: 100%; justify-content: center; margin-top: 0.5rem;" onclick="window.paytmSoundbox.broadcast('Paytm par Ramesh ji ka char sau pachaas rupaye udhaar darj ho gaya')">
+          🔊 Test Soundbox Chime
+        </button>
+
+        <div style="font-size: 0.75rem; color: #8c9ba5; margin-top: 1rem; line-height: 1.4;">
+          Streams audio over existing 4G MQTT telemetry. Requires zero new hardware from Paytm!
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <style>
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+  </style>
+
+  <!-- Scripts -->
+  <script src="/static/js/soundbox.js"></script>
+  <script src="/static/js/speech.js"></script>
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/app.js"></script>
+</body>
+</html>

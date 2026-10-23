@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+env/
+.env
+
+# Database
+*.sqlite3
+backend/vyapar.db-journal
+
+# IDE & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

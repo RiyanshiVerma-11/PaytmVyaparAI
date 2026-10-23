@@ -1,0 +1,116 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* App Header */
+.app-header {
+  background: linear-gradient(135deg, var(--paytm-navy) 0%, var(--paytm-blue) 100%);
+  color: var(--text-inverse);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-md);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.brand-section {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.brand-badge {
+  background: var(--paytm-cyan);
+  color: var(--paytm-navy);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.merchant-pill {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.12);
+  padding: 0.4rem 1rem;
+  border-radius: 50px;
+  backdrop-filter: blur(8px);
+}
+
+/* Main Layout Grid */
+.cockpit-container {
+  display: grid;
+  grid-template-columns: 240px 1fr 340px;
+  gap: 1.5rem;
+  padding: 1.5rem 2rem;
+  flex: 1;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Sidebar Nav */
+.cockpit-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1.2rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.nav-item:hover, .nav-item.active {
+  background: var(--bg-surface);
+  color: var(--paytm-blue);
+  box-shadow: var(--shadow-sm);
+  border-color: var(--border-color);
+}
+
+.nav-item.active {
+  border-left: 4px solid var(--paytm-cyan);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .cockpit-container {
+    grid-template-columns: 200px 1fr;
+  }
+  .soundbox-sidebar {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .cockpit-container {
+    grid-template-columns: 1fr;
+    padding: 1rem;
+  }
+}

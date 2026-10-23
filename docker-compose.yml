@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  paytm-vyapar-ai:
+    build: .
+    container_name: paytm_vyapar_cockpit
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+    restart: unless-stopped
+    volumes:
+      - ./backend/vyapar.db:/app/backend/vyapar.db
