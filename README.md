@@ -1,7 +1,8 @@
-# 🇮🇳 Paytm Vyapar Saathi (AI Business Copilot)
-> **Autonomous AI Business Partner & Intelligent Soundbox for 30M+ Indian Merchants**  
-> *Built for Paytm Build for India AI Hackathon – Delhi (Offline Finals @ Paytm HQ, SkymarkOne, Noida)*  
-> **Track:** Track 1 — *Merchant Growth AI ("Beyond Payments")*
+# Paytm Vyapar Saathi (Soundbox 4.0 Pro AI Retail OS)
+
+> **Autonomous AI Business Copilot & Intelligent Soundbox for India's 30M+ Retail Merchants**  
+> **Official Track:** Track 1 — *Merchant Growth AI ("Beyond Payments")*  
+> **Platform & Finals:** Paytm Build for India AI Hackathon (Paytm HQ, SkymarkOne, Noida)
 
 ---
 
@@ -9,69 +10,95 @@
 
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![SQLite](https://img.shields.io/badge/SQLite-07405E?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
-[![Web Audio API](https://img.shields.io/badge/Web_Audio-Soundbox_Chime-00BAF2?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
-[![Track](https://img.shields.io/badge/Track-Merchant_Growth_AI-002970?style=for-the-badge)](https://devsemble.com/hackathons/Paytm%20Build%20for%20India%20AI%20Hackathon%20%E2%80%93%20Delhi%20-by-paytm)
+[![SQLite / PostgreSQL Ready](https://img.shields.io/badge/Database-SQLite%20%2F%20PostgreSQL%20Ready-07405E?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Web Audio API](https://img.shields.io/badge/Hardware_Audio-Soundbox_Chime_Synthesizer-00BAF2?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
+[![Render Backend](https://img.shields.io/badge/Render-Live_Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://paytmvyaparai.onrender.com/)
+[![Vercel Ready](https://img.shields.io/badge/Vercel-Frontend_Proxy_Ready-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
 
 ---
 
-## 📌 Executive Summary
+## 1. Executive Summary
 
-**Paytm Vyapar Saathi** transforms the iconic **Paytm Soundbox** from a passive payment confirmation speaker into an **active, proactive digital business partner (Munshi + Marketing Manager + CFO)** for 30 million Indian Kirana and retail merchants.
+**Paytm Vyapar Saathi** transforms the iconic **Paytm Soundbox** from a passive payment confirmation speaker into an **active, proactive digital business partner (Munshi + Inventory Guardian + CFO)** for 30 million Indian Kirana and retail merchants.
 
-Instead of forcing busy shopkeepers to navigate complicated English apps during peak counter rush, **they simply speak in Hinglish or Hindi**. The autonomous ReAct agent executes business actions in real-time:
-1. **Records Udhaar (Credit)** in a persistent digital ledger.
-2. **Decrements stock** and alerts before fast-moving items run out.
-3. **Dispatches automated wholesale Purchase Orders via Email SMTP** to suppliers.
-4. **Broadcasts verbal confirmation** through the Soundbox with the signature dual-frequency chime.
-5. **Generates pre-approved working capital loan scores** (0–100) powered by Paytm Lending telemetry.
+During peak counter rush (6 PM – 9 PM), shopkeepers cannot open apps, browse nested menus, or type on keyboards. Unrecorded credit transactions (*udhaar*), missed reorders, and unnoticed customer churn cost Indian retail merchants an estimated ₹1.2 Lakh Crore annually.
+
+**Paytm Vyapar Saathi solves this via voice-first ambient intelligence:**
+1. **Zero-Typing Vernacular Ledger:** The merchant speaks naturally in Hindi, Hinglish, or English.
+2. **Instant Physical Trust:** The Soundbox plays its iconic dual-tone chime and confirms the action aloud in vernacular Hindi (*"Paytm par Manoj Verma ji ka ₹1,000 jama ho gaya"*).
+3. **Automated Supply Chain:** Stock is automatically tracked, and supplier Purchase Orders (POs) are drafted and dispatched via production SMTP.
+4. **Pre-Approved Working Capital:** Soundbox transaction velocity and ledger recovery rates feed directly into a 0–100 Credit Health Score, underwriting instant collateral-free loans.
 
 ---
 
-## 🚀 The 4 Core Pillars ("Beyond Payments")
+## 2. Live Cloud Deployment
+
+| Service | Environment | URL | Details |
+|---|---|---|---|
+| **Backend API** | Production (Render) | [https://paytmvyaparai.onrender.com/](https://paytmvyaparai.onrender.com/) | FastAPI, Uvicorn, SQLite persistent store, CORS enabled |
+| **Interactive Swagger Docs** | Production (Render) | [https://paytmvyaparai.onrender.com/docs](https://paytmvyaparai.onrender.com/docs) | Full OpenAPI schema & interactive test suite |
+| **Frontend Application** | Production (Vercel) | Deployable via Root / `frontend` directory | Reverse-proxy rewrites configured in `vercel.json` |
+
+---
+
+## 3. The 4 Core Pillars ("Beyond Payments")
 
 ![Paytm Vyapar Dashboard UI](./assets/dashboard_ui.jpg)
 
-### 1. 📈 Grow Their Business (Merchant Growth AI)
-* **Zero-Effort QR Telemetry CRM:** Automatically logs customer visit frequencies from incoming Paytm QR payments with zero manual typing.
-* **Customer Win-Back Engine:** Detects inactive regulars (*"Customer #9811 hasn't visited in 30 days"*) and crafts 1-tap native SMS discount vouchers.
-* **Festive Surge Forecaster:** Alerts merchants 7 days before festivals (Diwali, Navratri, Eid) to capitalize on 3x-4x demand spikes.
+### Pillar 1: Grow Their Business (Merchant Growth AI)
+* **Zero-Effort QR Telemetry CRM:** Inactive regular customers are automatically detected from incoming Paytm QR payments with zero manual typing.
+* **Customer Win-Back Engine:** Detects inactive regulars (*"Customer #9811 hasn't visited in 30 days"*) and crafts 1-tap native SMS discount vouchers with embedded UPI deep-links.
+* **Festive Surge Forecaster:** Predicts seasonal demand spikes 7 days before major Indian festivals (Diwali, Navratri, Eid, Holi) to lock in bulk wholesale pricing.
 
-### 2. ⚙️ Manage Operations (Autonomous Copilot)
-* **Hands-Free Voice Khata:** Shopkeeper speaks naturally:  
-  *👉 "Ramesh bhai ko ₹450 ka refine tel udhaar diya, note karlo."*
-* **Automated Supplier Email POs (Python SMTP):** Sends formal, professional reorders directly to wholesale distributors when stock dips below threshold.
-* **60-Second Daily Profit Pulse:** End-of-day audio summary through the Soundbox + branded P&L statement delivered directly to the merchant's email.
+### Pillar 2: Manage Operations (Autonomous Copilot)
+* **Hands-Free Voice Khata:** Merchants speak natural Hindi/Hinglish commands (*"Ramesh bhai ko ₹450 ka refine tel udhaar diya"* or *"मनोज वर्मा 1000 पैड"*).
+* **Automated Supplier Email POs (SMTP):** Sends formal, professional reorders directly to wholesale distributors when inventory hits reorder thresholds.
+* **60-Second Daily Profit Pulse:** End-of-day audio debrief through the Soundbox and automated branded P&L statements emailed to the merchant.
 
-### 3. ❤️ Serve Customers Better (Trust & Transparency)
-* **Two-Way Soundbox Voice Handshake:** Chime + verbal confirmation ensures 100% mutual trust between shopkeeper and customer.
-* **Instant Digital Bills:** Clear itemized receipts sent via 1-tap native SMS with direct UPI payment links (`upi://pay`).
-* **1-Tap Fail-Safe Undo:** 5-second safety timer on screen allows instant reversal if voice is misheard.
+### Pillar 3: Serve Customers Better (Trust & Transparency)
+* **Two-Way Soundbox Voice Handshake:** Dual-frequency chime (440Hz / 880Hz) + vernacular voice repetition guarantees 100% mutual trust between shopkeeper and customer.
+* **Digital E-Bills & Statements:** Clear itemized receipts sent via 1-tap native SMS with direct UPI payment links (`upi://pay`).
+* **1-Tap Fail-Safe Undo:** 5-second on-screen safety countdown allows instant cancellation if voice input was misheard.
 
-### 4. 💳 Beyond Payments (Paytm Lending Rails)
-* **0–100 Merchant Credit Health Score:** Aggregates Soundbox QR consistency and ledger recovery rates to underwrite collateral-free loans of ₹50,000 to ₹3,00,000.
+### Pillar 4: Beyond Payments (Paytm Lending Rails)
+* **0–100 Merchant Credit Health Score:** Real-time cashflow consistency and ledger recovery rates underwrite collateral-free loans of ₹50,000 to ₹3,00,000.
+* **Instant Disbursal Execution:** Voice-triggered working capital draws (*"₹50,000 लोन निकाल लो"*) credited immediately to store balance.
 
 ---
 
-## 🏛️ System Architecture
+## 4. Production Vernacular NLP Engine
+
+The copilot is built with high-tolerance vernacular entity extraction supporting both Devanagari Hindi and Hinglish:
+
+| Action / Intent | Example Vernacular Utterances | Engine Execution |
+|---|---|---|
+| **Khata Credit (Udhaar)** | *"Ramesh ₹450 udhaar"*, *"रमेश 450 का सामान ले गए"* | Logs udhaar, decrements stock, plays Soundbox chime |
+| **Vernacular Repayment** | *"मनोज वर्मा 1000 पैड"*, *"मनोज पेड ₹500"*, *"रमेश ने 450 पे किया"*, *"अमित ₹300 जमा"* | Credits ledger, marks paid/partial, Soundbox repeat-back |
+| **Zero-Amount Full Settlement** | *"मनोज वर्मा सेटल"*, *"मनोज का पूरा हिसाब चुकता हो गया"* | Queries SQLite balance, settles entire amount to ₹0 |
+| **Wholesale Stock Reorder** | *"फॉर्चून तेल मंगा लो"*, *"टाटा नमक ऑर्डर कर दो"* | Creates wholesale PO, dispatches SMTP email to distributor |
+| **Working Capital Disbursal** | *"₹50,000 लोन निकाल लो"*, *"लोन क्रेडिट कर दो"* | Verifies pre-approval score, credits store working capital |
+
+---
+
+## 5. System Architecture
 
 ```
-                              ┌──────────────────────────────────────────────┐
-                              │    Paytm Merchant Cockpit (Web & Mobile)     │
-                              │  • Web Speech API (Hinglish/Hindi NLP)       │
-                              │  • Web Audio API Soundbox Chime Synthesizer  │
-                              │  • Live Agent Thought & Action Telemetry     │
-                              └──────────────────────┬───────────────────────┘
-                                                     │ REST / SSE API
-                                                     ▼
-                              ┌──────────────────────────────────────────────┐
-                              │      FastAPI Backend & Agent Controller      │
-                              │  • Asynchronous Tool Dispatcher              │
-                              │  • Dual-Engine: LLM + Deterministic Fallback │
-                              └──────────────────────┬───────────────────────┘
-                                                     │
-      ┌───────────────────────────┬──────────────────┴────────────────┬───────────────────────────┐
-      ▼                           ▼                                   ▼                           ▼
+                               ┌──────────────────────────────────────────────┐
+                               │    Paytm Merchant Cockpit (Web & Mobile)     │
+                               │  • Web Speech API (Hinglish/Hindi NLP)       │
+                               │  • Web Audio API Soundbox Chime Synthesizer  │
+                               │  • Live Agent Thought & Action Telemetry     │
+                               └──────────────────────┬───────────────────────┘
+                                                      │ REST / SSE API
+                                                      ▼
+                               ┌──────────────────────────────────────────────┐
+                               │      FastAPI Backend & Agent Controller      │
+                               │  • Asynchronous Tool Dispatcher              │
+                               │  • Dual-Engine: LLM + Deterministic Fallback │
+                               └──────────────────────┬───────────────────────┘
+                                                      │
+       ┌───────────────────────────┬──────────────────┴────────────────┬───────────────────────────┐
+       ▼                           ▼                                   ▼                           ▼
 ┌──────────────┐          ┌──────────────┐                    ┌──────────────┐            ┌──────────────┐
 │ Tool 1:      │          │ Tool 2:      │                    │ Tool 3:      │            │ Tool 4:      │
 │ Voice Khata  │          │ Stock & PO   │                    │ Email SMTP & │            │ Credit &     │
@@ -80,56 +107,92 @@ Instead of forcing busy shopkeepers to navigate complicated English apps during 
        │                         │                                   │                           │
        └─────────────────────────┴─────────────────┬─────────────────┴───────────────────────────┘
                                                    ▼
-                              ┌──────────────────────────────────────────────┐
-                              │           SQLite Persistent Store            │
-                              │  • merchants  • customers  • khata_ledger    │
-                              │  • inventory  • soundbox_tx  • supplier_pos  │
-                              └──────────────────────────────────────────────┘
+                               ┌──────────────────────────────────────────────┐
+                               │     Persistent Store (SQLite / PostgreSQL)   │
+                               │  • merchants  • customers  • khata_ledger    │
+                               │  • inventory  • soundbox_tx  • supplier_pos  │
+                               └──────────────────────────────────────────────┘
 ```
 
----
-
-## 🛠️ Tech Stack
-
-* **Backend:** Python 3.10+, FastAPI, Pydantic v2
-* **Agent Core:** ReAct (Reasoning + Acting) autonomous agent with multi-tool dispatch
-* **Database:** SQLite (ACID compliant, zero-latency local state persistence)
-* **Audio Synthesis:** Web Audio API (authentic dual-tone 440Hz / 880Hz Paytm Soundbox chime) + Web Speech API (Hindi / Hinglish TTS)
-* **Communications:** Python `smtplib` (Wholesale Supplier POs & Daily P&L Statements) + Native SMS URI Protocol (`sms:`) for 100% deliverability with zero ban risk.
+### Database Persistence & PostgreSQL Portability
+- **Primary Engine:** SQLite at `backend/vyapar.db` with ACID guarantees.
+- **Portability:** All schema definitions in `backend/database.py` adhere strictly to standard ANSI SQL types (`INTEGER`, `REAL`, `TEXT`, `TIMESTAMP`).
+- **Zero-Friction Migration:** Transitioning to enterprise PostgreSQL is achieved simply by providing a standard `DATABASE_URL` connection string.
 
 ---
 
-## ⚡ Quickstart
+## 6. Frontend Deployment on Vercel
 
-### 1. Clone the repository
+The frontend is fully decoupled and configured for zero-configuration deployment on Vercel with transparent reverse-proxying to the live Render backend.
+
+### Deployment Steps:
+1. Connect your GitHub repository (`PaytmVyaparAI`) to [Vercel](https://vercel.com).
+2. Set the **Root Directory** to `frontend` (or keep root).
+3. Vercel automatically reads `vercel.json`:
+   ```json
+   {
+     "rewrites": [
+       {
+         "source": "/api/(.*)",
+         "destination": "https://paytmvyaparai.onrender.com/api/$1"
+       }
+     ]
+   }
+   ```
+4. All client requests to `/api/*` are securely proxied with zero CORS latency. In addition, `frontend/js/api.js` automatically detects non-localhost hostnames and targets Render directly if accessed as a standalone client.
+
+---
+
+## 7. Local Development Quickstart
+
+### Option A: Native Python Setup
+
 ```bash
-git clone https://github.com/[your-username]/PaytmVyaparAI.git
+# 1. Clone repository
+git clone https://github.com/RiyanshiVerma-11/PaytmVyaparAI.git
 cd PaytmVyaparAI
-```
 
-### 2. Set up virtual environment & dependencies
-```bash
+# 2. Create virtual environment
 python -m venv venv
-# On Windows:
+
+# Windows
 venv\Scripts\activate
-# On Linux/macOS:
+# Linux/macOS
 source venv/bin/activate
 
+# 3. Install dependencies
 pip install -r requirements.txt
+
+# 4. Start backend server
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-### 3. Run the application
+Open [http://127.0.0.1:8000](http://127.0.0.1:8000) in your browser.
+
+### Option B: Docker Compose Setup
+
 ```bash
-python backend/main.py
+docker-compose up --build
 ```
-Open your browser at `http://localhost:8000` to interact with the **Paytm Merchant Cockpit**.
 
 ---
 
-## 👥 Team
-* **Riyanshi Verma** & Team
-* **Event:** Paytm Build for India AI Hackathon – Delhi Edition
-* **Venue:** Paytm, SkymarkOne, Sector 98, Noida, Uttar Pradesh 201304
+## 8. Technology Stack
+
+* **Backend Services:** Python 3.10+, FastAPI, Uvicorn, Pydantic v2
+* **Storage Engine:** SQLite (`vyapar.db`), ANSI SQL schema portable to PostgreSQL
+* **Hardware Audio Synthesis:** Web Audio API (dual-tone 440Hz / 880Hz square-wave oscillator) + Web Speech API (Hindi/Hinglish TTS)
+* **Communications:** Python `smtplib` (Wholesale Supplier POs & Daily P&L Statements) + Native SMS URI Protocol (`sms:`) for 100% deliverability with zero ban risk
+* **Design & Frontend:** Semantic HTML5, Vanilla Modern CSS Design System (Bento Grid, Paytm Corporate Color Tokens `#002970` / `#00BAF2`), Vanilla JavaScript ES6+
 
 ---
-*Built with ❤️ for Bharat's 30 Million Retail Shopkeepers.*
+
+## 9. Project Contributors & Venue
+
+* **Team:** Riyanshi Verma & Team
+* **Hackathon:** Paytm Build for India AI Hackathon – Delhi Edition
+* **Venue:** Paytm Headquarters, SkymarkOne, Sector 98, Noida, Uttar Pradesh 201304
+* **Track:** Track 1 — *Merchant Growth AI ("Beyond Payments")*
+
+---
+*Built for Bharat's 30 Million Retail Shopkeepers.*
