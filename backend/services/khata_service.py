@@ -71,8 +71,13 @@ class KhataService:
             500: "paanch sau", 800: "aath sau", 1000: "ek hazaar", 1200: "baarah sau"
         }
         amt_spoken = hindi_numbers.get(int(amount), f"{int(amount)}")
-        action_word = "udhaar darj ho gaya" if entry_type.lower() == "udhaar" else "prapt hue"
-        speech_text = f"Paytm par {cust_name} ji ka {amt_spoken} rupaye {action_word}."
+        if entry_type.lower() == "udhaar":
+            speech_text = f"Paytm par {cust_name} ji ka {amt_spoken} rupaye udhaar darj ho gaya. Kul baaki {int(new_pending)} rupaye."
+        else:
+            if new_pending <= 0:
+                speech_text = f"Paytm par {cust_name} ji se {amt_spoken} rupaye prapt hue. Poora udhaar chukta ho gaya."
+            else:
+                speech_text = f"Paytm par {cust_name} ji se {amt_spoken} rupaye prapt hue. Baaki udhaar {int(new_pending)} rupaye bache hain."
 
         sms_msg = f"Namaste {cust_name} ji, Sharma Kirana se aapka Rs.{int(amount)} ka {entry_type} darj hua. Kul baaki: Rs.{int(new_pending)}. Pay via UPI: upi://pay?pa=paytm@sharmakirana&am={int(new_pending)}"
         sms_uri = f"sms:{cust_phone}?body={sms_msg.replace(' ', '%20')}"
@@ -133,4 +138,15 @@ class KhataService:
         cursor.execute("SELECT * FROM customers ORDER BY pending_udhaar DESC")
         customers = [dict(r) for r in cursor.fetchall()]
         conn.close()
-        return {"entries": entries, "customers": customers}
+
+        total_pending = sum(float(c.get("pending_udhaar") or 0) for c in customers)
+        total_recovered = sum(float(e.get("amount") or 0) for e in entries if e.get("entry_type") == "jama")
+        pending_count = len([c for c in customers if float(c.get("pending_udhaar") or 0) > 0])
+
+        return {
+            "entries": entries,
+            "customers": customers,
+            "total_pending_udhaar": round(total_pending, 2),
+            "total_recovered": round(total_recovered, 2),
+            "pending_customers_count": pending_count
+        }

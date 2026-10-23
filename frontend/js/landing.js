@@ -7,10 +7,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const authModal = document.getElementById('authOverlay');
   const demoLaunchBtn = document.getElementById('demoLaunchBtn');
 
-  // Open Auth Modal
+  // Launch Cockpit Directly
   if (launchBtn) {
     launchBtn.addEventListener('click', () => {
-      openAuthModal();
+      switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');
     });
   }
 
@@ -25,6 +25,11 @@ document.addEventListener('DOMContentLoaded', () => {
       // Instant launch into live cockpit
       switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');
     });
+  }
+
+  // Auto-launch into cockpit if hash or param is present
+  if (window.location.hash === '#dashboard' || window.location.hash === '#cockpit' || window.location.search.includes('cockpit')) {
+    switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');
   }
 
   function openAuthModal() {

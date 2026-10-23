@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Current Active State
   let currentView = 'dashboard';
+  window.currentView = 'dashboard';
   let khataCache = { customers: [], entries: [] };
   let inventoryCache = { items: [], low_stock_items: [] };
   let transactionsCache = { transactions: [] };
@@ -33,21 +34,224 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // ========================================================
-  // 2. THEME SWITCH (DARK / LIGHT MODE)
+  // 2. THEME SETUP (PERMANENT CRISP PAYTM LIGHT THEME)
   // ========================================================
+  localStorage.setItem('paytm_theme', 'light');
+  document.documentElement.setAttribute('data-theme', 'light');
   const themeSwitch = document.getElementById('themeSwitch');
-  const savedTheme = localStorage.getItem('paytm_theme') || 'light';
-  document.documentElement.setAttribute('data-theme', savedTheme);
   if (themeSwitch) {
-    themeSwitch.querySelector('.theme-switch-slider').textContent = savedTheme === 'dark' ? '🌙' : '☀️';
-    themeSwitch.addEventListener('click', () => {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      document.documentElement.setAttribute('data-theme', newTheme);
-      localStorage.setItem('paytm_theme', newTheme);
-      themeSwitch.querySelector('.theme-switch-slider').textContent = newTheme === 'dark' ? '🌙' : '☀️';
+    themeSwitch.style.display = 'none';
+  }
+
+  // ========================================================
+  // 2.5 BILINGUAL LANGUAGE ENGINE (English/Hinglish & शुद्ध हिन्दी)
+  // ========================================================
+  const I18N = {
+    en: {
+      voiceAction: "Bol Kar Likhein",
+      voiceTag: "Hindi • Hinglish",
+      voiceListening: "Sun raha hai...",
+      navDashboard: "Dashboard",
+      navKhata: "Bahi-Khata",
+      navInventory: "Stock & Samaan",
+      navHistory: "Transactions",
+      navGrowth: "Growth & Loans",
+      logout: "Log Out",
+      todayEarningsLabel: "Aaj Ki Kamai",
+      todayEarningsSub: "28 Payments • Settled",
+      pendingUdhaarLabel: "Baaki Udhaar",
+      pendingUdhaarSub: "₹1,450 Wapas Aaya",
+      soundboxStatusLabel: "Soundbox Status",
+      soundboxStatusVal: "● Connected",
+      soundboxStatusSub: "Battery: 94% • Hindi Ready",
+      loanAvailableLabel: "Loan Available",
+      loanAvailableSub: "0 Paperwork • Turant Milega",
+      khataTitle: "Bahi-Khata",
+      khataMicBtn: "Bol Kar Likhein",
+      khataChipPending: "Pending",
+      khataChipRecovered: "Recovered",
+      khataChipActive: "Accounts",
+      soundboxConnected: "Soundbox Connected",
+      voiceHint: 'Bolein: <em>"Ramesh ₹200 udhaar"</em>',
+      btnReminder: "Reminder Bhejo",
+      btnViewAllKhata: "Poori Khata Dekhein",
+      growthTitle: "AI Growth Engine",
+      winbackAlert: "Old Customers",
+      growthBadgeAlert: "Old Customer",
+      growthCustomerText: "Manoj Verma hasn't visited in 45 days. High churn risk.",
+      growthOfferSub: "10% Discount Voucher",
+      btnSendOffer: "Offer Bhejo (10% Discount)",
+      festiveSurgeTitle: "Diwali High Sales",
+      festiveBadge: "Diwali +42%",
+      festiveCardBody: "Mustard Oil & Basmati demand surges in 4 days. Lock wholesale rates today.",
+      festiveSurgeMeta: "Wholesale Margin Gain: <strong>+₹4,200</strong>",
+      btnOrderStock: "Order Karein",
+      btnOrderStockFast: "Order Karein",
+      counterSmartCombo: "Counter Combo",
+      comboMargin: "+18% Profit",
+      comboCardText: "Tea Leaves + Parle-G bundle recommended at checkout (18% extra margin)",
+      stockTitle: "Stock Alert",
+      stockChipCatalog: "Stock",
+      stockChipVal: "94% Stocked",
+      stockChipUrgent: "Low Stock",
+      stockChipUrgentVal: "3 Items",
+      stockChipAutoPO: "Supplier",
+      stockChipAutoPOVal: "Connected",
+      stockPartnerSummary: "Wholesale Supplier Connected (24h Delivery)",
+      stockPillSalt: "2 pkts left",
+      stockPillOil: "3 btls left",
+      stockPillAtta: "1 bag left",
+      btnViewAllStock: "Stock Dekhein",
+      creditScoreTier: "Accha Score",
+      creditLoanReady: "PRE-APPROVED LOAN",
+      creditTagline: "Collateral-Free Instant Working Capital",
+      creditDailyTerms: "₹75,000 Loan Ready • Great Past Record • Direct to Bank Account in 1 Min",
+      btnClaimLoan: "Paisa Payein",
+      btnClaimLoanSub: "Turant Bank Mein",
+      mobileHome: "Home",
+      mobileKhata: "Khata",
+      mobileStock: "Stock",
+      mobileMadad: "Madad"
+    },
+    hi: {
+      voiceAction: "बोल कर लिखें",
+      voiceTag: "हिंदी • हिंग्लिश",
+      voiceListening: "सुन रहा है...",
+      navDashboard: "डैशबोर्ड",
+      navKhata: "बही-खाता",
+      navInventory: "स्टॉक और सामान",
+      navHistory: "लेन-देन का हिसाब",
+      navGrowth: "व्यापार ग्रोथ और लोन",
+      logout: "लॉग आउट",
+      todayEarningsLabel: "आज की कमाई",
+      todayEarningsSub: "28 भुगतान • खाते में जमा",
+      pendingUdhaarLabel: "बाकी उधार",
+      pendingUdhaarSub: "₹1,450 वापस आया",
+      soundboxStatusLabel: "साउंडबॉक्स स्थिति",
+      soundboxStatusVal: "● कनेक्टेड",
+      soundboxStatusSub: "बैटरी: 94% • हिंदी तैयार",
+      loanAvailableLabel: "लोन उपलब्ध",
+      loanAvailableSub: "0 कागजी कार्रवाई • तुरंत मिलेगा",
+      khataTitle: "बही-खाता",
+      khataMicBtn: "बोल कर लिखें",
+      khataChipPending: "बाकी उधार",
+      khataChipRecovered: "वसूल हुआ",
+      khataChipActive: "खाते",
+      soundboxConnected: "साउंडबॉक्स चालू है",
+      voiceHint: 'बोलें: <em>"रमेश ₹200 उधार"</em>',
+      btnReminder: "याद दिलाएं",
+      btnViewAllKhata: "पूरा खाता देखें",
+      growthTitle: "व्यापार ग्रोथ",
+      winbackAlert: "पुराने ग्राहक",
+      growthBadgeAlert: "पुराने ग्राहक",
+      growthCustomerText: "मनोज वर्मा 45 दिनों से नहीं आए। ग्राहक टूटने का रिस्क है।",
+      growthOfferSub: "10% छूट कूपन तैयार",
+      btnSendOffer: "ऑफर भेजें (10% छूट)",
+      festiveSurgeTitle: "दीवाली पर ज्यादा बिक्री",
+      festiveBadge: "दीवाली पर ज्यादा बिक्री",
+      festiveCardBody: "4 दिनों में सरसों तेल और बासमती की मांग बढ़ेगी। आज ही थोक भाव में बुक करें।",
+      festiveSurgeMeta: "थोक में बचत: <strong>₹4,200</strong>",
+      btnOrderStock: "ऑर्डर करें",
+      btnOrderStockFast: "सस्ते रेट में ऑर्डर करें",
+      counterSmartCombo: "काउंटर कॉम्बो",
+      comboMargin: "+18% मुनाफा",
+      comboCardText: "चाय पत्ती के साथ पारले-जी ऑफर करें (18% ज्यादा मुनाफा)",
+      stockTitle: "स्टॉक अलर्ट",
+      stockChipCatalog: "स्टॉक",
+      stockChipVal: "94% भरा हुआ",
+      stockChipUrgent: "कम स्टॉक",
+      stockChipUrgentVal: "3 सामान",
+      stockChipAutoPO: "सप्लायर",
+      stockChipAutoPOVal: "जुड़ा हुआ है",
+      stockPartnerSummary: "थोक सप्लायर जुड़ा हुआ है (24 घंटे में डिलीवरी)",
+      stockPillSalt: "सिर्फ 2 बचे हैं",
+      stockPillOil: "सिर्फ 3 बचे हैं",
+      stockPillAtta: "सिर्फ 1 बचा है",
+      btnViewAllStock: "स्टॉक देखें",
+      creditScoreTier: "शानदार स्कोर",
+      creditLoanReady: "लोन प्री-अप्रूव्ड",
+      creditTagline: "बिना किसी गारंटी के तुरंत बिजनेस लोन",
+      creditDailyTerms: "₹75,000 का लोन तैयार • पुराना रिकॉर्ड बहुत अच्छा • 1 मिनट में सीधे बैंक खाते में",
+      btnClaimLoan: "पैसे पाएं",
+      btnClaimLoanSub: "सीधे बैंक खाते में",
+      mobileHome: "होम",
+      mobileKhata: "खाता",
+      mobileStock: "स्टॉक",
+      mobileMadad: "मदद"
+    }
+  };
+
+  function setLanguage(lang) {
+    localStorage.setItem('paytm_lang', lang);
+    const dict = I18N[lang] || I18N.en;
+
+    const toggleBtn = document.getElementById('langToggleBtn');
+    if (toggleBtn) {
+      const enSpan = toggleBtn.querySelector('[data-lang="en"]');
+      const hiSpan = toggleBtn.querySelector('[data-lang="hi"]');
+      if (lang === 'hi') {
+        if (enSpan) enSpan.className = 'lang-toggle-inactive';
+        if (hiSpan) hiSpan.className = 'lang-toggle-active';
+      } else {
+        if (enSpan) enSpan.className = 'lang-toggle-active';
+        if (hiSpan) hiSpan.className = 'lang-toggle-inactive';
+      }
+    }
+
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (dict[key]) {
+        el.innerHTML = dict[key];
+      }
+    });
+
+    const topSearch = document.getElementById('topSearchInput');
+    if (topSearch) {
+      topSearch.placeholder = lang === 'hi' ? 'कुछ भी खोजें या बोलें...' : 'Kuch bhi search karein...';
+    }
+
+    const cardSearch = document.getElementById('dashboardKhataSearchInput');
+    if (cardSearch) {
+      cardSearch.placeholder = lang === 'hi' ? 'ग्राहक खोजें (नाम या मोबाइल)...' : 'Search customer name or phone...';
+    }
+
+    if (typeof loadDashboardData === 'function') loadDashboardData();
+    if (typeof renderKhataCustomersTable === 'function') renderKhataCustomersTable();
+    if (typeof renderInventoryTable === 'function') renderInventoryTable();
+  }
+
+  window.setLanguage = setLanguage;
+
+  const langToggleBtn = document.getElementById('langToggleBtn');
+  if (langToggleBtn) {
+    langToggleBtn.addEventListener('click', () => {
+      const current = localStorage.getItem('paytm_lang') || 'en';
+      const next = current === 'en' ? 'hi' : 'en';
+      setLanguage(next);
+      if (window.paytmSoundbox) {
+        window.paytmSoundbox.broadcast(next === 'hi' ? 'Bhasha Hindi chuni gayi' : 'Language set to English');
+      }
+      showNotification(next === 'hi' ? 'भाषा बदलकर हिंदी कर दी गई है' : 'Language set to English / Hinglish', 'info');
     });
   }
+
+  // Instant 1-Click Loan Disbursal Trigger
+  window.disburseLoanInstant = function() {
+    const modalLoan = document.getElementById('modalLoanDisbursal');
+    if (modalLoan) {
+      const successMsg = document.getElementById('loanDisbursalSuccessMessage');
+      const confirmBtn = document.getElementById('confirmLoanDisbursalBtn');
+      if (successMsg) successMsg.style.display = 'none';
+      if (confirmBtn) {
+        confirmBtn.disabled = false;
+        const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
+        confirmBtn.textContent = isHindi ? 'स्वीकार करें और पैसे लें' : 'Accept & Disburse Now';
+      }
+      modalLoan.style.display = 'flex';
+    } else if (window.switchView) {
+      window.switchView('analytics');
+    }
+  };
 
   // ========================================================
   // 3. LOGOUT HANDLER
@@ -72,9 +276,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function switchView(viewName) {
     currentView = viewName;
+    window.currentView = viewName;
 
     // Update active sidebar item
     sidebarItems.forEach(item => {
+      if (item.getAttribute('data-view') === viewName) {
+        item.classList.add('active');
+      } else {
+        item.classList.remove('active');
+      }
+    });
+
+    // Update active mobile nav item
+    document.querySelectorAll('.mobile-nav-item').forEach(item => {
       if (item.getAttribute('data-view') === viewName) {
         item.classList.add('active');
       } else {
@@ -109,6 +323,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.switchView = switchView;
   window.loadDashboardData = loadDashboardData;
+  window.loadLedgerCard = loadLedgerCard;
+  window.loadKhataView = loadKhataView;
+  window.renderKhataCustomersTable = renderKhataCustomersTable;
+  window.renderKhataAuditList = renderKhataAuditList;
+  window.loadGrowthCard = loadGrowthCard;
+  window.loadStockCard = loadStockCard;
+  window.loadLoanCard = loadLoanCard;
 
 
   sidebarItems.forEach(item => {
@@ -129,6 +350,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. VOICE COMMAND & AI AGENT INTEGRATION
   // ========================================================
   const micBtn = document.getElementById('voiceMicTrigger');
+  const desktopMicBtn = document.getElementById('desktopVoiceMicBtn');
   const voicePulse = document.getElementById('voicePulseIndicator');
 
   const speech = new SpeechEngine(
@@ -140,13 +362,35 @@ document.addEventListener('DOMContentLoaded', () => {
         voicePulse.style.display = isListening ? 'flex' : 'none';
       }
       if (micBtn) {
-        micBtn.style.color = isListening ? '#ff4d4f' : 'var(--paytm-blue)';
+        if (isListening) {
+          micBtn.classList.add('listening');
+          const span = micBtn.querySelector('span');
+          if (span) span.textContent = '🔴 Sun Rahe Hain...';
+        } else {
+          micBtn.classList.remove('listening');
+          const span = micBtn.querySelector('span');
+          if (span) span.textContent = '🎤 Bol Kar Likhein';
+        }
+      }
+      if (desktopMicBtn) {
+        if (isListening) {
+          desktopMicBtn.classList.add('listening');
+          const act = desktopMicBtn.querySelector('.desktop-voice-action');
+          if (act) act.textContent = '🔴 Sun Rahe Hain...';
+        } else {
+          desktopMicBtn.classList.remove('listening');
+          const act = desktopMicBtn.querySelector('.desktop-voice-action');
+          if (act) act.textContent = 'Bol Kar Likhein (Mic)';
+        }
       }
     }
   );
 
   if (micBtn) {
     micBtn.addEventListener('click', () => speech.toggle());
+  }
+  if (desktopMicBtn) {
+    desktopMicBtn.addEventListener('click', () => speech.toggle());
   }
 
   // Top Search Input for voice or direct commands
@@ -160,26 +404,47 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Direct In-Card Customer Search Listeners
+  const dashboardKhataSearchInput = document.getElementById('dashboardKhataSearchInput');
+  const clearDashboardKhataSearch = document.getElementById('clearDashboardKhataSearch');
+
+  if (dashboardKhataSearchInput) {
+    dashboardKhataSearchInput.addEventListener('input', () => {
+      loadLedgerCard(true);
+    });
+  }
+
+  if (clearDashboardKhataSearch) {
+    clearDashboardKhataSearch.addEventListener('click', () => {
+      if (dashboardKhataSearchInput) {
+        dashboardKhataSearchInput.value = '';
+        dashboardKhataSearchInput.focus();
+      }
+      loadLedgerCard(true);
+    });
+  }
+
   async function executeVoiceQuery(queryText) {
     showNotification(`🎤 Processing: "${queryText}"`, 'info');
     try {
       const res = await API.sendQuery(queryText);
 
       // Play Soundbox Chime & Voice
-      if (res.result && res.result.soundbox_payload) {
-        const sp = res.result.soundbox_payload;
-        if (window.paytmSoundbox) {
-          window.paytmSoundbox.broadcast(sp.speech_text);
-        }
+      const sp = res.soundbox_payload || (res.result && res.result.soundbox_payload) || (res.data && res.data.soundbox_payload);
+      if (sp && window.paytmSoundbox) {
+        window.paytmSoundbox.broadcast(sp.speech_text);
         showNotification(`🔊 Soundbox: ${sp.speech_text}`, 'success');
+      } else if (res.reply) {
+        const firstLine = res.reply.split('\n')[0].replace(/[#*]/g, '');
+        showNotification(`🤖 Copilot: ${firstLine}`, 'success');
       }
 
-      // Refresh current view
-      if (currentView === 'dashboard') loadDashboardData();
-      else if (currentView === 'khata') loadKhataView();
-      else if (currentView === 'inventory') loadInventoryView();
-      else if (currentView === 'history') loadHistoryView();
-      else if (currentView === 'analytics') loadAnalyticsView();
+      // Immediately refresh all views
+      await loadDashboardData();
+      if (typeof loadKhataView === 'function') await loadKhataView();
+      if (typeof renderKhataAuditList === 'function') renderKhataAuditList();
+      if (typeof loadHistoryView === 'function') await loadHistoryView();
+
     } catch (err) {
       showNotification(`❌ Error: ${err.message}`, 'error');
     }
@@ -196,36 +461,131 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Card 1: Live Voice Khata Ledger
-  async function loadLedgerCard() {
+  async function loadLedgerCard(useCache = false) {
     try {
-      const data = await API.getKhata();
+      let data = khataCache;
+      if (!useCache || !data || !data.customers || data.customers.length === 0) {
+        data = await API.getKhata();
+        if (data) {
+          khataCache = data;
+        }
+      }
+
+      // Dynamically sync Glance Strip and Metric Chips
+      const customers = data.customers || [];
+      const totalPending = data.total_pending_udhaar !== undefined 
+        ? data.total_pending_udhaar 
+        : customers.reduce((sum, c) => sum + (c.pending_udhaar || 0), 0);
+      const pendingCustomersCount = customers.filter(c => (c.pending_udhaar || 0) > 0).length;
+      const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
+
+      const glancePendingEl = document.getElementById('glancePendingUdhaar');
+      if (glancePendingEl) glancePendingEl.textContent = `₹${Math.round(totalPending).toLocaleString('en-IN')}`;
+
+      const glanceCountEl = document.getElementById('glanceUdhaarCount');
+      if (glanceCountEl) glanceCountEl.textContent = isHindi ? `कुल ${pendingCustomersCount} ग्राहक` : `${pendingCustomersCount} Grahak`;
+
+      const cardPendingPill = document.getElementById('cardKhataPendingPill');
+      if (cardPendingPill) cardPendingPill.textContent = isHindi ? `₹${Math.round(totalPending).toLocaleString('en-IN')} उधार` : `₹${Math.round(totalPending).toLocaleString('en-IN')} Udhaar`;
+
+      const chipPending = document.getElementById('chipPendingUdhaar');
+      if (chipPending) chipPending.textContent = `₹${Math.round(totalPending).toLocaleString('en-IN')}`;
+
+      const chipActive = document.getElementById('chipActiveGrahak');
+      if (chipActive) chipActive.textContent = isHindi ? `कुल ${pendingCustomersCount} ग्राहक` : `${pendingCustomersCount} Grahak`;
+
+      const recoveredAmt = data.total_recovered !== undefined
+        ? data.total_recovered
+        : (data.entries || []).filter(e => e.entry_type === 'jama').reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      const chipRecovered = document.getElementById('chipRecoveredUdhaar');
+      if (chipRecovered) chipRecovered.textContent = `₹${Math.round(recoveredAmt).toLocaleString('en-IN')}`;
+
+      const glanceRecoveredEl = document.getElementById('glanceUdhaarSubtext');
+      if (glanceRecoveredEl) {
+        glanceRecoveredEl.textContent = isHindi 
+          ? `₹${Math.round(recoveredAmt).toLocaleString('en-IN')} वापस आया` 
+          : `₹${Math.round(recoveredAmt).toLocaleString('en-IN')} Wapas Aaya`;
+      }
+
       const listEl = document.getElementById('liveLedgerList');
       if (!listEl) return;
 
       listEl.innerHTML = '';
-      const recentCustomers = data.customers ? data.customers.slice(0, 4) : [];
+      
+      // Real-time In-card Search Filter
+      const searchInput = document.getElementById('dashboardKhataSearchInput');
+      const searchTerm = (searchInput ? searchInput.value : '').toLowerCase().trim();
+      const clearBtn = document.getElementById('clearDashboardKhataSearch');
+      if (clearBtn) {
+        clearBtn.style.display = searchTerm ? 'flex' : 'none';
+      }
 
-      if (recentCustomers.length === 0) {
-        listEl.innerHTML = '<div style="padding:1rem; color:var(--text-muted); text-align:center;">No khata entries recorded yet.</div>';
+      // STRICT FILTER: Only show customers who actually have pending udhaar!
+      let pendingCustomers = customers.filter(c => (c.pending_udhaar || 0) > 0);
+      
+      if (searchTerm) {
+        pendingCustomers = pendingCustomers.filter(c => 
+          (c.name && c.name.toLowerCase().includes(searchTerm)) ||
+          (c.phone && c.phone.includes(searchTerm))
+        );
+      }
+
+      if (pendingCustomers.length === 0) {
+        if (searchTerm) {
+          listEl.innerHTML = `
+            <div style="padding:1.2rem 1rem; color:#64748B; text-align:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; margin:6px 0;">
+              <span style="font-size:1.2rem; display:block; margin-bottom:4px;">🔍</span>
+              <strong style="font-size:0.88rem; color:#0F172A;">${isHindi ? 'कोई ग्राहक नहीं मिला:' : 'No matching customer:'} "${searchTerm}"</strong>
+              <div style="font-size:0.75rem; color:#64748B; margin-top:2px;">${isHindi ? 'स्पेलिंग चेक करें या मोबाइल नंबर डालें' : 'Check spelling or enter phone number'}</div>
+            </div>`;
+        } else {
+          listEl.innerHTML = `
+            <div style="padding:1.4rem 1rem; color:#059669; text-align:center; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; margin:6px 0;">
+              <div style="font-size:1.6rem; margin-bottom:4px;">🎉</div>
+              <strong style="font-size:0.95rem; display:block; color:#065F46;">${isHindi ? 'कोई बाकी उधार नहीं है!' : 'No Pending Udhaar!'}</strong>
+              <span style="font-size:0.8rem; color:#047857;">${isHindi ? 'सभी ग्राहकों का हिसाब चुकता है। पूरा खाता नीचे देखें।' : 'All customer accounts are clear & settled.'}</span>
+            </div>`;
+        }
         return;
       }
 
-      recentCustomers.forEach((c) => {
-        const isPaid = c.pending_udhaar === 0;
-        const amountDisplay = isPaid ? `₹${c.total_spent > 0 ? c.total_spent : 2500}` : `₹${c.pending_udhaar}`;
-        const typeDisplay = isPaid ? 'Paid' : 'Udhaar';
-
+      pendingCustomers.forEach((c) => {
         const item = document.createElement('div');
-        item.className = 'ledger-item';
+        item.className = 'pos-feed-row';
+        item.id = `khataRow-${c.id}`;
+
+        const reminderMsg = encodeURIComponent(
+          `Namaste ${c.name} ji! Sharma Kirana Store se aapka kul baaki udhaar Rs.${c.pending_udhaar} hai. Kripya is Paytm UPI link se bhugtan karein: upi://pay?pa=paytm@sharmakirana&am=${c.pending_udhaar}&pn=SharmaKirana. Dhanyawad!`
+        );
+        const whatsappUrl = `https://wa.me/${(c.phone || '').replace(/[^0-9]/g, '')}?text=${reminderMsg}`;
+
+        const settleBtnText = isHindi ? '✓ पैसे मिले' : '✓ Paid';
+
         item.innerHTML = `
-          <div style="display:flex; align-items:center;">
-            <span class="ledger-dot ${isPaid ? 'dot-green' : 'dot-orange'}"></span>
-            <div>
-              <strong style="font-size:0.95rem; font-weight:800; color:var(--text-primary);">${c.name}</strong> 
-              <span class="badge-ledger-amount ${isPaid ? 'badge-ledger-paid' : 'badge-ledger-udhaar'}">${amountDisplay} • ${typeDisplay}</span>
+          <div class="pos-row-left">
+            <span class="pos-dot pos-dot-coral"></span>
+            <div class="pos-customer-meta">
+              <span class="pos-customer-name">${c.name}</span>
+              <span class="pos-customer-sub">${c.phone || '+91 98112XXXXX'}</span>
             </div>
           </div>
-          <div class="date-stamp-pill">${c.last_visit_date || 'Today'}</div>
+          <div class="pos-row-right">
+            <span class="pos-amount-tag pos-amount-coral">₹${c.pending_udhaar.toLocaleString('en-IN')} ${isHindi ? 'उधार' : 'Udhaar'}</span>
+            <span class="pos-time-tag">${c.last_visit_date || 'Today'}</span>
+            <div style="display:flex; align-items:center; gap:5px;">
+              <button class="pos-btn-action-sm pos-btn-settle-emerald" 
+                      title="${isHindi ? 'पूरा पैसा आ गया (खाता चुकता)' : 'Mark full amount paid'}"
+                      onclick="window.settleKhataDirect(${c.id}, '${c.name}', ${c.pending_udhaar}, this)">
+                ${settleBtnText}
+              </button>
+              <a href="${whatsappUrl}" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" 
+                 style="text-decoration:none; display:inline-flex; align-items:center; gap:2px;"
+                 title="${isHindi ? 'व्हाट्सएप पर याद दिलाएं' : 'Send WhatsApp Reminder'}">
+                💬
+              </a>
+            </div>
+          </div>
         `;
         listEl.appendChild(item);
       });
@@ -234,20 +594,57 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  // 1-Click Instant Settle Interaction with Smooth Fade-Out
+  window.settleKhataDirect = async function(customerId, customerName, pendingAmount, btn) {
+    const row = btn ? btn.closest('.pos-feed-row') : document.getElementById(`khataRow-${customerId}`);
+    if (row) {
+      row.style.transition = 'all 0.35s cubic-bezier(0.16, 1, 0.3, 1)';
+      row.style.opacity = '0';
+      row.style.transform = 'translateX(25px)';
+    }
+
+    const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
+    showNotification(isHindi ? `✅ ${customerName}: ₹${pendingAmount} हिसाब चुकता हो गया!` : `✅ ${customerName}: ₹${pendingAmount} settled!`, 'success');
+
+    try {
+      const res = await API.settleKhataCustomer(customerId);
+      if (res.soundbox_payload && window.paytmSoundbox) {
+        window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
+      }
+      setTimeout(async () => {
+        if (row) row.remove();
+        await loadDashboardData();
+        if (typeof renderKhataAuditList === 'function') renderKhataAuditList();
+      }, 350);
+    } catch(err) {
+      showNotification(`❌ Error: ${err.message}`, 'error');
+      if (row) {
+        row.style.opacity = '1';
+        row.style.transform = 'none';
+      }
+    }
+  };
+
   // Card 2: AI Merchant Growth Engine
   async function loadGrowthCard() {
     try {
       const data = await API.getGrowth();
       const nameEl = document.getElementById('growthCustomerName');
       const offerBtn = document.getElementById('growthSendOfferBtn');
+      const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
 
       if (data.campaigns && data.campaigns.length > 0) {
         const c = data.campaigns[0];
-        if (nameEl) nameEl.textContent = `${c.customer_name} hasn't visited in 45 days. High churn risk.`;
+        if (nameEl) {
+          nameEl.textContent = isHindi 
+            ? 'मनोज वर्मा 45 दिनों से नहीं आए। ग्राहक टूटने का रिस्क है।'
+            : "Manoj Verma hasn't visited in 45 days. High churn risk.";
+        }
         if (offerBtn) {
+          offerBtn.innerHTML = `<span>📲</span> ${isHindi ? 'ऑफर भेजें (10% छूट)' : 'Offer Bhejo (10% Discount)'}`;
           offerBtn.onclick = () => {
             window.location.href = c.sms_uri;
-            showNotification(`📲 1-Tap SMS Voucher prepared for ${c.customer_name}`, 'success');
+            showNotification(isHindi ? '📲 मनोज वर्मा के लिए 10% छूट का एसएमएस तैयार' : '📲 Offer SMS prepared for Manoj Verma', 'success');
           };
         }
       }
@@ -267,25 +664,35 @@ document.addEventListener('DOMContentLoaded', () => {
       const displayItems = data.low_stock_items && data.low_stock_items.length > 0 
         ? data.low_stock_items.slice(0, 3) 
         : (data.items ? data.items.slice(0, 3) : []);
+      const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
 
       if (displayItems.length === 0) {
-        container.innerHTML = '<div style="padding:1rem; color:#00d26a; text-align:center;">✓ All inventory items well stocked!</div>';
+        container.innerHTML = `<div style="padding:1rem; color:#00d26a; text-align:center;">${isHindi ? '✓ सारा सामान स्टॉक में मौजूद है!' : '✓ All inventory items well stocked!'}</div>`;
         return;
       }
 
       displayItems.forEach(item => {
         const isLow = item.current_stock <= item.reorder_threshold;
+        const orderText = isHindi ? 'ऑर्डर करें' : 'Order Karein';
+        let stockLeftText = `${item.current_stock} left`;
+        if (isHindi) {
+          stockLeftText = item.current_stock === 1 ? 'सिर्फ 1 बचा है' : `सिर्फ ${item.current_stock} बचे हैं`;
+        }
+
         const div = document.createElement('div');
-        div.className = 'stock-warning-item';
+        div.className = 'pos-stock-row';
         div.innerHTML = `
-          <div style="display:flex; align-items:center; gap:0.75rem;">
-            <span style="font-size:1.2rem; flex-shrink:0;">${isLow ? '⚠️' : '✅'}</span>
+          <div class="pos-stock-meta">
+            <span class="pos-stock-icon">📦</span>
             <div>
-              <strong style="font-size:0.95rem; font-weight:800; color:var(--text-primary); display:block;">${item.item_name}</strong>
-              <span class="stock-warning-badge">${item.current_stock} ${item.unit || 'units'} left (Threshold: ${item.reorder_threshold})</span>
+              <strong class="pos-stock-name">${item.item_name}</strong>
+              <span class="pos-stock-sub">${isHindi ? 'थोक भाव' : 'Wholesale'}: ₹${item.wholesale_price || 50}/unit</span>
             </div>
           </div>
-          <button class="btn-action-cyan" onclick="window.reorderStock('${item.item_name}')">1-Click Reorder</button>
+          <div class="pos-stock-action">
+            <span class="pos-stock-pill ${isLow ? 'pos-stock-pill-critical' : 'pos-stock-pill-healthy'}">${stockLeftText}</span>
+            <button class="pos-btn-action-sm" onclick="window.reorderStock('${item.item_name}', 15)">${orderText}</button>
+          </div>
         `;
         container.appendChild(div);
       });
@@ -300,10 +707,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await API.getCredit();
       const scoreEl = document.getElementById('loanScoreNumber');
       const detailsEl = document.getElementById('loanEligibilityDetails');
+      const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
 
-      if (scoreEl) scoreEl.textContent = `${data.credit_health_score}/100`;
+      if (scoreEl) {
+        const cleanScore = String(data.credit_health_score || '88').replace('/100', '');
+        scoreEl.textContent = cleanScore;
+      }
       if (detailsEl) {
-        detailsEl.textContent = `Current Eligibility: ₹${data.pre_approved_loan.toLocaleString()} | Recent repayment performance: Great | Instant Disbursal Ready!`;
+        detailsEl.textContent = isHindi
+          ? '₹75,000 का लोन तैयार • पुराना रिकॉर्ड बहुत अच्छा • 1 मिनट में सीधे बैंक खाते में'
+          : `Current Eligibility: ₹${data.pre_approved_loan.toLocaleString()} | Recent repayment performance: Great | 1-Min Instant Disbursal Ready!`;
       }
     } catch(e) {
       console.error('Error loading loan card:', e);
@@ -396,14 +809,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="text-align:right;">
           <div style="display:inline-flex; gap:0.5rem; justify-content:flex-end;">
             ${isPending ? `
-              <a href="${whatsappUrl}" target="_blank" class="btn-secondary-flat" style="padding:0.4rem 0.8rem; font-size:0.8rem; text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Send WhatsApp Reminder">
-                💬 WhatsApp
+              <a href="${whatsappUrl}" target="_blank" class="pos-btn-action-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Send WhatsApp Reminder">
+                💬 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'व्हाट्सएप भेजें' : 'WhatsApp Bhejo'}
               </a>
-              <button class="btn-action-cyan" style="padding:0.4rem 0.8rem; font-size:0.8rem;" onclick="window.settleKhata(${c.id}, '${c.name}', ${c.pending_udhaar})">
-                ✓ Settle
+              <button class="pos-btn-action-sm" style="background:#059669;" onclick="window.settleKhata(${c.id}, '${c.name}', ${c.pending_udhaar})">
+                ✓ ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'पैसा आया' : 'Paisa Aaya'}
               </button>
             ` : `
-              <span style="color:#00d26a; font-weight:700; font-size:0.85rem;">All Clear</span>
+              <span style="color:#059669; font-weight:700; font-size:0.85rem;">✓ ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'चुकाया गया' : 'All Clear'}</span>
             `}
           </div>
         </td>
@@ -426,17 +839,19 @@ document.addEventListener('DOMContentLoaded', () => {
     entries.slice(0, 8).forEach(entry => {
       const isUdhaar = entry.entry_type === 'udhaar';
       const div = document.createElement('div');
-      div.className = 'ledger-item';
+      div.className = 'ledger-item audit-item';
       div.innerHTML = `
-        <div style="display:flex; align-items:center; gap:0.8rem;">
-          <span class="ledger-dot ${isUdhaar ? 'dot-orange' : 'dot-green'}"></span>
-          <div>
-            <strong>${entry.customer_name}</strong>
-            <span style="color:var(--text-secondary); font-size:0.85rem;">— ₹${entry.amount} (${isUdhaar ? 'Udhaar Added' : 'Jama / Repaid'})</span>
-            <div style="font-size:0.8rem; color:var(--text-muted);">${entry.item_description || 'General Items'}</div>
+        <div style="display:flex; align-items:flex-start; gap:0.75rem; flex:1; min-width:0;">
+          <span class="ledger-dot ${isUdhaar ? 'dot-orange' : 'dot-green'}" style="margin-top:5px;"></span>
+          <div style="flex:1; min-width:0; line-height:1.35;">
+            <div style="display:flex; align-items:baseline; gap:6px; flex-wrap:wrap;">
+              <strong style="font-size:0.90rem; font-weight:800; color:#0F172A;">${entry.customer_name}</strong>
+              <span style="color:${isUdhaar ? '#DC2626' : '#059669'}; font-size:0.82rem; font-weight:700;">— ₹${entry.amount} (${isUdhaar ? 'Udhaar Added' : 'Jama / Repaid'})</span>
+            </div>
+            <div style="font-size:0.78rem; color:#64748B; margin-top:3px; font-weight:500;">${entry.item_description || 'Kirana Items'}</div>
           </div>
         </div>
-        <div style="font-size:0.8rem; color:var(--text-muted);">${entry.created_at || 'Just now'}</div>
+        <div style="font-size:0.75rem; color:#64748B; white-space:nowrap; margin-left:12px; font-weight:600; flex-shrink:0;">${entry.created_at || 'Just now'}</div>
       `;
       auditList.appendChild(div);
     });
@@ -617,8 +1032,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div style="font-size:0.75rem; color:var(--text-muted);">${item.supplier_email || 'orders@distributor.mock'}</div>
         </td>
         <td style="text-align:right;">
-          <button class="btn-action-cyan" style="padding:0.45rem 1rem;" onclick="window.reorderStock('${item.item_name}', 15)">
-            ⚡ 1-Click Reorder (15)
+          <button class="pos-btn-action-sm" style="padding:0.5rem 1.1rem; font-size:0.82rem;" onclick="window.reorderStock('${item.item_name}', 15)">
+            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर करें' : 'Order Karein'} (15)
           </button>
         </td>
       `;
@@ -928,8 +1343,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   Offer: ${c.suggested_discount}
                 </div>
               </div>
-              <a href="${c.sms_uri}" target="_blank" class="btn-action-cyan" style="text-decoration:none; padding:0.45rem 1rem; font-size:0.85rem;" onclick="window.paytmSoundbox.broadcast('Customer win-back offer sent to ${c.customer_name}')">
-                📲 Send 1-Tap SMS
+              <a href="${c.sms_uri}" target="_blank" class="pos-btn-action-sm" style="text-decoration:none; padding:0.5rem 1rem; font-size:0.85rem;" onclick="window.paytmSoundbox.broadcast('Customer win-back offer sent to ${c.customer_name}')">
+                📲 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑफर भेजें' : 'Offer Bhejo'}
               </a>
             `;
             campaignsList.appendChild(div);
@@ -1050,6 +1465,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   window.showToast = showNotification;
 
-  // Initial Load
+  // Initial Load with Saved or Default Language
+  const savedLang = localStorage.getItem('paytm_lang') || 'en';
+  setLanguage(savedLang);
   loadDashboardData();
 });

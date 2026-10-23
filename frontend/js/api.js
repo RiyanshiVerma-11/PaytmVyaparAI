@@ -2,7 +2,19 @@
  * Paytm Vyapar Saathi - Full Real-Time API Client
  * Supports single-host deployment and decoupled hosting (e.g. Vercel frontend + Render backend)
  */
-const API_BASE = (window.PAYTM_API_BASE || localStorage.getItem('PAYTM_API_BASE') || '').replace(/\/$/, '');
+const RENDER_BACKEND_URL = 'https://paytmvyaparai.onrender.com';
+
+const isLocalhost = typeof window !== 'undefined' && Boolean(
+  window.location.hostname === 'localhost' ||
+  window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '[::1]'
+);
+
+const API_BASE = (
+  (typeof window !== 'undefined' && window.PAYTM_API_BASE) || 
+  (typeof localStorage !== 'undefined' && localStorage.getItem('PAYTM_API_BASE')) || 
+  (isLocalhost ? '' : RENDER_BACKEND_URL)
+).replace(/\/$/, '');
 
 function endpoint(path) {
   return `${API_BASE}${path}`;

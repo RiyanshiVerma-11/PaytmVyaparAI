@@ -133,7 +133,9 @@ class ChatbotService:
     @classmethod
     def handle_message(cls, message: str, session_id: str = "default_merchant"):
         msg = message.strip()
-        q = msg.lower()
+        # Normalize Devanagari numerals (०-९) to standard digits (0-9)
+        devanagari_digits = str.maketrans("०१२३४५६७८९", "0123456789")
+        q = msg.lower().translate(devanagari_digits)
         session = cls.get_or_create_session(session_id)
         
         # 1. Fetch real-time live app state
@@ -146,87 +148,229 @@ class ChatbotService:
         suggestions = []
         thoughts = []
 
-        # ========================================================
-        # INTENT 1: KHATA / UDHAAR INQUIRY & ACTION
-        # ========================================================
-        if any(w in q for w in ["udhaar", "khata", "baaki", "bahi", "jama", "ledger", "balance"]):
-            # Check if it's an action to record udhaar / jama
-            if any(w in q for w in ["likho", "likh lo", "diya", "jama kar", "settle", "add kar"]):
-                thoughts.append("Action detected: Record or modify Khata ledger entry")
-                
-                amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+)', q)
-                amount = float(amt_match.group(1)) if amt_match else 250.0
+        # Customer name aliases (Hindi Devanagari & phonetic Hinglish)
+        customer_alias_map = {
+            # Ramesh Kumar
+            "रमेश": "Ramesh Kumar", "रमेश कुमार": "Ramesh Kumar", "रामेश": "Ramesh Kumar",
+            "ramesh": "Ramesh Kumar", "ramesh kumar": "Ramesh Kumar",
+            # Rajesh Chawla
+            "राजेश": "Rajesh Chawla", "राजेश चावला": "Rajesh Chawla", "चावला": "Rajesh Chawla",
+            "rajesh": "Rajesh Chawla", "rajesh chawla": "Rajesh Chawla", "chawla": "Rajesh Chawla",
+            # Pooja Gupta
+            "पूजा": "Pooja Gupta", "पूजा गुप्ता": "Pooja Gupta", "गुप्ता": "Pooja Gupta",
+            "pooja": "Pooja Gupta", "pooja gupta": "Pooja Gupta", "puja": "Pooja Gupta", "puja gupta": "Pooja Gupta",
+            # Manoj Verma
+            "मनोज": "Manoj Verma", "मनोज वर्मा": "Manoj Verma", "वर्मा": "Manoj Verma",
+            "manoj": "Manoj Verma", "manoj verma": "Manoj Verma", "verma": "Manoj Verma",
+            # Ananya Singh
+            "अनन्या": "Ananya Singh", "अनन्या सिंह": "Ananya Singh", "सिंह": "Ananya Singh",
+            "ananya": "Ananya Singh", "ananya singh": "Ananya Singh",
+            # Sunil Yadav
+            "सुनील": "Sunil Yadav", "सुनील यादव": "Sunil Yadav", "यादव": "Sunil Yadav",
+            "sunil": "Sunil Yadav", "sunil yadav": "Sunil Yadav",
+        }
 
-                # Customer name extraction
-                customer_name = session.get("last_mentioned_customer") or "Ramesh Kumar"
+        # ========================================================
+        # INTENT 1: KHATA / UDHAAR INQUIRY & REAL-TIME ACTION
+        # ========================================================
+        has_amount = bool(re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\d+(?:\.\d+)?)', q))
+        is_jama_phrase = any(w in q for w in [
+            # Hinglish / English
+            "aa gaye", "aa gaya", "aagye", "aagaya", "aaye", "aaya", "aagayi", "aa gayi",
+            "mil gaye", "mil gaya", "mila", "mile", "received", "receive", "rcvd", "recvd",
+            "jama", "jama kar", "jama ho", "settle", "settled", "clear", "cleared",
+            "pay kar", "paid", "pad", "pay", "payed", "pe", "payment",
+            "de diya", "de diye", "de gaya", "diya", "diye", "dia",
+            "chuka diya", "chuka diye", "prapt", "bhar diya", "bhar diye",
+            "bhi aa gaye", "bhi aa gaya",
+            "wapas", "wapas aa gaye", "wapas aa gaya", "wapas mil gaye", "paisa aaya", "paise aa gaye",
+            # Devanagari Hindi
+            "पैड", "पेड", "पेड़", "पे", "पेमेंट", "पे कर", "पे किया", "पे कर दिया", "पे हुआ", "पे हो गए", "पे हो गया",
+            "आ गए", "आ गया", "आ गई", "आगए", "आगया", "आए", "आया", "आये",
+            "मिल गए", "मिल गया", "मिला", "मिले",
+            "जमा", "जमा कर", "जमा करो", "जमा कर लो", "जमा हो गए", "जमा हुआ",
+            "प्राप्त", "प्राप्त हुए", "प्राप्त हुआ",
+            "दे दिए", "दे दिया", "दे गया", "दिए", "दिया", "दिये",
+            "चुका दिया", "चुका दिए", "चुकाया", "चुकाए",
+            "भर दिया", "भर दिए", "भुगतान", "भुगतान किया", "भुगतान हुआ",
+            "चुकता", "हिसाब चुकता", "चुकता कर", "चुकता करो", "निपटा दिया", "क्लियर", "सेटल", "सैटल", "सेटल कर", "सेटल करो", "सेटल कर दो",
+            "वापस", "वापस आ गए", "वापस मिल गए", "पैसे आ गए", "पैसा आया"
+        ])
+        is_udhaar_action = any(w in q for w in [
+            # Hinglish / English
+            "likho", "likh lo", "likh do", "likh", "udhaar", "de do",
+            "add kar", "jod do", "le gaya", "udhari",
+            # Devanagari Hindi
+            "लिखो", "लिख लो", "लिख दो", "लिख लेना", "लिखिये", "लिखिए",
+            "उधार", "उधारी", "दे दो", "जोड़ दो", "जोड़ो",
+            "ले गया", "ले गए"
+        ])
+        is_khata_general = any(w in q for w in [
+            "khata", "baaki", "bahi", "ledger", "balance", "udhaar", "jama",
+            "खाता", "बही", "बाकी", "बैलेंस", "हिसाब", "उधार", "कितना बाकी"
+        ])
+
+        # Customer presence check
+        has_known_customer = any(k in q for k in customer_alias_map) or any(c["name"].lower().split()[0] in q for c in context["khata"]["all_customers"])
+
+        # Check if it's a direct ledger action (Jama / Udhaar entry)
+        if (is_jama_phrase or is_udhaar_action) and (has_amount or has_known_customer):
+            thoughts.append("Action detected: Record real-time Khata ledger transaction")
+            # Customer name extraction
+            customer_name = None
+            
+            # 1. Check known alias mapping (Hindi + English)
+            for alias, official_name in customer_alias_map.items():
+                if alias in q:
+                    customer_name = official_name
+                    break
+
+            # 2. Check DB customer list
+            if not customer_name:
                 for c in context["khata"]["all_customers"]:
-                    first_name = c["name"].lower().split()[0]
-                    if first_name in q:
+                    full_name = c["name"].lower()
+                    first_name = full_name.split()[0]
+                    last_name = full_name.split()[-1] if len(full_name.split()) > 1 else ""
+                    if full_name in q or first_name in q or (last_name and len(last_name) > 3 and last_name in q):
                         customer_name = c["name"]
                         break
 
-                session["last_mentioned_customer"] = customer_name
-                entry_type = "jama" if ("jama" in q or "settle" in q or "mila" in q) else "udhaar"
-                item_desc = "Kirana Items"
-                for it in ["oil", "butter", "maggi", "salt", "atta", "tea", "tel"]:
-                    if it in q:
-                        item_desc = it.title()
+            # 3. Hindi phrase parsing: "रमेश कुमार के ₹450" or "सुनील से 500"
+            if not customer_name:
+                hi_match = re.search(r'([^\s,₹\d।]+(?:\s+[^\s,₹\d।]+)?)\s*(?:के|का|की|ने|को|से|भी)', msg)
+                if hi_match:
+                    cand = hi_match.group(1).strip()
+                    if cand in customer_alias_map:
+                        customer_name = customer_alias_map[cand]
+                    elif len(cand) > 1 and cand not in ["आज", "कल", "भाई", "साउंडबॉक्स", "पेटीएम", "खाता", "उधार"]:
+                        customer_name = cand
+
+            # 4. English phrase parsing
+            if not customer_name:
+                name_match = re.match(r'^\s*([a-zA-Z\s]+?)(?:,|\ska\b|\ske\b|\sne\b|\sko\b|\sse\b|\s*(?:rs\.?|inr|₹)?\s*\d+)', message, re.IGNORECASE)
+                if name_match:
+                    ext = name_match.group(1).strip()
+                    if len(ext) > 2 and ext.lower() not in ["aaj", "kal", "bhai", "soundbox", "paytm", "khata", "udhaar"]:
+                        customer_name = ext.title()
+
+            if not customer_name:
+                customer_name = session.get("last_mentioned_customer") or "Ramesh Kumar"
+
+            session["last_mentioned_customer"] = customer_name
+
+            # Look up customer's current balance in DB
+            cust_record = next((c for c in context["khata"]["all_customers"] if c["name"].lower() == customer_name.lower()), None)
+            if not cust_record:
+                cust_record = next((c for c in context["khata"]["all_customers"] if c["name"].lower().split()[0] == customer_name.lower().split()[0]), None)
+            cust_pending = float(cust_record.get("pending", 0)) if cust_record else 0.0
+
+            # Check if this is a full settlement request without an explicit amount
+            is_full_settlement = any(w in q for w in [
+                "pura chukta", "poora chukta", "hisab chukta", "hisab clear", 
+                "sab chukta", "pura clear", "poora clear", "full settle", "pura settle", 
+                "settle", "चुकता", "हिसाब चुकता", "पूरा चुकता", "खाता चुकता", "सेटल", "क्लियर"
+            ]) and not re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,6}(?:\.\d+)?\b)', q)
+
+            if is_full_settlement:
+                if cust_pending <= 0:
+                    reply = f"ℹ️ **{customer_name} Ji Ka Khata Pehle Se Chukta Hai!**\n\n" \
+                            f"• **Grahak:** {customer_name}\n" \
+                            f"• **Pending Udhaar:** ₹0 (All Clear)\n" \
+                            f"• **Status:** Koi bakaya rashi bachi nahi hai."
+                    suggestions = ["Khata ledger dekhein", "Stock status check karo", "Customer ko offer bhejo"]
+                    session["history"].append({"role": "user", "content": message, "timestamp": datetime.now().isoformat()})
+                    session["history"].append({"role": "assistant", "content": reply, "timestamp": datetime.now().isoformat()})
+                    return {
+                        "reply": reply,
+                        "action_taken": "KHATA_ALREADY_CLEARED",
+                        "data": {"customer_name": customer_name, "pending": 0},
+                        "soundbox_payload": {
+                            "chime": True,
+                            "speech_text": f"Paytm par {customer_name} ji ka koi baaki udhaar nahi hai. Hisab chukta hai."
+                        },
+                        "suggestions": suggestions,
+                        "thoughts": ["Customer has 0 pending udhaar; no settlement required."],
+                        "context_summary": {
+                            "pending_udhaar": context["khata"]["total_pending_udhaar"],
+                            "low_stock_count": context["inventory"]["low_stock_count"],
+                            "credit_score": context["credit"]["score"],
+                            "memory_turns": len(session["history"])
+                        }
+                    }
+                amount = cust_pending
+            else:
+                amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,6}(?:\.\d+)?\b)', q)
+                amount = float(amt_match.group(1)) if amt_match else (cust_pending if cust_pending > 0 else 250.0)
+
+            entry_type = "jama" if is_jama_phrase else "udhaar"
+            
+            item_desc = "Kirana Items"
+            for it in ["oil", "butter", "maggi", "salt", "atta", "tea", "tel", "doodh", "biscuit", "sugar", "तेल", "मक्खन", "आटा", "मैगी", "नमक"]:
+                if it in q:
+                    item_desc = it.title()
+                    break
+
+            action_res = KhataService.record_entry(customer_name, amount, item_desc, entry_type)
+            action_taken = "KHATA_ENTRY_RECORDED"
+            data_payload = action_res
+            soundbox_payload = action_res.get("soundbox_payload")
+            
+            # Dynamic memory update
+            session["last_action"] = f"{entry_type.title()} of ₹{int(amount)} for {customer_name}"
+            new_bal = action_res.get("new_pending_balance", 0)
+
+            reply = f"✅ **Entry Darj Ho Gayi Hai!**\n\n" \
+                    f"• **Grahak:** {customer_name}\n" \
+                    f"• **Type:** {entry_type.upper()} ({'Prapt Hue (Jama)' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
+                    f"• **Raqam:** ₹{int(amount):,}\n" \
+                    f"• **Naya Pending Udhaar:** ₹{int(new_bal):,}\n\n" \
+                    f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
+            
+            suggestions = ["Khata ledger dekhein", "Stock status check karo", "Customer ko reminder bhejo"]
+
+        elif is_khata_general:
+            # Query about Khata status
+            thoughts.append("Intent detected: Khata / Udhaar status inquiry")
+            total_pending = context["khata"]["total_pending_udhaar"]
+            udhaar_list = context["khata"]["customers_with_udhaar"]
+            
+            # Check for specific customer
+            specific_cust = None
+            for alias, official_name in customer_alias_map.items():
+                if alias in q:
+                    specific_cust = next((c for c in context["khata"]["all_customers"] if c["name"] == official_name), None)
+                    if specific_cust:
                         break
 
-                action_res = KhataService.record_entry(customer_name, amount, item_desc, entry_type)
-                action_taken = "KHATA_ENTRY_RECORDED"
-                data_payload = action_res
-                soundbox_payload = action_res.get("soundbox_payload")
-                
-                # Dynamic memory update
-                session["last_action"] = f"{entry_type.title()} of ₹{int(amount)} for {customer_name}"
-                new_bal = action_res.get("new_pending_balance", 0)
-
-                reply = f"✅ **Entry Darj Ho Gayi Hai!**\n\n" \
-                        f"• **Grahak:** {customer_name}\n" \
-                        f"• **Type:** {entry_type.upper()} ({'Prapt Hue' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
-                        f"• **Raqam:** ₹{int(amount)}\n" \
-                        f"• **Naya Pending Udhaar:** ₹{int(new_bal)}\n\n" \
-                        f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
-                
-                suggestions = ["Khata ledger dekhein", "Stock status check karo", "Customer ko reminder bhejo"]
-
-            else:
-                # Query about Khata status
-                thoughts.append("Intent detected: Khata / Udhaar status inquiry")
-                total_pending = context["khata"]["total_pending_udhaar"]
-                udhaar_list = context["khata"]["customers_with_udhaar"]
-                
-                # Check for specific customer
-                specific_cust = None
+            if not specific_cust:
                 for c in context["khata"]["all_customers"]:
                     first_name = c["name"].lower().split()[0]
                     if first_name in q:
                         specific_cust = c
                         break
 
-                if specific_cust:
-                    session["last_mentioned_customer"] = specific_cust["name"]
-                    reply = f"📋 **{specific_cust['name']} Ji Ka Khata Details:**\n\n" \
-                            f"• **Pending Udhaar:** ₹{int(specific_cust['pending'])}\n" \
-                            f"• **Mobile:** `{specific_cust['phone']}`\n" \
-                            f"• **Total Spent Till Date:** ₹{int(specific_cust['spent'])}\n" \
-                            f"• **Risk Status:** {specific_cust['churn_risk']}\n\n" \
-                            f"Aap bol sakte hain: *'{specific_cust['name'].split()[0]} ka ₹{int(specific_cust['pending'])} jama kar lo'* ya WhatsApp reminder bhej sakte hain."
-                    suggestions = [f"{specific_cust['name'].split()[0]} ka udhaar clear karo", "Bahi-Khata ledger khole", "Baaki grahakon ka udhaar"]
-                else:
-                    cust_str = "\n".join([f"• **{c['name']}**: ₹{int(c['pending'])} (Last visit: {c['last_visit']})" for c in udhaar_list])
-                    reply = f"📊 **Sharma Kirana — Bahi-Khata Summary:**\n\n" \
-                            f"Aapka kul **₹{int(total_pending):,}** udhaar market me pending hai across **{len(udhaar_list)} grahak**:\n\n" \
-                            f"{cust_str}\n\n" \
-                            f"💡 *Tip: Kisi bhi grahak ka naam lekar bol sakte hain unka udhaar jama ya darj karne ke liye.*"
-                    suggestions = ["Manoj Verma ka balance", "Pooja Gupta ka balance", "Udhaar darj karein", "Low stock check"]
+            if specific_cust:
+                session["last_mentioned_customer"] = specific_cust["name"]
+                reply = f"📋 **{specific_cust['name']} Ji Ka Khata Details:**\n\n" \
+                        f"• **Pending Udhaar:** ₹{int(specific_cust['pending'])}\n" \
+                        f"• **Mobile:** `{specific_cust['phone']}`\n" \
+                        f"• **Total Spent Till Date:** ₹{int(specific_cust['spent'])}\n" \
+                        f"• **Risk Status:** {specific_cust['churn_risk']}\n\n" \
+                        f"Aap bol sakte hain: *'{specific_cust['name'].split()[0]} ka ₹{int(specific_cust['pending'])} jama kar lo'* ya WhatsApp reminder bhej sakte hain."
+                suggestions = [f"{specific_cust['name'].split()[0]} ka udhaar clear karo", "Bahi-Khata ledger khole", "Baaki grahakon ka udhaar"]
+            else:
+                cust_str = "\n".join([f"• **{c['name']}**: ₹{int(c['pending'])} (Last visit: {c['last_visit']})" for c in udhaar_list])
+                reply = f"📊 **Sharma Kirana — Bahi-Khata Summary:**\n\n" \
+                        f"Aapka kul **₹{int(total_pending):,}** udhaar market me pending hai across **{len(udhaar_list)} grahak**:\n\n" \
+                        f"{cust_str}\n\n" \
+                        f"💡 *Tip: Kisi bhi grahak ka naam lekar bol sakte hain unka udhaar jama ya darj karne ke liye.*"
+                suggestions = ["Manoj Verma ka balance", "Pooja Gupta ka balance", "Udhaar darj karein", "Low stock check"]
 
         # ========================================================
         # INTENT 2: INVENTORY & SUPPLIER RESTOCK
         # ========================================================
-        elif any(w in q for w in ["stock", "khatam", "supplier", "order", "reorder", "po", "inventory", "tel", "oil", "butter", "atta", "maggi", "salt"]):
-            if any(w in q for w in ["order", "reorder", "manga", "bhejo", "po bhej"]):
+        elif any(w in q for w in ["stock", "khatam", "supplier", "order", "reorder", "po", "inventory", "tel", "oil", "butter", "atta", "maggi", "salt", "स्टॉक", "माल", "खत्म", "सप्लायर", "ऑर्डर", "तेल", "मक्खन", "आटा", "मैगी", "नमक", "फॉर्च्यून", "अमूल"]):
+            if any(w in q for w in ["order", "reorder", "manga", "bhejo", "po bhej", "ऑर्डर", "मंगा", "मंगाओ", "मंगा लो", "भेज", "भेजो", "मंगवा", "मंगवा लो", "बुक"]):
                 thoughts.append("Action detected: Send supplier restock purchase order")
                 target_item = session.get("last_mentioned_item") or "Fortune Refined Oil 1L"
                 for it in context["inventory"]["all_items"]:
@@ -268,8 +412,8 @@ class ChatbotService:
         # ========================================================
         # INTENT 3: PAYTM LOAN & CREDIT HEALTH
         # ========================================================
-        elif any(w in q for w in ["loan", "credit", "score", "capital", "paise", "underwrite", "disburse", "limit"]):
-            if any(w in q for w in ["disburse", "le lo", "apply", "transfer", "bank"]):
+        elif any(w in q for w in ["loan", "credit", "score", "capital", "paise", "underwrite", "disburse", "limit", "लोन", "क्रेडिट", "कर्ज", "उधार पैसा", "पूंजी"]):
+            if any(w in q for w in ["disburse", "le lo", "apply", "transfer", "bank", "निकाल", "ले लो", "चाहिए", "ट्रांसफर", "डाल दो", "लेना", "अप्लाई", "दे दो"]):
                 thoughts.append("Action detected: Disburse pre-approved merchant loan")
                 disburse_res = CreditService.disburse_loan(context["credit"]["pre_approved_amount"])
                 action_taken = "LOAN_DISBURSED"

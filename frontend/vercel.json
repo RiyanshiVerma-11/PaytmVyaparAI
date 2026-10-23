@@ -2,7 +2,15 @@
   "cleanUrls": true,
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "https://paytmvyaparai.onrender.com/api/$1"
+    },
+    {
       "source": "/static/(.*)",
+      "destination": "/$1"
+    },
+    {
+      "source": "/(.*)",
       "destination": "/$1"
     }
   ]

@@ -36,7 +36,7 @@
             </svg>
           </div>
           <div class="chatbot-launcher-tooltip">
-            <span>✨</span> <strong>Paytm AI Copilot</strong> • Full Context
+            <strong>Paytm AI Copilot</strong> • Full Context
           </div>
         `;
         document.body.appendChild(launcher);
@@ -301,11 +301,20 @@
 
         // 4. Dynamically Refresh Main App Views & Context
         this.refreshContext();
-        if (window.loadDashboardData) {
-          window.loadDashboardData();
+        if (typeof window.loadDashboardData === 'function') {
+          await window.loadDashboardData();
         }
-        if (window.switchView && currentView) {
-          window.switchView(currentView);
+        if (typeof window.loadLedgerCard === 'function') {
+          await window.loadLedgerCard(false);
+        }
+        if (typeof window.renderKhataCustomersTable === 'function') {
+          window.renderKhataCustomersTable();
+        }
+        if (typeof window.renderKhataAuditList === 'function') {
+          window.renderKhataAuditList();
+        }
+        if (window.showNotification && data.action_taken) {
+          window.showNotification(`⚡ ${replyText.split('\n')[0].replace(/[#*]/g, '')}`, 'success');
         }
 
         // 5. Update Suggestions if returned

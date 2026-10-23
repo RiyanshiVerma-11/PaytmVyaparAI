@@ -47,3 +47,14 @@
 - [x] Verified FastAPI backend import & route registration
 - [x] Verified authentic Soundbox chime synthesis & audio feedback
 - [x] Ready for GitHub synchronization & live demonstration
+
+---
+
+### ✅ Phase 6: Anomaly Resolution & Cloud Deployment (Render + Vercel)
+- [x] **Backend Live Reload & Persistent DB Execution**: Fixed in-memory snapshot anomaly, running `uvicorn --reload` connected to persistent SQLite `backend/vyapar.db`.
+- [x] **Universal Vernacular Chatbot Intent Engine**: Full support for Hindi Devanagari and Hinglish across Khata repayments ("पैड", "पेड", "जमा", "आ गए"), Udhaar recording, stock reorders ("मंगा लो", "ऑर्डर"), and instant working capital loan ("लोन निकाल लो").
+- [x] **Zero-Amount Full Settlement Resolution**: Saying "मनोज वर्मा सेटल" or "पूरा हिसाब चुकता" dynamically resolves the customer's actual pending balance from SQLite and settles it to ₹0 with celebratory Soundbox chime.
+- [x] **Real-Time Cross-Module UI Sync**: `window.loadDashboardData`, `window.loadLedgerCard`, `window.loadKhataView`, `window.renderKhataCustomersTable`, and `window.renderKhataAuditList` synchronously bound to refresh glance strips, recovery metrics, and bento cards on voice/chat entry.
+- [x] **PostgreSQL Portability**: Standard ANSI SQL schema and types in SQLite (`backend/database.py`) allow zero-friction migration to PostgreSQL with `psycopg2`/`asyncpg`.
+- [x] **Vercel Reverse-Proxy & CORS Architecture**: Configured both root [`vercel.json`](./vercel.json) and [`frontend/vercel.json`](./frontend/vercel.json) with transparent `/api/(.*)` rewrites to live Render backend (`https://paytmvyaparai.onrender.com`), plus auto-detect fallback in [`frontend/js/api.js`](./frontend/js/api.js).
+
