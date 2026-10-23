@@ -210,6 +210,72 @@ document.addEventListener('DOMContentLoaded', () => {
         if (merchantNameEl) merchantNameEl.textContent = s.name;
         if (merchantShopEl) merchantShopEl.textContent = (s.shopName || 'Kirana Store') + ' ▾';
       }
-    } catch(e) {}
+    } catch (e) {
+      console.warn('Failed to parse merchant session:', e);
+    }
   }
+
+  // Global Logout Handler (Used by Mobile Profile Circle, Profile Modal, and Sidebar)
+  window.handleMerchantLogout = function() {
+    window.closeMerchantProfileModal();
+    localStorage.removeItem('paytm_merchant_session');
+    const landingEl = document.getElementById('landingView');
+    const appEl = document.getElementById('appView');
+    if (appEl) appEl.style.display = 'none';
+    if (landingEl) landingEl.style.display = 'flex';
+    document.body.classList.remove('in-cockpit');
+    window.location.hash = '';
+    const launcher = document.getElementById('chatbotLauncher');
+    if (launcher) launcher.style.display = 'none';
+    if (window.showNotification) {
+      window.showNotification('Logged out successfully / सफलतापूर्वक लॉग आउट हो गया', 'info');
+    }
+  };
+
+  // Khata Form Helpers (Visual pill toggles, amount adders, item quick chips)
+  window.setKhataEntryType = function(type) {
+    const input = document.getElementById('khataInputType');
+    const udhaarBtn = document.getElementById('khataTypeUdhaarBtn');
+    const jamaBtn = document.getElementById('khataTypeJamaBtn');
+    const amountBox = document.getElementById('khataAmountContainer');
+    const amountLabel = document.getElementById('khataAmountLabel');
+    const submitBtn = document.getElementById('submitAddKhataBtn');
+
+    if (input) input.value = type;
+    if (type === 'udhaar') {
+      if (udhaarBtn) udhaarBtn.className = 'type-pill-btn active-udhaar';
+      if (jamaBtn) jamaBtn.className = 'type-pill-btn';
+      if (amountBox) amountBox.className = 'hero-amount-box is-udhaar';
+      if (amountLabel) amountLabel.textContent = 'उधार राशि / Amount';
+      if (submitBtn) {
+        submitBtn.className = 'btn-modal-submit-khata';
+        submitBtn.innerHTML = '<span>💾</span> खाताबही में दर्ज करें (Save Entry)';
+      }
+    } else {
+      if (udhaarBtn) udhaarBtn.className = 'type-pill-btn';
+      if (jamaBtn) jamaBtn.className = 'type-pill-btn active-jama';
+      if (amountBox) amountBox.className = 'hero-amount-box is-jama';
+      if (amountLabel) amountLabel.textContent = 'जमा राशि / Amount';
+      if (submitBtn) {
+        submitBtn.className = 'btn-modal-submit-khata is-jama';
+        submitBtn.innerHTML = '<span>📗</span> जमा राशि दर्ज करें (Save Payment)';
+      }
+    }
+  };
+
+  window.setKhataAmount = function(amt) {
+    const amountInput = document.getElementById('khataInputAmount');
+    if (!amountInput) return;
+    const current = parseFloat(amountInput.value) || 0;
+    amountInput.value = current + amt;
+    amountInput.focus();
+  };
+
+  window.setKhataDesc = function(desc) {
+    const descInput = document.getElementById('khataInputDesc');
+    if (descInput) {
+      descInput.value = desc;
+      descInput.focus();
+    }
+  };
 });

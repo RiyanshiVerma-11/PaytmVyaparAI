@@ -259,13 +259,18 @@ document.addEventListener('DOMContentLoaded', () => {
   const logoutBtn = document.getElementById('sidebarLogoutBtn');
   if (logoutBtn) {
     logoutBtn.addEventListener('click', () => {
-      localStorage.removeItem('paytm_merchant_session');
-      const landingEl = document.getElementById('landingView');
-      const appEl = document.getElementById('appView');
-      if (appEl) appEl.style.display = 'none';
-      if (landingEl) landingEl.style.display = 'flex';
-      document.body.classList.remove('in-cockpit');
-      showNotification('Logged out successfully', 'info');
+      if (typeof window.handleMerchantLogout === 'function') {
+        window.handleMerchantLogout();
+      } else {
+        localStorage.removeItem('paytm_merchant_session');
+        const landingEl = document.getElementById('landingView');
+        const appEl = document.getElementById('appView');
+        if (appEl) appEl.style.display = 'none';
+        if (landingEl) landingEl.style.display = 'flex';
+        document.body.classList.remove('in-cockpit');
+        window.location.hash = '';
+        showNotification('Logged out successfully', 'info');
+      }
     });
   }
 

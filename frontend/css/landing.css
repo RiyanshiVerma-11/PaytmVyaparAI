@@ -695,6 +695,12 @@
     font-size: 1.05rem !important;
     white-space: nowrap !important;
   }
+  .brand-desktop-only {
+    display: none !important;
+  }
+  .brand-mobile-only {
+    display: inline !important;
+  }
   .landing-nav > div:last-child {
     gap: 6px !important;
   }

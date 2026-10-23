@@ -31,9 +31,10 @@
     <!-- Landing Navigation -->
     <nav class="landing-nav">
       <div style="display:flex; align-items:center; gap:0.8rem;">
-        <div style="width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg, #002970, #00baf2); color:white; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:1.1rem;">P</div>
+        <div style="width:36px; height:36px; border-radius:8px; background:linear-gradient(135deg, #002970, #00baf2); color:white; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.95rem; letter-spacing:-0.5px;">VS</div>
         <div style="font-size:1.3rem; font-weight:800; letter-spacing:-0.5px;">
-          <span style="color:var(--paytm-cyan);">Paytm</span> Vyapar Saathi
+          <span class="brand-desktop-only"><span style="color:var(--paytm-cyan);">Paytm</span> Vyapar Saathi</span>
+          <span class="brand-mobile-only" style="display:none;"><span style="color:#FFFFFF;">Vyapar</span> <span style="color:var(--paytm-cyan);">Saathi</span></span>
         </div>
       </div>
 
@@ -576,11 +577,17 @@
           RK
         </div>
         <div style="flex: 1; min-width: 0;">
-          <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-            <h3 id="modalMerchantDisplayName" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ramesh Sharma</h3>
-            <span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px;">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Verified Merchant
-            </span>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <h3 id="modalMerchantDisplayName" style="margin: 0; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Ramesh Sharma</h3>
+              <span style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 3px;">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> Verified
+              </span>
+            </div>
+            <button type="button" class="btn-profile-quick-logout" title="Log Out / साइन आउट" onclick="window.handleMerchantLogout && window.handleMerchantLogout()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              <span>Log Out</span>
+            </button>
           </div>
           <div id="modalShopDisplayName" style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 2px;">Sharma Kirana & General Store</div>
           <div style="font-size: 0.75rem; color: #00BAF2; font-weight: 600; margin-top: 2px;">Paytm Soundbox 4.0 Pro Linked (Active)</div>
@@ -636,9 +643,19 @@
           Profile updated successfully!
         </div>
 
-        <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem;">
-          <button type="submit" class="btn-auth-submit" style="flex: 2; margin-top: 0;">Save Profile Changes</button>
-          <button type="button" class="btn-demo-quick" style="flex: 1; margin-top: 0; justify-content: center;" onclick="window.closeMerchantProfileModal()">Cancel</button>
+        <div style="display: flex; gap: 0.8rem; margin-top: 1.2rem; flex-wrap: wrap;">
+          <button type="submit" class="btn-auth-submit" style="flex: 2; margin-top: 0; min-width: 140px;">Save Profile Changes</button>
+          <button type="button" class="btn-demo-quick" style="flex: 1; margin-top: 0; justify-content: center; min-width: 80px;" onclick="window.closeMerchantProfileModal()">Cancel</button>
+        </div>
+
+        <div style="margin-top: 1rem; padding-top: 0.9rem; border-top: 1px dashed var(--border-glass); display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+          <div style="font-size: 0.82rem; color: var(--text-secondary);">
+            Logged in as <strong id="profileSignedAsText" style="color: var(--text-primary);">Ramesh Sharma</strong>
+          </div>
+          <button type="button" id="profileModalLogoutBtn" class="btn-profile-logout" onclick="window.handleMerchantLogout && window.handleMerchantLogout()">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            <span>Log Out / साइन आउट</span>
+          </button>
         </div>
       </form>
     </div>
@@ -655,10 +672,10 @@
     <aside id="cockpitSidebar" class="cockpit-sidebar">
       <div class="sidebar-header">
         <div class="sidebar-brand">
-          <div class="sidebar-brand-icon">P</div>
+          <div class="sidebar-brand-icon">VS</div>
           <div class="sidebar-brand-text">
-            <div class="brand-title"><span class="paytm-highlight">Paytm</span></div>
-            <div class="brand-subtitle">Vyapar Saathi</div>
+            <div class="brand-title"><span class="paytm-highlight">Paytm</span> Vyapar Saathi</div>
+            <div class="brand-subtitle">Autonomous Business Copilot</div>
           </div>
         </div>
         <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" title="Toggle Sidebar">
@@ -719,10 +736,10 @@
       <!-- Top Navbar Matching assets/dashboard_ui.jpg -->
       <header class="top-navbar">
         <div class="top-nav-left-group">
-          <!-- Mobile Brand Logo -->
-          <div class="mobile-top-brand" style="display:none; align-items:center; gap:6px;">
-            <div style="width:28px; height:28px; border-radius:6px; background:linear-gradient(135deg, #002970, #00BAF2); color:white; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.9rem;">P</div>
-            <span style="font-weight:800; font-size:0.95rem; color:#002970; letter-spacing:-0.3px;">Pay<span style="color:#00BAF2;">tm</span></span>
+          <!-- Mobile Brand Logo: Strictly "Vyapar Saathi" on mobile -->
+          <div class="mobile-top-brand" style="display:none; align-items:center; gap:8px;">
+            <div style="width:28px; height:28px; border-radius:7px; background:linear-gradient(135deg, #002970, #00BAF2); color:white; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:0.85rem; box-shadow:0 2px 6px rgba(0,41,112,0.25); flex-shrink:0;">VS</div>
+            <span style="font-weight:900; font-size:1.02rem; color:#002970; letter-spacing:-0.4px;">Vyapar <span style="color:#00BAF2;">Saathi</span></span>
           </div>
 
           <div class="top-search-bar">
@@ -1593,55 +1610,101 @@
        4. INTERACTIVE APPLICATION MODALS
        ======================================================== -->
 
-  <!-- Modal 1: Add Khata Entry -->
+  <!-- Modal 1: Add Khata Entry (Ultra User-Friendly & Modern) -->
   <div id="modalAddKhata" class="vyapar-modal-overlay" style="display:none;">
-    <div class="vyapar-modal-card">
+    <div class="vyapar-modal-card khata-modal-card">
       <div class="vyapar-modal-header">
-        <div class="vyapar-modal-title"><span>📝</span> Record Bahi-Khata Entry</div>
-        <button id="closeAddKhataModalBtn" class="vyapar-modal-close">&times;</button>
+        <div class="vyapar-modal-title">
+          <div class="modal-title-badge">📖</div>
+          <div>
+            <div class="modal-main-heading">खाता एंट्री दर्ज करें <span class="modal-subtag">New Khata</span></div>
+            <div class="modal-sub-heading">ग्राहक का नया उधार या जमा तुरंत जोड़ें</div>
+          </div>
+        </div>
+        <button type="button" id="closeAddKhataModalBtn" class="vyapar-modal-close" title="बंद करें / Close">&times;</button>
       </div>
+
       <form id="formAddKhata">
         <div class="vyapar-modal-body">
-          <div class="form-field-group">
-            <label class="form-label">Customer Full Name</label>
-            <input type="text" id="khataInputName" class="form-input-text" placeholder="e.g. Sunil Verma" required>
+          
+          <!-- 1. Transaction Type Toggle (Udhaar vs Jama) -->
+          <div class="khata-type-toggle-wrap">
+            <button type="button" id="khataTypeUdhaarBtn" class="type-pill-btn active-udhaar" onclick="window.setKhataEntryType('udhaar')">
+              <span class="type-dot red-dot"></span>
+              <span class="type-text">🔴 उधार दिया (Udhaar)</span>
+            </button>
+            <button type="button" id="khataTypeJamaBtn" class="type-pill-btn" onclick="window.setKhataEntryType('jama')">
+              <span class="type-dot green-dot"></span>
+              <span class="type-text">🟢 पैसे मिले (Jama)</span>
+            </button>
+            <input type="hidden" id="khataInputType" value="udhaar">
           </div>
 
-          <div class="form-field-group">
-            <label class="form-label">Mobile Number (For WhatsApp / SMS Reminder)</label>
-            <input type="tel" id="khataInputPhone" class="form-input-text" placeholder="e.g. +91 9810112233" value="+91 9810112233">
+          <!-- 2. Hero Amount Input Box -->
+          <div class="hero-amount-box is-udhaar" id="khataAmountContainer">
+            <span class="hero-currency-tag">₹</span>
+            <input type="number" id="khataInputAmount" class="hero-amount-input" placeholder="0" required autofocus>
+            <span class="hero-amount-label" id="khataAmountLabel">उधार राशि / Amount</span>
           </div>
 
+          <!-- Quick Amount Chips -->
+          <div class="quick-chip-strip">
+            <button type="button" class="amount-quick-chip" onclick="window.setKhataAmount(100)">+₹100</button>
+            <button type="button" class="amount-quick-chip" onclick="window.setKhataAmount(250)">+₹250</button>
+            <button type="button" class="amount-quick-chip" onclick="window.setKhataAmount(500)">+₹500</button>
+            <button type="button" class="amount-quick-chip" onclick="window.setKhataAmount(1000)">+₹1,000</button>
+            <button type="button" class="amount-quick-chip" onclick="window.setKhataAmount(2000)">+₹2,000</button>
+          </div>
+
+          <!-- 3. Customer Info Grid -->
           <div class="form-grid-2">
             <div class="form-field-group">
-              <label class="form-label">Amount (₹)</label>
-              <input type="number" id="khataInputAmount" class="form-input-text" placeholder="450" required>
+              <label class="form-label">
+                <span>👤 Customer Name (ग्राहक का नाम)</span>
+                <span class="required-star">*</span>
+              </label>
+              <input type="text" id="khataInputName" class="form-input-text" placeholder="e.g. Sunil Verma, Manoj" required>
             </div>
+
             <div class="form-field-group">
-              <label class="form-label">Entry Type</label>
-              <select id="khataInputType" class="form-input-text">
-                <option value="udhaar">Udhaar (Baaki Credit)</option>
-                <option value="jama">Jama (Paid / Repaid)</option>
-              </select>
+              <label class="form-label">
+                <span>📱 Mobile Number</span>
+                <span class="badge-sms">WhatsApp / SMS</span>
+              </label>
+              <input type="tel" id="khataInputPhone" class="form-input-text" placeholder="+91 98101 12233" value="+91 98101 12233">
             </div>
           </div>
 
-          <div class="chip-group" style="margin-bottom:1rem;">
-            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='150'">₹150</button>
-            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='450'">₹450</button>
-            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='800'">₹800</button>
-            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='1200'">₹1,200</button>
+          <!-- 4. Item Description with Quick Suggestions -->
+          <div class="form-field-group">
+            <label class="form-label">
+              <span>🛒 Samaan / Items (सामान का विवरण)</span>
+            </label>
+            <input type="text" id="khataInputDesc" class="form-input-text" placeholder="e.g. 1L Tel, 2kg Atta, Groceries" value="General Groceries">
+            
+            <div class="item-suggestion-chips">
+              <button type="button" class="item-chip" onclick="window.setKhataDesc('Refined Tel & Masale')">Tel & Masale</button>
+              <button type="button" class="item-chip" onclick="window.setKhataDesc('5kg Atta & Rice')">Atta & Rice</button>
+              <button type="button" class="item-chip" onclick="window.setKhataDesc('General Kirana Groceries')">Kirana Ration</button>
+              <button type="button" class="item-chip" onclick="window.setKhataDesc('Dairy & Milk Products')">Doodh & Dairy</button>
+            </div>
           </div>
 
-          <div class="form-field-group">
-            <label class="form-label">Item Description / Provisions</label>
-            <input type="text" id="khataInputDesc" class="form-input-text" placeholder="e.g. 1L Refined Tel + 2kg Atta" value="General Groceries">
+          <!-- Soundbox Notification Banner -->
+          <div class="soundbox-reminder-banner">
+            <div class="soundbox-reminder-icon">🔊</div>
+            <div class="soundbox-reminder-text">
+              <strong>Paytm Soundbox 4.0 Pro Auto-Sync:</strong> Entry darj hote hi Soundbox par audio chime bajegi aur customer ko receipt SMS jayegi.
+            </div>
           </div>
+
         </div>
 
         <div class="vyapar-modal-footer">
-          <button type="button" id="cancelAddKhataBtn" class="btn-secondary-flat">Cancel</button>
-          <button type="submit" class="btn-primary-gradient">Confirm & Save to Khata</button>
+          <button type="button" id="cancelAddKhataBtn" class="btn-modal-cancel">Cancel (रद्द करें)</button>
+          <button type="submit" id="submitAddKhataBtn" class="btn-modal-submit-khata">
+            <span>💾</span> खाताबही में दर्ज करें (Save Entry)
+          </button>
         </div>
       </form>
     </div>
