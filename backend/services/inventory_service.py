@@ -61,3 +61,39 @@ class InventoryService:
                 "speech_text": f"Paytm supplier restock order bhej diya gaya hai. {quantity} packet {item['item_name']} dispatch ho rahe hain."
             }
         }
+
+    @staticmethod
+    def add_or_update_item(item_name: str, category: str, current_stock: int, reorder_threshold: int, unit: str, unit_price: float, wholesale_price: float, supplier_name: str, supplier_email: str):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT id FROM inventory WHERE item_name = ?", (item_name,))
+        existing = cursor.fetchone()
+
+        if existing:
+            cursor.execute("""
+            UPDATE inventory 
+            SET category = ?, current_stock = ?, reorder_threshold = ?, unit = ?, unit_price = ?, wholesale_price = ?, supplier_name = ?, supplier_email = ?
+            WHERE id = ?
+            """, (category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email, existing["id"]))
+            item_id = existing["id"]
+        else:
+            cursor.execute("""
+            INSERT INTO inventory (item_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (item_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email))
+            item_id = cursor.lastrowid
+
+        conn.commit()
+        conn.close()
+
+        return {
+            "success": True,
+            "item_id": item_id,
+            "item_name": item_name,
+            "soundbox_payload": {
+                "chime": True,
+                "speech_text": f"Paytm inventory mein {item_name} update ho gaya."
+            }
+        }
+

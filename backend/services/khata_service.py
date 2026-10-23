@@ -1,4 +1,5 @@
 from database import get_connection
+from datetime import datetime
 
 class KhataService:
     @staticmethod
@@ -7,13 +8,13 @@ class KhataService:
         cursor = conn.cursor()
 
         # Find or create customer
-        cursor.execute("SELECT * FROM customers WHERE name LIKE ?", (f"%{customer_name}%",))
+        cursor.execute("SELECT * FROM customers WHERE name LIKE ? OR phone = ?", (f"%{customer_name}%", phone or ""))
         customer = cursor.fetchone()
 
         if customer:
             cust_id = customer["id"]
             cust_name = customer["name"]
-            cust_phone = customer["phone"]
+            cust_phone = phone or customer["phone"]
             curr_pending = customer["pending_udhaar"]
         else:
             cust_name = customer_name.title()
@@ -40,6 +41,13 @@ class KhataService:
         INSERT INTO khata_entries (customer_id, customer_name, amount, item_description, entry_type, created_at, status)
         VALUES (?, ?, ?, ?, ?, datetime('now'), 'pending')
         """, (cust_id, cust_name, amount, item_description, entry_type.lower()))
+
+        # Also log to transactions table
+        txn_id = f"TXN_{int(datetime.now().timestamp())}"
+        cursor.execute("""
+        INSERT INTO transactions (txn_id, amount, customer_phone, payment_mode, timestamp, status)
+        VALUES (?, ?, ?, ?, datetime('now'), 'SUCCESS')
+        """, (txn_id, amount, cust_phone, 'Udhaar' if entry_type.lower() == 'udhaar' else 'Cash'))
 
         # Check and auto-decrement stock if specific Kirana item mentioned
         stock_decremented = None
@@ -83,6 +91,36 @@ class KhataService:
                 "speech_text": speech_text,
                 "amount": amount,
                 "entry_type": entry_type
+            }
+        }
+
+    @staticmethod
+    def settle_customer(customer_id: int):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM customers WHERE id = ?", (customer_id,))
+        c = cursor.fetchone()
+        if not c:
+            conn.close()
+            return {"success": False, "message": "Customer not found."}
+
+        settled_amount = c["pending_udhaar"]
+        cursor.execute("UPDATE customers SET pending_udhaar = 0 WHERE id = ?", (customer_id,))
+        cursor.execute("""
+        INSERT INTO khata_entries (customer_id, customer_name, amount, item_description, entry_type, created_at, status)
+        VALUES (?, ?, ?, 'Full Balance Settled', 'jama', datetime('now'), 'settled')
+        """, (customer_id, c["name"], settled_amount))
+
+        conn.commit()
+        conn.close()
+
+        return {
+            "success": True,
+            "customer_name": c["name"],
+            "settled_amount": settled_amount,
+            "soundbox_payload": {
+                "chime": True,
+                "speech_text": f"Paytm par {c['name']} ji ka pura balance chukta ho gaya."
             }
         }
 

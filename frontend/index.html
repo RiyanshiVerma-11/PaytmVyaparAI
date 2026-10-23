@@ -12,9 +12,12 @@
   
   <!-- CSS Stylesheets -->
   <link rel="stylesheet" href="/static/css/variables.css">
+  <link rel="stylesheet" href="/static/css/layout.css">
   <link rel="stylesheet" href="/static/css/landing.css">
   <link rel="stylesheet" href="/static/css/auth.css">
   <link rel="stylesheet" href="/static/css/cockpit.css">
+  <link rel="stylesheet" href="/static/css/components.css">
+  <link rel="stylesheet" href="/static/css/chatbot.css">
 </head>
 <body>
 
@@ -91,6 +94,434 @@
         </div>
       </div>
     </header>
+
+    <!-- ========================================================
+         1.1 FEATURES: THE GROUND REALITY & SOLUTIONS (PROBLEM MATRIX)
+         ======================================================== -->
+    <section id="features" class="landing-section">
+      <div class="landing-section-header">
+        <div class="section-badge">
+          <span>🎯</span> Problem vs Solution Matrix
+        </div>
+        <h2 class="section-title">Solving Bharat's Real Counter Challenges</h2>
+        <p class="section-desc">
+          Paytm won digital payments with the QR and Soundbox. But Indian merchants still lose ₹1.2 Lakh Crore annually on what happens <strong>before and after</strong> the payment. Here is the exact problem and how Vyapar Saathi solves it.
+        </p>
+      </div>
+
+      <div class="problem-solution-grid">
+        <!-- Card 1: Khata -->
+        <div class="ps-card">
+          <div class="ps-card-header">
+            <div class="ps-card-icon">📒</div>
+            <div>
+              <div class="ps-card-category">Operations & Cashflow</div>
+              <div class="ps-card-title">The Paper Udhaar Trap</div>
+            </div>
+          </div>
+          <div class="ps-block-problem">
+            <div class="ps-block-label"><span>⚠️</span> Ground Reality Problem</div>
+            <div class="ps-block-text">
+              During peak 7 PM rush, typing customer names and amounts into an app is impossible. Verbal credit agreements are forgotten or disputed. ₹1.2L Cr is trapped in messy paper Bahi-Khata books, and 20–30% turns into bad debt.
+            </div>
+          </div>
+          <div class="ps-block-solution">
+            <div class="ps-block-label"><span>✨</span> How Vyapar Saathi Solves It</div>
+            <div class="ps-block-text">
+              <strong>Zero-Touch Voice Khata:</strong> Shopkeeper simply speaks in natural Hinglish (<em>"Ramesh bhai ko ₹450 ka refine tel udhaar diya"</em>). AI parses the entry in under 2 seconds, updates the digital ledger, decrements stock, and triggers a verbal Soundbox chime.
+            </div>
+          </div>
+          <div class="ps-card-metric">
+            <span>Result: 0 manual typing</span>
+            <span class="ps-metric-highlight">100% Credit Capture & Recovery</span>
+          </div>
+        </div>
+
+        <!-- Card 2: Inventory -->
+        <div class="ps-card">
+          <div class="ps-card-header">
+            <div class="ps-card-icon">📦</div>
+            <div>
+              <div class="ps-card-category">Supply Chain & Automation</div>
+              <div class="ps-card-title">Blind Inventory & Stockouts</div>
+            </div>
+          </div>
+          <div class="ps-block-problem">
+            <div class="ps-block-label"><span>⚠️</span> Ground Reality Problem</div>
+            <div class="ps-block-text">
+              Kirana stores stock 2,000+ un-barcoded items. Merchants only discover empty shelves when customers ask for Fortune Oil or Tata Salt and walk away empty-handed. Lost sales average 15–20% of daily margin.
+            </div>
+          </div>
+          <div class="ps-block-solution">
+            <div class="ps-block-label"><span>✨</span> How Vyapar Saathi Solves It</div>
+            <div class="ps-block-text">
+              <strong>Low-Stock Sentinel & Automated Supplier SMTP:</strong> The ReAct agent tracks sales velocity in real-time. When items hit critical safety thresholds, it autonomously generates and emails formal Purchase Orders (POs) directly to wholesale distributors.
+            </div>
+          </div>
+          <div class="ps-card-metric">
+            <span>Zero stockouts</span>
+            <span class="ps-metric-highlight">Automated Restock via Email POs</span>
+          </div>
+        </div>
+
+        <!-- Card 3: CRM & Churn -->
+        <div class="ps-card">
+          <div class="ps-card-header">
+            <div class="ps-card-icon">👥</div>
+            <div>
+              <div class="ps-card-category">Merchant Growth & Retention</div>
+              <div class="ps-card-title">Silent Customer Churn to Quick-Commerce</div>
+            </div>
+          </div>
+          <div class="ps-block-problem">
+            <div class="ps-block-label"><span>⚠️</span> Ground Reality Problem</div>
+            <div class="ps-block-text">
+              40% of regular neighborhood shoppers quietly migrate to 10-minute delivery apps. Local retailers have no CRM to notice who stopped visiting, and 3rd-party unofficial WhatsApp bots get accounts permanently banned by Meta.
+            </div>
+          </div>
+          <div class="ps-block-solution">
+            <div class="ps-block-label"><span>✨</span> How Vyapar Saathi Solves It</div>
+            <div class="ps-block-text">
+              <strong>QR Telemetry CRM & 1-Tap SMS Links:</strong> Customer profiles and visit intervals are tracked automatically from incoming Paytm QR payments. The AI flags lapsed regulars and sends personalized 1-tap SMS discount vouchers with direct UPI links—100% ban-free.
+            </div>
+          </div>
+          <div class="ps-card-metric">
+            <span>Zero Meta ban risks</span>
+            <span class="ps-metric-highlight">32% Lapsed Customer Win-Back</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Lending -->
+        <div class="ps-card">
+          <div class="ps-card-header">
+            <div class="ps-card-icon">💳</div>
+            <div>
+              <div class="ps-card-category">Financial Inclusion</div>
+              <div class="ps-card-title">Credit Invisibility & Capital Starvation</div>
+            </div>
+          </div>
+          <div class="ps-block-problem">
+            <div class="ps-block-label"><span>⚠️</span> Ground Reality Problem</div>
+            <div class="ps-block-text">
+              Small retailers cannot get formal bank loans to restock for festivals or renovate because commercial banks demand 3 years of audited ITRs and balance sheets that cash/UPI retailers simply do not possess.
+            </div>
+          </div>
+          <div class="ps-block-solution">
+            <div class="ps-block-label"><span>✨</span> How Vyapar Saathi Solves It</div>
+            <div class="ps-block-text">
+              <strong>Real-Time 0–100 Vyapar Credit Scoring:</strong> Proprietary underwriting calculates creditworthiness from daily Soundbox UPI volume consistency, Udhaar collection velocity, and stock turnover. Unlocks collateral-free micro-loans in 60 seconds.
+            </div>
+          </div>
+          <div class="ps-card-metric">
+            <span>No paper ITR needed</span>
+            <span class="ps-metric-highlight">₹1,50,000 Instant Working Capital</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         1.2 SOUNDBOX COPILOT: HARDWARE LINKAGE & VOICE AI
+         ======================================================== -->
+    <section id="soundbox" class="landing-section">
+      <div class="landing-section-header">
+        <div class="section-badge">
+          <span>🔊</span> Hardware Linkage • Zero Capex
+        </div>
+        <h2 class="section-title">Upgrading 10M+ Soundboxes Into Proactive Copilots</h2>
+        <p class="section-desc">
+          Paytm has already deployed over 10 Million Soundboxes across India. Vyapar Saathi requires <strong>₹0 new hardware</strong>. It upgrades every soundbox into a two-way conversational business terminal via cloud audio streaming.
+        </p>
+      </div>
+
+      <div class="soundbox-container">
+        <!-- Flow Steps -->
+        <div>
+          <div class="soundbox-flow-step">
+            <div class="soundbox-step-num">1</div>
+            <div class="soundbox-step-content">
+              <h4>Vernacular Voice Input (Hindi & Hinglish)</h4>
+              <p>The shopkeeper speaks naturally without opening or unlocking their phone: <em>"Ramesh bhai ko chaar sau pachaas rupaye udhaar diya."</em> Web Speech / Whisper processes dialect variations effortlessly.</p>
+            </div>
+          </div>
+
+          <div class="soundbox-flow-step">
+            <div class="soundbox-step-num">2</div>
+            <div class="soundbox-step-content">
+              <h4>Autonomous ReAct Agent Entity Extraction</h4>
+              <p>In less than 2 seconds, the AI extracts intent, customer name, transaction amount, and product items. It updates the database ledger and checks safety stock levels.</p>
+            </div>
+          </div>
+
+          <div class="soundbox-flow-step">
+            <div class="soundbox-step-num">3</div>
+            <div class="soundbox-step-content">
+              <h4>Two-Way Soundbox Audio Handshake</h4>
+              <p>The Soundbox plays the iconic Paytm dual-frequency chime followed by clear vernacular audio: <em>"Paytm par Ramesh ji ka ₹450 udhaar darj ho gaya."</em> Total mutual trust for both merchant and customer.</p>
+            </div>
+          </div>
+
+          <div class="soundbox-flow-step">
+            <div class="soundbox-step-num">4</div>
+            <div class="soundbox-step-content">
+              <h4>5-Second Fail-Safe Undo Safeguard</h4>
+              <p>A safety countdown appears on the cockpit screen. If speech was misheard, a single tap or voice rollback instantly reverses the transaction with zero financial risk.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Soundbox Mockup -->
+        <div class="soundbox-mockup">
+          <div class="soundbox-speaker-grille">🔊</div>
+          <div style="font-size:1.4rem; font-weight:800; color:#ffffff; margin-bottom:0.4rem;">
+            Paytm Soundbox 4.0 AI
+          </div>
+          <div style="font-size:0.88rem; color:var(--paytm-cyan); font-weight:600; margin-bottom:1.5rem;">
+            Official Dual-Frequency Audio Engine (880Hz + 1320Hz)
+          </div>
+          <button class="btn-hero-primary" style="width:100%; justify-content:center; padding:0.85rem;" onclick="window.paytmSoundbox.broadcast('Paytm par Ramesh ji ka char sau pachaas rupaye udhaar darj ho gaya')">
+            <span>▶️</span> Test Soundbox Audio Chime
+          </button>
+          <div style="margin-top:1.2rem; font-size:0.78rem; color:rgba(255,255,255,0.6);">
+            100% Backward Compatible • Web Audio API & MQTT Audio Stream
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         1.3 MERCHANT LENDING: ALGORITHMIC UNDERWRITING
+         ======================================================== -->
+    <section id="lending" class="landing-section">
+      <div class="landing-section-header">
+        <div class="section-badge">
+          <span>💳</span> Paytm Ecosystem Synergy
+        </div>
+        <h2 class="section-title">Algorithmic Merchant Lending & Credit Underwriting</h2>
+        <p class="section-desc">
+          Unlocking collateral-free working capital for 30M+ unbanked merchants using live Soundbox cashflow telemetry instead of 3-year audited ITR balance sheets.
+        </p>
+      </div>
+
+      <div class="lending-grid">
+        <!-- Score & Weights -->
+        <div class="lending-card">
+          <div style="font-size:1.25rem; font-weight:700; color:#ffffff;">Vyapar Credit Health Score</div>
+          <div style="font-size:0.88rem; color:rgba(255,255,255,0.7); margin-top:0.2rem;">
+            Continuous machine learning assessment based on daily store velocity
+          </div>
+
+          <div class="score-display">
+            <div class="score-number">88</div>
+            <div class="score-badge-box">
+              <div style="font-size:1.1rem; font-weight:800; color:var(--color-success);">Excellent Tier</div>
+              <div style="font-size:0.82rem; color:rgba(255,255,255,0.7);">Low Default Risk (1.2%)</div>
+              <div style="font-size:0.82rem; color:var(--paytm-cyan); font-weight:600; margin-top:0.2rem;">Eligible for Pre-Approved Loans</div>
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="font-size:0.9rem; font-weight:700; color:#ffffff; margin-bottom:0.8rem;">Underwriting Weights:</div>
+            
+            <div style="margin-bottom:0.8rem;">
+              <div class="weight-row">
+                <span>Daily UPI Cashflow Consistency</span>
+                <span style="font-weight:700; color:var(--paytm-cyan);">40% Weight</span>
+              </div>
+              <div class="weight-bar-bg"><div class="weight-bar-fill" style="width:40%;"></div></div>
+            </div>
+
+            <div style="margin-bottom:0.8rem;">
+              <div class="weight-row">
+                <span>Khata Udhaar Recovery Velocity</span>
+                <span style="font-weight:700; color:var(--paytm-cyan);">25% Weight</span>
+              </div>
+              <div class="weight-bar-bg"><div class="weight-bar-fill" style="width:25%;"></div></div>
+            </div>
+
+            <div style="margin-bottom:0.8rem;">
+              <div class="weight-row">
+                <span>Supplier POs & Stock Turnover</span>
+                <span style="font-weight:700; color:var(--paytm-cyan);">20% Weight</span>
+              </div>
+              <div class="weight-bar-bg"><div class="weight-bar-fill" style="width:20%;"></div></div>
+            </div>
+
+            <div>
+              <div class="weight-row">
+                <span>Customer Retention & Repeat Footfall</span>
+                <span style="font-weight:700; color:var(--paytm-cyan);">15% Weight</span>
+              </div>
+              <div class="weight-bar-bg"><div class="weight-bar-fill" style="width:15%;"></div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pre-Approved Loan Offer -->
+        <div class="lending-card" style="border-color:rgba(0, 210, 106, 0.4);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <div style="font-size:1.25rem; font-weight:700; color:#ffffff;">Pre-Approved Working Capital</div>
+            <span style="background:rgba(0, 210, 106, 0.2); color:var(--color-success); padding:0.3rem 0.8rem; border-radius:50px; font-size:0.78rem; font-weight:800;">INSTANT DISBURSAL</span>
+          </div>
+
+          <div style="background:rgba(0, 18, 51, 0.7); border:1px solid rgba(255,255,255,0.1); border-radius:var(--radius-md); padding:1.5rem; margin-bottom:1.5rem;">
+            <div style="font-size:0.85rem; color:rgba(255,255,255,0.7);">Approved Loan Capital</div>
+            <div style="font-size:2.8rem; font-weight:900; color:#ffffff; margin:0.3rem 0;">₹1,50,000</div>
+            <div style="font-size:0.85rem; color:var(--color-success); font-weight:600;">Zero Collateral • No Physical Documentation</div>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+            <div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:var(--radius-sm);">
+              <div style="font-size:0.75rem; color:rgba(255,255,255,0.6);">DAILY REPAYMENT</div>
+              <div style="font-size:1.15rem; font-weight:800; color:#ffffff; margin-top:0.2rem;">₹250 / day</div>
+              <div style="font-size:0.72rem; color:rgba(255,255,255,0.5);">Auto-deducted from settlement</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.05); padding:1rem; border-radius:var(--radius-sm);">
+              <div style="font-size:0.75rem; color:rgba(255,255,255,0.6);">DISBURSAL SPEED</div>
+              <div style="font-size:1.15rem; font-weight:800; color:var(--paytm-cyan); margin-top:0.2rem;">&lt; 60 Seconds</div>
+              <div style="font-size:0.72rem; color:rgba(255,255,255,0.5);">Direct to Paytm Payments Bank</div>
+            </div>
+          </div>
+
+          <button id="lendingApplyCta" class="btn-hero-primary" style="margin-top:auto; justify-content:center; width:100%;" onclick="document.getElementById('launchCockpitBtn').click()">
+            <span>⚡</span> Claim Working Capital in Cockpit
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         1.4 ROADMAP & HACKATHON TRACK 1 ALIGNMENT
+         ======================================================== -->
+    <section id="roadmap" class="landing-section">
+      <div class="landing-section-header">
+        <div class="section-badge">
+          <span>🏆</span> Paytm Build for India AI Hackathon
+        </div>
+        <h2 class="section-title">Track 1 Alignment: Merchant Growth AI</h2>
+        <p class="section-desc">
+          Strictly engineered against the official challenge mandate: <em>"Think beyond payments, build scalable AI-led solutions that help merchants grow their business, manage operations, and serve customers better."</em>
+        </p>
+      </div>
+
+      <!-- 3 Pillars Grid -->
+      <div class="roadmap-pillars-grid">
+        <!-- Pillar 1 -->
+        <div class="pillar-card">
+          <div class="pillar-card-header">
+            <span>🚀</span> Pillar 1: Grow Business
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Zero-Effort QR CRM:</strong> Logs customer repeat visit cadence with zero typing.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Native 1-Tap SMS Vouchers:</strong> Direct UPI links with 0-ban risk from Meta.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Festival Surge Predictor:</strong> 7-day demand spikes forecast for Diwali & Navratri.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Cross-Sell Smart Combos:</strong> High-margin recommendations for counter shoppers.</div>
+          </div>
+        </div>
+
+        <!-- Pillar 2 -->
+        <div class="pillar-card">
+          <div class="pillar-card-header">
+            <span>⚙️</span> Pillar 2: Manage Operations
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Voice-First Khata:</strong> Hinglish conversational ledger entries in &lt;2 seconds.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Automated Supplier Email POs:</strong> Low-stock threshold triggers Python SMTP POs.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>60-Second Daily Profit Pulse:</strong> Audio debrief + nightly P&L email statement.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Working Capital Underwriting:</strong> Real-time 0–100 micro-loan scoring.</div>
+          </div>
+        </div>
+
+        <!-- Pillar 3 -->
+        <div class="pillar-card">
+          <div class="pillar-card-header">
+            <span>❤️</span> Pillar 3: Serve Customers
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Two-Way Soundbox Chime:</strong> Verbal confirmations create 100% mutual trust.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Instant Digital E-Receipts:</strong> Clean itemized billing sent via SMS/Email.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Fail-Safe 1-Tap Undo:</strong> 5-second countdown to cancel voice mishearings.</div>
+          </div>
+          <div class="pillar-item">
+            <span class="pillar-icon-check">✓</span>
+            <div><strong>Respectful Payment Reminders:</strong> Polite vernacular reminders with 1-tap UPI pay.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Execution Timeline -->
+      <div class="timeline-card">
+        <div style="font-size:1.3rem; font-weight:800; color:#ffffff; margin-bottom:1.5rem; text-align:center;">
+          Architecture & Scalability Roadmap
+        </div>
+        <div class="timeline-phases">
+          <div class="phase-box">
+            <span class="phase-badge phase-live">● Fully Functional Hackathon Prototype</span>
+            <h4 style="font-size:1.1rem; font-weight:700; color:#ffffff; margin-bottom:0.5rem;">Phase 1: Working System</h4>
+            <p style="font-size:0.88rem; color:rgba(255,255,255,0.75); line-height:1.5;">
+              FastAPI ReAct Agent, SQLite persistent store, Web Speech API (Hinglish/Hindi NLP), Web Audio dual-frequency Soundbox chime simulation, and live Python SMTP purchase order dispatch.
+            </p>
+          </div>
+
+          <div class="phase-box">
+            <span class="phase-badge phase-future">★ Paytm Ecosystem Integration</span>
+            <h4 style="font-size:1.1rem; font-weight:700; color:#ffffff; margin-bottom:0.5rem;">Phase 2: Production Scale</h4>
+            <p style="font-size:0.88rem; color:rgba(255,255,255,0.75); line-height:1.5;">
+              Direct MQTT broker streaming to 10M+ physical Paytm Soundbox units, automatic fulfillment routing via Paytm B2B Wholesale procurement, and Core Lending Partner API integration.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         1.5 LANDING FOOTER
+         ======================================================== -->
+    <footer class="landing-footer">
+      <div style="display:flex; justify-content:center; align-items:center; gap:0.8rem; margin-bottom:1rem;">
+        <div style="width:32px; height:32px; border-radius:8px; background:linear-gradient(135deg, #002970, #00baf2); color:white; display:flex; align-items:center; justify-content:center; font-weight:900;">P</div>
+        <span style="font-size:1.2rem; font-weight:800;"><span style="color:var(--paytm-cyan);">Paytm</span> Vyapar Saathi</span>
+      </div>
+      <p style="color:rgba(255,255,255,0.65); font-size:0.9rem; max-width:600px; margin:0 auto 1.5rem;">
+        Autonomous AI Business Copilot & Intelligent Soundbox for India's 30 Million+ Retailers.
+      </p>
+      <div style="display:flex; justify-content:center; gap:1.5rem; font-size:0.88rem; margin-bottom:1.5rem;">
+        <a href="#features" style="color:rgba(255,255,255,0.7); text-decoration:none;">Features</a>
+        <a href="#soundbox" style="color:rgba(255,255,255,0.7); text-decoration:none;">Soundbox Copilot</a>
+        <a href="#lending" style="color:rgba(255,255,255,0.7); text-decoration:none;">Merchant Lending</a>
+        <a href="#roadmap" style="color:rgba(255,255,255,0.7); text-decoration:none;">Track 1 Roadmap</a>
+      </div>
+      <div style="font-size:0.78rem; color:rgba(255,255,255,0.45);">
+        Paytm Build for India AI Hackathon • Paytm HQ, SkymarkOne, Noida • Track 1: Merchant Growth AI
+      </div>
+    </footer>
   </div>
 
 
@@ -103,7 +534,7 @@
       
       <div class="auth-header">
         <div class="auth-logo">
-          <span style="color:var(--paytm-cyan);">Pay</span>tm <span style="font-weight:400;">Business</span>
+          <span class="paytm-cyan-part">Pay</span>tm <span style="font-weight:400;">Business</span>
         </div>
         <div class="auth-subtitle">Sign in to your Merchant AI Dashboard</div>
       </div>
@@ -144,8 +575,8 @@
         <div class="sidebar-brand">
           <div class="sidebar-brand-icon">P</div>
           <div class="sidebar-brand-text">
-            <span style="color:var(--paytm-cyan);">Paytm</span> <br>
-            <span style="font-size:0.75rem; color:var(--text-secondary); font-weight:600;">Vyapar Saathi</span>
+            <div class="brand-title"><span class="paytm-highlight">Paytm</span></div>
+            <div class="brand-subtitle">Vyapar Saathi</div>
           </div>
         </div>
         <button id="sidebarCollapseBtn" class="sidebar-collapse-btn" title="Toggle Sidebar">
@@ -154,35 +585,35 @@
       </div>
 
       <div class="sidebar-menu">
-        <div class="sidebar-item active" title="Dashboard">
+        <div class="sidebar-item active" data-view="dashboard" title="Dashboard">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
           </div>
           <span class="sidebar-text">Dashboard</span>
         </div>
 
-        <div class="sidebar-item" title="Khata Ledger" onclick="window.paytmSoundbox.broadcast('Paytm Bahi-Khata ledger mein kul teen hazaar ek sau rupaye pending hain')">
+        <div class="sidebar-item" data-view="khata" title="Bahi-Khata Ledger">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M7 15h0M2 9.5h20"/></svg>
           </div>
           <span class="sidebar-text">Bahi-Khata</span>
         </div>
 
-        <div class="sidebar-item" title="Inventory Alerts" onclick="window.paytmSoundbox.broadcast('Alert: Amul Butter ke sirf 3 packet bache hain')">
+        <div class="sidebar-item" data-view="inventory" title="Stock Alerts & Reorder">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
           </div>
           <span class="sidebar-text">Stock Alerts</span>
         </div>
 
-        <div class="sidebar-item" title="Transactions">
+        <div class="sidebar-item" data-view="history" title="Transaction History">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
           <span class="sidebar-text">History</span>
         </div>
 
-        <div class="sidebar-item" title="Growth Analytics">
+        <div class="sidebar-item" data-view="analytics" title="AI Growth & Credit Underwriting">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
           </div>
@@ -191,7 +622,7 @@
       </div>
 
       <div class="sidebar-footer">
-        <div id="sidebarLogoutBtn" class="sidebar-item" title="Sign Out" style="color:var(--color-danger);">
+        <div id="sidebarLogoutBtn" class="sidebar-item sidebar-logout-item" title="Sign Out">
           <div class="sidebar-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
           </div>
@@ -231,160 +662,706 @@
           <div class="merchant-profile-btn">
             <div class="merchant-avatar">RK</div>
             <div>
-              <div id="headerMerchantName" style="font-size:0.9rem; font-weight:700;">Rakesh Kumar</div>
-              <div id="headerMerchantShop" style="font-size:0.75rem; color:var(--text-secondary);">Grocery Store ▾</div>
+              <div id="headerMerchantName" style="font-size:0.9rem; font-weight:700;">Ramesh Sharma</div>
+              <div id="headerMerchantShop" style="font-size:0.75rem; color:var(--text-secondary);">Sharma Kirana Store ▾</div>
             </div>
           </div>
         </div>
       </header>
 
-      <!-- Flagship 4-Card Dashboard Canvas Matching assets/dashboard_ui.jpg -->
-      <div class="dashboard-canvas">
+      <!-- ========================================================
+           VIEW 1: FLAGSHIP DASHBOARD CANVAS
+           ======================================================== -->
+      <section id="view-dashboard" class="cockpit-view-section active">
+        <div class="dashboard-canvas">
 
-        <!-- CARD 1: Live Voice Khata Ledger -->
-        <div class="glass-card">
-          <div class="card-top">
-            <div class="card-heading">
-              <button id="voiceMicTrigger" style="background:transparent; border:none; cursor:pointer; color:var(--paytm-blue); display:flex; align-items:center;" title="Tap to speak in Hindi/Hinglish">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-              </button>
-              <span>Live Voice Khata Ledger</span>
+          <!-- CARD 1: Live Voice Khata Ledger -->
+          <div class="glass-card">
+            <div class="card-top">
+              <div class="card-heading">
+                <button id="voiceMicTrigger" style="background:transparent; border:none; cursor:pointer; color:var(--paytm-blue); display:flex; align-items:center;" title="Tap to speak in Hindi/Hinglish">
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+                </button>
+                <span>Live Voice Khata Ledger</span>
+              </div>
+            </div>
+
+            <div id="liveLedgerList" class="ledger-list">
+              <!-- Dynamically Loaded from SQLite -->
+            </div>
+
+            <button id="dashboardViewLedgerBtn" class="btn-full-width">
+              View Full Bahi-Khata Ledger →
+            </button>
+          </div>
+
+          <!-- CARD 2: AI Merchant Growth Engine -->
+          <div class="glass-card">
+            <div class="card-top">
+              <div class="card-heading">
+                <span>AI Merchant Growth Engine</span>
+              </div>
+            </div>
+
+            <div class="growth-alert-box">
+              <div class="alert-title">
+                <span>🔔</span> Customer Win-Back Alert!
+              </div>
+              <div id="growthCustomerName" class="alert-subtext">
+                Rohan hasn't visited in 45 days. High churn risk.
+              </div>
+
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-size:0.85rem; color:var(--text-secondary);">Recommended action:</span>
+                <button id="growthSendOfferBtn" class="btn-action-blue">Send Offer</button>
+              </div>
+            </div>
+
+            <div class="growth-potential-strip">
+              <span>📈</span> Potential Growth: 12% increase this month
             </div>
           </div>
 
-          <div id="liveLedgerList" class="ledger-list">
-            <!-- Dynamically Loaded from SQLite -->
-            <div class="ledger-item">
-              <div style="display:flex; align-items:center;">
-                <span class="ledger-dot dot-green"></span>
-                <strong>Anya</strong> - ₹2500 - Paid (Cash)
+          <!-- CARD 3: Low Stock Inventory Warnings -->
+          <div class="glass-card">
+            <div class="card-top">
+              <div class="card-heading">
+                <span>Low Stock Inventory Warnings</span>
               </div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">2 min ago</div>
             </div>
-            <div class="ledger-item">
-              <div style="display:flex; align-items:center;">
-                <span class="ledger-dot dot-orange"></span>
-                <strong>Rahul</strong> - ₹500 - Udhaar
-              </div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">Today, 10:15 AM</div>
-            </div>
-            <div class="ledger-item">
-              <div style="display:flex; align-items:center;">
-                <span class="ledger-dot dot-cyan"></span>
-                <strong>Meera</strong> - ₹120 - Online
-              </div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">Yesterday, 6:30 PM</div>
-            </div>
-            <div class="ledger-item">
-              <div style="display:flex; align-items:center;">
-                <span class="ledger-dot dot-gray"></span>
-                <strong>Vijay</strong> - ₹800 - Udhaar
-              </div>
-              <div style="font-size:0.8rem; color:var(--text-muted);">18 Oct</div>
+
+            <div id="stockWarningContainer" class="stock-warning-list">
+              <!-- Dynamically Loaded -->
             </div>
           </div>
 
-          <button class="btn-full-width" onclick="window.paytmSoundbox.broadcast('Kahiye, kiska hisaab likhna hai?')">
-            View Full Ledger
+          <!-- CARD 4: Pre-Approved Loan Health Score -->
+          <div class="glass-card">
+            <div class="card-top">
+              <div class="card-heading">
+                <span>Pre-Approved Loan Health Score</span>
+              </div>
+            </div>
+
+            <div class="gauge-container">
+              <!-- SVG Semi-Circular Radial Gauge -->
+              <svg class="radial-gauge-svg" viewBox="0 0 200 110">
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-glass)" stroke-width="18" stroke-linecap="round"/>
+                <path d="M 20 100 A 80 80 0 0 1 165 50" fill="none" stroke="var(--paytm-cyan)" stroke-width="18" stroke-linecap="round"/>
+              </svg>
+
+              <div id="loanScoreNumber" class="score-display">88/100</div>
+              <div class="score-tagline">Excellent Health! Ready for expansion?</div>
+              <div id="loanEligibilityDetails" class="loan-eligibility-text">
+                Current Eligibility: ₹75,000 | Recent repayment performance: Great | Instant Disbursal Available!
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 2: BAHI-KHATA (DIGITAL UDHAAR LEDGER)
+           ======================================================== -->
+      <section id="view-khata" class="cockpit-view-section">
+        <div class="section-banner">
+          <div class="section-banner-title">
+            <h2><span>📖</span> Bahi-Khata Ledger & Voice Udhaar</h2>
+            <p>Real-time digital credit book with automated WhatsApp reminders & 1-tap settlement.</p>
+          </div>
+          <button id="openAddKhataModalBtn" class="btn-primary-gradient">
+            <span>➕</span> Record New Khata Entry
           </button>
         </div>
 
-        <!-- CARD 2: AI Merchant Growth Engine -->
-        <div class="glass-card">
-          <div class="card-top">
-            <div class="card-heading">
-              <span>AI Merchant Growth Engine</span>
+        <!-- Khata Stat Ribbon -->
+        <div class="stat-ribbon">
+          <div class="stat-card">
+            <div class="stat-icon red">₹</div>
+            <div class="stat-info">
+              <div id="khataTotalPending" class="stat-val">₹3,100</div>
+              <div class="stat-lbl">Total Pending Udhaar</div>
             </div>
           </div>
-
-          <div class="growth-alert-box">
-            <div class="alert-title">
-              <span>🔔</span> Customer Win-Back Alert!
-            </div>
-            <div id="growthCustomerName" class="alert-subtext">
-              Rohan hasn't visited in 45 days. High churn risk.
-            </div>
-
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span style="font-size:0.85rem; color:var(--text-secondary);">Recommended action:</span>
-              <button id="growthSendOfferBtn" class="btn-action-blue">Send Offer</button>
+          <div class="stat-card">
+            <div class="stat-icon cyan">👥</div>
+            <div class="stat-info">
+              <div id="khataCustomerCount" class="stat-val">6</div>
+              <div class="stat-lbl">Active Customer Accounts</div>
             </div>
           </div>
-
-          <div style="display:flex; align-items:center; gap:0.5rem; font-weight:700; color:var(--paytm-cyan); font-size:0.95rem; margin-top:auto;">
-            <span>📈</span> Potential Growth: 12% increase this month
-          </div>
-        </div>
-
-        <!-- CARD 3: Low Stock Inventory Warnings -->
-        <div class="glass-card">
-          <div class="card-top">
-            <div class="card-heading">
-              <span>Low Stock Inventory Warnings</span>
+          <div class="stat-card">
+            <div class="stat-icon green">💰</div>
+            <div class="stat-info">
+              <div id="khataTodayCollected" class="stat-val">₹2,500</div>
+              <div class="stat-lbl">Today's Udhaar Recovered</div>
             </div>
           </div>
-
-          <div id="stockWarningContainer" class="stock-warning-list">
-            <!-- Dynamically Loaded -->
-            <div class="stock-warning-item">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span style="color:var(--color-warning);">⚠️</span>
-                <div>
-                  <strong>Maggi Noodles</strong>
-                  <div style="font-size:0.8rem; color:var(--text-muted);">(6 units left)</div>
-                </div>
-              </div>
-              <button class="btn-action-cyan" onclick="window.reorderStock('Maggi 2-Minute Noodles')">1-Click Reorder</button>
-            </div>
-
-            <div class="stock-warning-item">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span style="color:var(--color-warning);">⚠️</span>
-                <div>
-                  <strong>Parle-G Biscuits</strong>
-                  <div style="font-size:0.8rem; color:var(--text-muted);">(10 units left)</div>
-                </div>
-              </div>
-              <button class="btn-action-cyan" onclick="window.reorderStock('Parle-G Biscuits')">1-Click Reorder</button>
-            </div>
-
-            <div class="stock-warning-item">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <span style="color:var(--color-warning);">⚠️</span>
-                <div>
-                  <strong>Amul Butter 100g</strong>
-                  <div style="font-size:0.8rem; color:var(--text-muted);">(3 units left)</div>
-                </div>
-              </div>
-              <button class="btn-action-cyan" onclick="window.reorderStock('Amul Butter 100g')">1-Click Reorder</button>
+          <div class="stat-card">
+            <div class="stat-icon purple">⚡</div>
+            <div class="stat-info">
+              <div class="stat-val">94.2%</div>
+              <div class="stat-lbl">Udhaar Recovery Rate</div>
             </div>
           </div>
         </div>
 
-        <!-- CARD 4: Pre-Approved Loan Health Score -->
-        <div class="glass-card">
-          <div class="card-top">
-            <div class="card-heading">
-              <span>Pre-Approved Loan Health Score</span>
+        <!-- Filter & Search Toolbar -->
+        <div class="filter-toolbar">
+          <div class="filter-group">
+            <button class="filter-pill active" data-khata-filter="all">All Customers</button>
+            <button class="filter-pill" data-khata-filter="pending">Pending Udhaar</button>
+            <button class="filter-pill" data-khata-filter="cleared">Settled / Clear</button>
+          </div>
+          <div class="search-pill-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="khataSearchInput" placeholder="Search customer name or phone...">
+          </div>
+        </div>
+
+        <!-- Customer Balances Table -->
+        <div class="table-responsive-card">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th>Customer Name</th>
+                <th>Phone Number</th>
+                <th>Total Spent</th>
+                <th>Pending Udhaar</th>
+                <th>Last Visit</th>
+                <th>Risk Profile</th>
+                <th style="text-align:right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="khataCustomersTableBody">
+              <!-- Dynamically populated from SQLite -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Recent Audit Trail Feed -->
+        <div style="margin-top:2rem;">
+          <h3 style="font-size:1.15rem; font-weight:700; margin-bottom:1rem; display:flex; align-items:center; gap:0.5rem;">
+            <span>📜</span> Recent Khata Transactions & Audit Log
+          </h3>
+          <div id="khataAuditList" class="ledger-list" style="background:var(--bg-card); padding:1rem; border-radius:var(--radius-lg); border:1px solid var(--border-glass);">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 3: STOCK ALERTS & INVENTORY MANAGEMENT
+           ======================================================== -->
+      <section id="view-inventory" class="cockpit-view-section">
+        <div class="section-banner">
+          <div class="section-banner-title">
+            <h2><span>📦</span> Kirana Inventory & Automated Restock</h2>
+            <p>Smart stock replenishment with 1-click B2B wholesale purchase orders and alerts.</p>
+          </div>
+          <button id="openAddInventoryModalBtn" class="btn-primary-gradient">
+            <span>➕</span> Add New Product
+          </button>
+        </div>
+
+        <!-- Inventory Stat Ribbon -->
+        <div class="stat-ribbon">
+          <div class="stat-card">
+            <div class="stat-icon red">⚠️</div>
+            <div class="stat-info">
+              <div id="invLowStockCount" class="stat-val">3</div>
+              <div class="stat-lbl">Low Stock Warnings</div>
             </div>
           </div>
-
-          <div class="gauge-container">
-            <!-- SVG Semi-Circular Radial Gauge -->
-            <svg class="radial-gauge-svg" viewBox="0 0 200 110">
-              <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-glass)" stroke-width="18" stroke-linecap="round"/>
-              <path d="M 20 100 A 80 80 0 0 1 165 50" fill="none" stroke="var(--paytm-cyan)" stroke-width="18" stroke-linecap="round"/>
-            </svg>
-
-            <div id="loanScoreNumber" class="score-display">88/100</div>
-            <div class="score-tagline">Excellent Health! Ready for expansion?</div>
-            <div id="loanEligibilityDetails" class="loan-eligibility-text">
-              Current Eligibility: ₹5,00,000 | Recent repayment performance: Great | New Offer available!
+          <div class="stat-card">
+            <div class="stat-icon cyan">📊</div>
+            <div class="stat-info">
+              <div id="invTotalSkus" class="stat-val">8</div>
+              <div class="stat-lbl">Active Products (SKUs)</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">💵</div>
+            <div class="stat-info">
+              <div id="invTotalVal" class="stat-val">₹14,250</div>
+              <div class="stat-lbl">Total Inventory Worth</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">🚚</div>
+            <div class="stat-info">
+              <div class="stat-val">Active</div>
+              <div class="stat-lbl">B2B Restock Dispatch</div>
             </div>
           </div>
         </div>
 
+        <!-- Filter & Search Toolbar -->
+        <div class="filter-toolbar">
+          <div class="filter-group">
+            <button class="filter-pill active" data-inv-filter="all">All Products</button>
+            <button class="filter-pill" data-inv-filter="low">⚠️ Low Stock Alerts</button>
+            <button class="filter-pill" data-inv-filter="healthy">✅ Well Stocked</button>
+          </div>
+          <div class="search-pill-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="inventorySearchInput" placeholder="Search item or brand...">
+          </div>
+        </div>
+
+        <!-- Inventory Table -->
+        <div class="table-responsive-card">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th>Product Name</th>
+                <th>Category</th>
+                <th>Stock Level</th>
+                <th>Retail Price</th>
+                <th>Wholesale Cost</th>
+                <th>Supplier / Distributor</th>
+                <th style="text-align:right;">1-Click Procurement</th>
+              </tr>
+            </thead>
+            <tbody id="inventoryTableBody">
+              <!-- Dynamically populated from SQLite -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 4: TRANSACTIONS & SOUNDBOX TELEMETRY
+           ======================================================== -->
+      <section id="view-history" class="cockpit-view-section">
+        <div class="section-banner">
+          <div class="section-banner-title">
+            <h2><span>💳</span> Soundbox & UPI Transaction History</h2>
+            <p>Live payment telemetry powering merchant cashflow analysis & instant credit underwriting.</p>
+          </div>
+        </div>
+
+        <!-- History Stat Ribbon -->
+        <div class="stat-ribbon">
+          <div class="stat-card">
+            <div class="stat-icon green">₹</div>
+            <div class="stat-info">
+              <div id="txTodayVol" class="stat-val">₹1,850</div>
+              <div class="stat-lbl">Today's QR Collections</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon cyan">📈</div>
+            <div class="stat-info">
+              <div id="tx30dVol" class="stat-val">₹38,400</div>
+              <div class="stat-lbl">30-Day Soundbox Volume</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">🧾</div>
+            <div class="stat-info">
+              <div id="txTotalCount" class="stat-val">75+</div>
+              <div class="stat-lbl">Total Payments Logged</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">🔊</div>
+            <div class="stat-info">
+              <div class="stat-val">99.98%</div>
+              <div class="stat-lbl">Soundbox Chime Uptime</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Real-Time Payment Simulator -->
+        <div class="simulator-card">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+            <div>
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--paytm-blue); display:flex; align-items:center; gap:0.5rem;">
+                <span>⚡</span> Real-Time Soundbox QR Payment Simulator
+              </h3>
+              <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.2rem;">
+                Simulate a customer scanning your Paytm QR code in real-time. Hear the Soundbox chime and verify live telemetry!
+              </p>
+            </div>
+            <div style="font-size:0.8rem; background:rgba(0, 210, 106, 0.15); color:#00d26a; padding:0.4rem 0.8rem; border-radius:20px; font-weight:700;">
+              ● Hardware Online
+            </div>
+          </div>
+
+          <div style="margin-top:1rem;">
+            <div style="font-size:0.85rem; font-weight:700; color:var(--text-secondary);">Select or Enter Payment Amount:</div>
+            <div class="chip-group">
+              <button class="amount-chip" data-amt="50">₹50</button>
+              <button class="amount-chip" data-amt="100">₹100</button>
+              <button class="amount-chip active" data-amt="250">₹250</button>
+              <button class="amount-chip" data-amt="500">₹500</button>
+              <button class="amount-chip" data-amt="1200">₹1,200</button>
+            </div>
+
+            <div style="display:flex; gap:1rem; align-items:center; margin-top:0.8rem; flex-wrap:wrap;">
+              <input type="number" id="simCustomAmount" class="form-input-text" style="width:160px;" placeholder="Amount (₹)" value="250">
+              <input type="text" id="simCustomerPhone" class="form-input-text" style="width:200px;" placeholder="Customer Mobile" value="+91 9810998877">
+              <button id="simulateTxnBtn" class="btn-primary-gradient" style="padding:0.75rem 1.6rem; font-size:0.95rem;">
+                <span>🔊</span> Trigger Soundbox Payment
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="filter-toolbar">
+          <div class="filter-group">
+            <button class="filter-pill active" data-tx-filter="all">All Modes</button>
+            <button class="filter-pill" data-tx-filter="UPI_Soundbox">UPI Soundbox</button>
+            <button class="filter-pill" data-tx-filter="Cash">Cash</button>
+            <button class="filter-pill" data-tx-filter="Udhaar">Khata Udhaar</button>
+            <button class="filter-pill" data-tx-filter="Loan_Disbursal">Loan Disbursal</button>
+          </div>
+          <div class="search-pill-input">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="historySearchInput" placeholder="Search Txn ID or Phone...">
+          </div>
+        </div>
+
+        <!-- Transaction History Table -->
+        <div class="table-responsive-card">
+          <table class="interactive-table">
+            <thead>
+              <tr>
+                <th>Transaction ID</th>
+                <th>Amount</th>
+                <th>Payment Mode</th>
+                <th>Customer Contact</th>
+                <th>Timestamp</th>
+                <th style="text-align:right;">Status</th>
+              </tr>
+            </thead>
+            <tbody id="transactionsTableBody">
+              <!-- Dynamically populated from SQLite -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ========================================================
+           VIEW 5: AI GROWTH ENGINE & PRE-APPROVED CREDIT
+           ======================================================== -->
+      <section id="view-analytics" class="cockpit-view-section">
+        <div class="section-banner">
+          <div class="section-banner-title">
+            <h2><span>🚀</span> AI Merchant Growth & Credit Engine</h2>
+            <p>Smart customer churn win-back campaigns and instant working capital loan disbursal.</p>
+          </div>
+        </div>
+
+        <!-- Analytics Stat Ribbon -->
+        <div class="stat-ribbon">
+          <div class="stat-card">
+            <div class="stat-icon green">★</div>
+            <div class="stat-info">
+              <div id="analyticsScore" class="stat-val">88/100</div>
+              <div class="stat-lbl">Paytm Credit Health Score</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon cyan">💼</div>
+            <div class="stat-info">
+              <div id="analyticsLoanAmount" class="stat-val">₹75,000</div>
+              <div class="stat-lbl">Pre-Approved Capital</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon purple">🗓️</div>
+            <div class="stat-info">
+              <div id="analyticsRunway" class="stat-val">45 Days</div>
+              <div class="stat-lbl">Working Capital Runway</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">📈</div>
+            <div class="stat-info">
+              <div class="stat-val">+12.4%</div>
+              <div class="stat-lbl">Projected Churn Recovery</div>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(360px, 1fr)); gap:1.5rem; margin-top:1.5rem;">
+          
+          <!-- Churn Risk & Win-Back Panel -->
+          <div class="glass-card" style="padding:1.5rem;">
+            <div class="card-heading" style="margin-bottom:1rem;">
+              <span>🎯</span> Customer Win-Back & Retention
+            </div>
+            <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:1rem;">
+              AI analyzes visit gaps and alerts you before regular patrons permanently churn to competitor supermarkets.
+            </p>
+            <div id="analyticsCampaignsList" style="display:flex; flex-direction:column; gap:0.8rem;">
+              <!-- Dynamically populated from /api/growth -->
+            </div>
+
+            <!-- Festive Alert -->
+            <div id="festiveAlertBox" style="margin-top:1.5rem; padding:1.2rem; background:linear-gradient(135deg, rgba(255, 159, 28, 0.12), rgba(0, 186, 242, 0.08)); border-radius:var(--radius-md); border:1px solid rgba(255, 159, 28, 0.3);">
+              <div style="font-weight:800; font-size:1rem; color:#ff9f1c; display:flex; align-items:center; gap:0.5rem;">
+                <span>🪔</span> <span id="festiveTitle">Upcoming Demand Surge</span>
+              </div>
+              <div id="festiveDetails" style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.4rem; line-height:1.4;">
+                Loading festive intelligence...
+              </div>
+            </div>
+          </div>
+
+          <!-- Instant Underwriting & Loan Disbursal Card -->
+          <div class="glass-card" style="padding:1.5rem; display:flex; flex-direction:column;">
+            <div class="card-heading" style="margin-bottom:1rem;">
+              <span>🏛️</span> Paytm Pre-Approved Loan Underwriting
+            </div>
+
+            <div class="gauge-container" style="margin:0.5rem 0;">
+              <svg class="radial-gauge-svg" viewBox="0 0 200 110">
+                <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-glass)" stroke-width="18" stroke-linecap="round"/>
+                <path d="M 20 100 A 80 80 0 0 1 165 50" fill="none" stroke="var(--paytm-cyan)" stroke-width="18" stroke-linecap="round"/>
+              </svg>
+              <div class="score-display" style="font-size:2.2rem;">88/100</div>
+              <div class="score-tagline">Tier-1 Prime Merchant • 0 Paperwork</div>
+            </div>
+
+            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); margin:1rem 0; font-size:0.85rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+                <span style="color:var(--text-secondary);">Pre-Approved Limit:</span>
+                <strong id="loanModalAmountDisplay" style="color:var(--paytm-cyan); font-size:1rem;">₹75,000</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+                <span style="color:var(--text-secondary);">Interest Rate:</span>
+                <strong>1.1% / month flat</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+                <span style="color:var(--text-secondary);">Repayment Tenure:</span>
+                <strong>12 Months (Daily EDI auto-split)</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between;">
+                <span style="color:var(--text-secondary);">Estimated Monthly EMI:</span>
+                <strong>₹6,938 / month</strong>
+              </div>
+            </div>
+
+            <button id="openLoanDisbursalBtn" class="btn-primary-gradient" style="padding:0.9rem; font-size:1rem; width:100%; margin-top:auto;">
+              🚀 1-Click Instant Disbursal to Bank
+            </button>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- ========================================================
+       4. INTERACTIVE APPLICATION MODALS
+       ======================================================== -->
+
+  <!-- Modal 1: Add Khata Entry -->
+  <div id="modalAddKhata" class="vyapar-modal-overlay" style="display:none;">
+    <div class="vyapar-modal-card">
+      <div class="vyapar-modal-header">
+        <div class="vyapar-modal-title"><span>📝</span> Record Bahi-Khata Entry</div>
+        <button id="closeAddKhataModalBtn" class="vyapar-modal-close">&times;</button>
       </div>
+      <form id="formAddKhata">
+        <div class="vyapar-modal-body">
+          <div class="form-field-group">
+            <label class="form-label">Customer Full Name</label>
+            <input type="text" id="khataInputName" class="form-input-text" placeholder="e.g. Sunil Verma" required>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Mobile Number (For WhatsApp / SMS Reminder)</label>
+            <input type="tel" id="khataInputPhone" class="form-input-text" placeholder="e.g. +91 9810112233" value="+91 9810112233">
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-field-group">
+              <label class="form-label">Amount (₹)</label>
+              <input type="number" id="khataInputAmount" class="form-input-text" placeholder="450" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Entry Type</label>
+              <select id="khataInputType" class="form-input-text">
+                <option value="udhaar">Udhaar (Baaki Credit)</option>
+                <option value="jama">Jama (Paid / Repaid)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chip-group" style="margin-bottom:1rem;">
+            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='150'">₹150</button>
+            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='450'">₹450</button>
+            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='800'">₹800</button>
+            <button type="button" class="amount-chip" onclick="document.getElementById('khataInputAmount').value='1200'">₹1,200</button>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Item Description / Provisions</label>
+            <input type="text" id="khataInputDesc" class="form-input-text" placeholder="e.g. 1L Refined Tel + 2kg Atta" value="General Groceries">
+          </div>
+        </div>
+
+        <div class="vyapar-modal-footer">
+          <button type="button" id="cancelAddKhataBtn" class="btn-secondary-flat">Cancel</button>
+          <button type="submit" class="btn-primary-gradient">Confirm & Save to Khata</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Add Inventory Item -->
+  <div id="modalAddInventory" class="vyapar-modal-overlay" style="display:none;">
+    <div class="vyapar-modal-card">
+      <div class="vyapar-modal-header">
+        <div class="vyapar-modal-title"><span>📦</span> Add New Kirana Product</div>
+        <button id="closeAddInventoryModalBtn" class="vyapar-modal-close">&times;</button>
+      </div>
+      <form id="formAddInventory">
+        <div class="vyapar-modal-body">
+          <div class="form-field-group">
+            <label class="form-label">Product Name</label>
+            <input type="text" id="invInputName" class="form-input-text" placeholder="e.g. MDH Deggi Mirch 100g" required>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-field-group">
+              <label class="form-label">Category</label>
+              <select id="invInputCategory" class="form-input-text">
+                <option value="Groceries">Groceries</option>
+                <option value="Dairy">Dairy</option>
+                <option value="Oil & Ghee">Oil & Ghee</option>
+                <option value="Snacks">Snacks & Biscuits</option>
+                <option value="Flour">Flour & Grains</option>
+                <option value="Beverages">Beverages</option>
+              </select>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Unit Type</label>
+              <input type="text" id="invInputUnit" class="form-input-text" placeholder="Pack / Box / Pouch" value="Pack">
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-field-group">
+              <label class="form-label">Initial Stock Count</label>
+              <input type="number" id="invInputStock" class="form-input-text" placeholder="12" value="12" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Low Stock Reorder Alert Limit</label>
+              <input type="number" id="invInputThreshold" class="form-input-text" placeholder="5" value="5" required>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-field-group">
+              <label class="form-label">Retail Selling MRP (₹)</label>
+              <input type="number" step="0.5" id="invInputPrice" class="form-input-text" placeholder="85.0" value="85.0" required>
+            </div>
+            <div class="form-field-group">
+              <label class="form-label">Wholesale Cost (₹)</label>
+              <input type="number" step="0.5" id="invInputWholesale" class="form-input-text" placeholder="72.0" value="72.0" required>
+            </div>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Supplier / Distributor Name</label>
+            <input type="text" id="invInputSupplierName" class="form-input-text" placeholder="National FMCG Depot" value="National FMCG Depot">
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label">Supplier Restock Email</label>
+            <input type="email" id="invInputSupplierEmail" class="form-input-text" placeholder="orders@nationalfmcg.mock" value="orders@nationalfmcg.mock">
+          </div>
+        </div>
+
+        <div class="vyapar-modal-footer">
+          <button type="button" id="cancelAddInventoryBtn" class="btn-secondary-flat">Cancel</button>
+          <button type="submit" class="btn-primary-gradient">Add to Inventory</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Purchase Order Sent Confirmation -->
+  <div id="modalPOReceipt" class="vyapar-modal-overlay" style="display:none;">
+    <div class="vyapar-modal-card">
+      <div class="vyapar-modal-header">
+        <div class="vyapar-modal-title"><span>📧</span> Purchase Order Dispatched!</div>
+        <button id="closePOReceiptModalBtn" class="vyapar-modal-close">&times;</button>
+      </div>
+      <div class="vyapar-modal-body">
+        <div style="text-align:center; padding:1rem 0;">
+          <div style="width:56px; height:56px; border-radius:50%; background:rgba(0, 210, 106, 0.15); color:#00d26a; display:inline-flex; align-items:center; justify-content:center; font-size:1.8rem; margin-bottom:0.8rem;">
+            ✓
+          </div>
+          <h3 id="poReceiptTitle" style="font-size:1.2rem; font-weight:800;">PO #PO-PAYTM-48291 Sent</h3>
+          <p id="poReceiptSubtitle" style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.3rem;">
+            Dispatched via Paytm B2B Procurement Rail
+          </p>
+        </div>
+
+        <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); font-family:monospace; font-size:0.8rem; color:var(--text-secondary); white-space:pre-wrap; max-height:180px; overflow-y:auto;" id="poReceiptEmailPreview">
+          <!-- Email body preview -->
+        </div>
+      </div>
+      <div class="vyapar-modal-footer">
+        <button id="okPOReceiptBtn" class="btn-primary-gradient" style="width:100%;">Got It, Thanks!</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Loan Instant Disbursal -->
+  <div id="modalLoanDisbursal" class="vyapar-modal-overlay" style="display:none;">
+    <div class="vyapar-modal-card">
+      <div class="vyapar-modal-header">
+        <div class="vyapar-modal-title"><span>🚀</span> Instant Working Capital Disbursal</div>
+        <button id="closeLoanModalBtn" class="vyapar-modal-close">&times;</button>
+      </div>
+      <div class="vyapar-modal-body">
+        <div style="text-align:center; margin-bottom:1.2rem;">
+          <div style="font-size:0.85rem; color:var(--text-secondary); font-weight:600;">Disbursement Amount</div>
+          <div style="font-size:2.2rem; font-weight:900; color:var(--paytm-cyan); margin:0.2rem 0;">₹75,000</div>
+          <div style="font-size:0.8rem; color:#00d26a; font-weight:700;">● 100% Zero-Collateral Instant Transfer</div>
+        </div>
+
+        <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); font-size:0.85rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span style="color:var(--text-secondary);">Beneficiary Bank:</span>
+            <strong>Paytm Payments Bank</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span style="color:var(--text-secondary);">Account Number:</span>
+            <strong>919811••••4519</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
+            <span style="color:var(--text-secondary);">IFSC Code:</span>
+            <strong>PYTM0123456</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between;">
+            <span style="color:var(--text-secondary);">Tenure & EMI:</span>
+            <strong>12 Months @ ₹6,938/mo</strong>
+          </div>
+        </div>
+
+        <div id="loanDisbursalSuccessMessage" style="display:none; padding:1rem; background:rgba(0, 210, 106, 0.15); border-radius:var(--radius-md); color:#00d26a; font-weight:700; text-align:center; font-size:0.95rem; margin-bottom:1rem;">
+          🎉 ₹75,000 Transferred to Bank Account Successfully!
+        </div>
+      </div>
+      <div class="vyapar-modal-footer">
+        <button id="cancelLoanModalBtn" class="btn-secondary-flat">Cancel</button>
+        <button id="confirmLoanDisbursalBtn" class="btn-primary-gradient">Accept & Disburse Now</button>
+      </div>
+    </div>
+  </div>
+
     </main>
 
   </div>
@@ -396,5 +1373,6 @@
   <script src="/static/js/landing.js"></script>
   <script src="/static/js/auth.js"></script>
   <script src="/static/js/app.js"></script>
+  <script src="/static/js/chatbot.js"></script>
 </body>
 </html>

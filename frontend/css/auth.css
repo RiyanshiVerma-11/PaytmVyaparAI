@@ -1,16 +1,20 @@
-/* Auth Modal Styles */
+/* ========================================================
+   PAYTM MERCHANT AUTHENTICATION MODAL (WCAG AAA HIGH CONTRAST)
+   ======================================================== */
 .auth-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 18, 51, 0.75);
+  background: rgba(0, 18, 51, 0.82);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.25s ease;
+  padding: 1.5rem;
 }
 
 .auth-overlay.active {
@@ -20,12 +24,12 @@
 
 .auth-card {
   background: var(--bg-card);
-  border: 1px solid var(--border-glass);
+  border: 1.5px solid var(--border-glass);
   border-radius: var(--radius-xl);
   width: 100%;
   max-width: 460px;
   padding: 2.5rem;
-  box-shadow: 0 25px 60px rgba(0, 41, 112, 0.25);
+  box-shadow: 0 25px 60px rgba(0, 20, 50, 0.35);
   transform: translateY(20px) scale(0.96);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
@@ -40,12 +44,25 @@
   position: absolute;
   top: 1.2rem;
   right: 1.2rem;
-  background: transparent;
-  border: none;
-  font-size: 1.5rem;
-  color: var(--text-muted);
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-glass);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.3rem;
+  color: var(--text-secondary);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+  transition: all 0.2s;
+}
+
+.auth-close:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
 }
 
 .auth-header {
@@ -54,26 +71,37 @@
 }
 
 .auth-logo {
-  font-size: 1.8rem;
-  font-weight: 800;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  margin-bottom: 0.4rem;
+  color: var(--text-primary);
+}
+
+.auth-logo .paytm-cyan-part {
+  color: #0056b3;
+}
+
+[data-theme="dark"] .auth-logo .paytm-cyan-part {
+  color: var(--paytm-cyan);
 }
 
 .auth-subtitle {
-  font-size: 0.9rem;
+  font-size: 0.95rem;
   color: var(--text-secondary);
+  font-weight: 600;
 }
 
 .auth-form-group {
-  margin-bottom: 1.2rem;
+  margin-bottom: 1.3rem;
 }
 
 .auth-label {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.45rem;
 }
 
 .auth-input {
@@ -85,71 +113,86 @@
   color: var(--text-primary);
   font-family: inherit;
   font-size: 0.95rem;
-  transition: border-color 0.2s;
+  font-weight: 600;
+  transition: all 0.2s;
 }
 
 .auth-input:focus {
   outline: none;
-  border-color: var(--paytm-cyan);
-  box-shadow: 0 0 0 3px rgba(0, 186, 242, 0.15);
+  border-color: var(--border-focus);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 3px rgba(0, 86, 179, 0.15);
 }
 
 .btn-auth-submit {
   width: 100%;
-  padding: 0.9rem;
+  padding: 0.95rem;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, var(--paytm-blue) 0%, var(--paytm-primary) 100%);
-  color: white;
+  background: linear-gradient(135deg, #002970 0%, #0056b3 100%);
+  color: #ffffff;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 800;
   border: none;
   cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 41, 112, 0.3);
-  transition: transform 0.2s;
-  margin-top: 0.5rem;
+  box-shadow: 0 4px 16px rgba(0, 41, 112, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+  margin-top: 0.6rem;
 }
 
 .btn-auth-submit:hover {
   transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(0, 41, 112, 0.4);
 }
 
 .auth-divider {
   display: flex;
   align-items: center;
   text-align: center;
-  margin: 1.5rem 0;
-  color: var(--text-muted);
-  font-size: 0.8rem;
+  margin: 1.6rem 0;
+  color: var(--text-secondary);
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.8px;
 }
 
 .auth-divider::before, .auth-divider::after {
   content: '';
   flex: 1;
-  border-bottom: 1px solid var(--border-glass);
+  border-bottom: 1.5px solid var(--border-glass);
 }
 
 .auth-divider span {
-  padding: 0 0.8rem;
+  padding: 0 0.9rem;
 }
 
 .btn-demo-quick {
   width: 100%;
-  padding: 0.8rem;
+  padding: 0.9rem;
   border-radius: var(--radius-md);
-  background: var(--paytm-light-cyan);
-  color: var(--paytm-blue);
-  font-weight: 700;
-  font-size: 0.9rem;
-  border: 1.5px dashed var(--paytm-cyan);
+  background: #e0f2fe;
+  color: #004b99;
+  font-weight: 800;
+  font-size: 0.92rem;
+  border: 2px dashed #0056b3;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.6rem;
+  gap: 0.65rem;
   transition: all 0.2s;
 }
 
+[data-theme="dark"] .btn-demo-quick {
+  background: rgba(0, 186, 242, 0.15);
+  color: #38bdf8;
+  border-color: var(--paytm-cyan);
+}
+
 .btn-demo-quick:hover {
-  background: #d8f2fd;
+  background: #bae6fd;
   transform: translateY(-1px);
+}
+
+[data-theme="dark"] .btn-demo-quick:hover {
+  background: rgba(0, 186, 242, 0.25);
 }

@@ -13,6 +13,8 @@ from services.khata_service import KhataService
 from services.inventory_service import InventoryService
 from services.growth_service import GrowthService
 from services.credit_service import CreditService
+from services.transaction_service import TransactionService
+from services.chatbot_service import ChatbotService
 from agent.react_agent import ReactAgent
 
 # Initialize DB
@@ -31,14 +33,53 @@ class KhataEntryRequest(BaseModel):
     entry_type: str = "udhaar"
     phone: str = None
 
+class KhataSettleRequest(BaseModel):
+    customer_id: int
+
 class PORequest(BaseModel):
     item_name: str
     quantity: int = 15
 
+class InventoryItemRequest(BaseModel):
+    item_name: str
+    category: str = "Groceries"
+    current_stock: int = 10
+    reorder_threshold: int = 5
+    unit: str = "Pack"
+    unit_price: float = 50.0
+    wholesale_price: float = 42.0
+    supplier_name: str = "National FMCG Suppliers"
+    supplier_email: str = "orders@nationalfmcg.mock"
+
+class SimulateTxnRequest(BaseModel):
+    amount: float
+    customer_phone: str = "+91 9810998877"
+    payment_mode: str = "UPI_Soundbox"
+
+class LoanDisburseRequest(BaseModel):
+    amount: float = 75000.0
+
+class ChatbotMessageRequest(BaseModel):
+    message: str
+    session_id: str = "default_merchant"
+
 # Routes
+@app.post("/api/chatbot/message")
+async def chatbot_message(req: ChatbotMessageRequest):
+    res = ChatbotService.handle_message(req.message, req.session_id)
+    return JSONResponse(content=res)
+
+@app.get("/api/chatbot/context")
+async def chatbot_context():
+    return JSONResponse(content=ChatbotService.get_full_app_context())
+
+@app.post("/api/chatbot/clear")
+async def chatbot_clear(req: ChatbotMessageRequest):
+    return JSONResponse(content=ChatbotService.clear_session(req.session_id))
+
 @app.post("/api/agent/chat")
 async def chat_with_agent(req: ChatQuery):
-    response = ReactAgent.process_query(req.query)
+    response = ChatbotService.handle_message(req.query)
     return JSONResponse(content=response)
 
 @app.get("/api/khata")
@@ -50,6 +91,11 @@ async def add_khata_entry(req: KhataEntryRequest):
     res = KhataService.record_entry(req.customer_name, req.amount, req.item_description, req.entry_type, req.phone)
     return JSONResponse(content=res)
 
+@app.post("/api/khata/settle")
+async def settle_khata_customer(req: KhataSettleRequest):
+    res = KhataService.settle_customer(req.customer_id)
+    return JSONResponse(content=res)
+
 @app.get("/api/inventory")
 async def get_inventory():
     return JSONResponse(content=InventoryService.get_inventory())
@@ -59,6 +105,14 @@ async def create_po(req: PORequest):
     res = InventoryService.create_supplier_po(req.item_name, req.quantity)
     return JSONResponse(content=res)
 
+@app.post("/api/inventory/item")
+async def add_inventory_item(req: InventoryItemRequest):
+    res = InventoryService.add_or_update_item(
+        req.item_name, req.category, req.current_stock, req.reorder_threshold,
+        req.unit, req.unit_price, req.wholesale_price, req.supplier_name, req.supplier_email
+    )
+    return JSONResponse(content=res)
+
 @app.get("/api/growth")
 async def get_growth():
     return JSONResponse(content=GrowthService.get_campaigns())
@@ -66,6 +120,21 @@ async def get_growth():
 @app.get("/api/credit")
 async def get_credit():
     return JSONResponse(content=CreditService.get_merchant_credit_health())
+
+@app.post("/api/credit/disburse")
+async def disburse_credit_loan(req: LoanDisburseRequest):
+    res = CreditService.disburse_loan(req.amount)
+    return JSONResponse(content=res)
+
+@app.get("/api/transactions")
+async def get_transactions(limit: int = 100):
+    return JSONResponse(content=TransactionService.get_all_transactions(limit))
+
+@app.post("/api/transactions/simulate")
+async def simulate_transaction(req: SimulateTxnRequest):
+    res = TransactionService.simulate_payment(req.amount, req.customer_phone, req.payment_mode)
+    return JSONResponse(content=res)
+
 
 # Static files & Frontend
 FRONTEND_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "frontend"))
@@ -83,4 +152,5 @@ if os.path.exists(FRONTEND_DIR):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

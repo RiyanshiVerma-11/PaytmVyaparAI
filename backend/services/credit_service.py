@@ -38,3 +38,47 @@ class CreditService:
             "pending_receivables": round(total_udhaar, 2),
             "instant_disbursement_ready": True
         }
+
+    @staticmethod
+    def disburse_loan(amount: float):
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        cursor.execute("SELECT * FROM merchants LIMIT 1")
+        merchant = cursor.fetchone()
+        merchant_id = merchant["id"] if merchant else 1
+
+        # Update merchant runway & reduce pre_approved_loan_amount
+        cursor.execute("""
+        UPDATE merchants 
+        SET loan_runway_days = loan_runway_days + 60,
+            pre_approved_loan_amount = MAX(0, pre_approved_loan_amount - ?)
+        WHERE id = ?
+        """, (int(amount), merchant_id))
+
+        # Log credit transaction
+        txn_id = f"LN_DISB_{int(amount)}_{merchant_id}"
+        cursor.execute("""
+        INSERT INTO transactions (txn_id, amount, customer_phone, payment_mode, timestamp, status)
+        VALUES (?, ?, '+91 Paytm Payments Bank', 'Loan_Disbursal', datetime('now'), 'SUCCESS')
+        """, (txn_id, float(amount)))
+
+        conn.commit()
+        conn.close()
+
+        speech_text = f"Badhaai ho! Aapka Paytm Vyapar Loan {int(amount)} rupaye safalta-purvak aapke bank khate mein transfer kar diya gaya hai."
+
+        return {
+            "success": True,
+            "loan_amount": amount,
+            "bank_account": "Paytm Payments Bank •••• 4519",
+            "ifsc": "PYTM0123456",
+            "txn_id": txn_id,
+            "new_runway_days": 105,
+            "soundbox_payload": {
+                "chime": True,
+                "speech_text": speech_text,
+                "amount": amount
+            }
+        }
+

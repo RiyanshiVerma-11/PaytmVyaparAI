@@ -58,6 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (window.paytmSoundbox) {
       window.paytmSoundbox.playChime();
     }
+
+    if (window.loadDashboardData) {
+      window.loadDashboardData();
+    }
   };
 
   // Check if session exists

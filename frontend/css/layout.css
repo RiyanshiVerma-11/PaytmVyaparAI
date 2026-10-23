@@ -1,116 +1,76 @@
-* {
+/* ========================================================
+   GLOBAL BASE STYLING & ACCESSIBLE TYPOGRAPHY FOUNDATION
+   ======================================================== */
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+html {
+  font-family: var(--font-family);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: var(--font-family);
-  background-color: var(--bg-primary);
+  background-color: var(--bg-app);
   color: var(--text-primary);
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+  line-height: 1.5;
+  font-size: 15px;
 }
 
-/* App Header */
-.app-header {
-  background: linear-gradient(135deg, var(--paytm-navy) 0%, var(--paytm-blue) 100%);
-  color: var(--text-inverse);
-  padding: 1rem 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  box-shadow: var(--shadow-md);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+/* Ensure all form controls and buttons inherit the modern font */
+input, button, select, textarea, optgroup {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
-.brand-section {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+/* Visible Accessible Focus Rings for WCAG 2.1 AA/AAA Focus Indicator */
+:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
-.brand-badge {
-  background: var(--paytm-cyan);
-  color: var(--paytm-navy);
+/* Base Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
   font-weight: 800;
-  font-size: 0.75rem;
-  padding: 0.2rem 0.6rem;
-  border-radius: var(--radius-sm);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  color: var(--text-primary);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
 }
 
-.merchant-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  background: rgba(255, 255, 255, 0.12);
-  padding: 0.4rem 1rem;
-  border-radius: 50px;
-  backdrop-filter: blur(8px);
-}
-
-/* Main Layout Grid */
-.cockpit-container {
-  display: grid;
-  grid-template-columns: 240px 1fr 340px;
-  gap: 1.5rem;
-  padding: 1.5rem 2rem;
-  flex: 1;
-  max-width: 1600px;
-  margin: 0 auto;
-  width: 100%;
-}
-
-/* Sidebar Nav */
-.cockpit-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  padding: 0.8rem 1.2rem;
-  border-radius: var(--radius-md);
+p {
   color: var(--text-secondary);
-  font-weight: 600;
+  line-height: 1.6;
+}
+
+/* Links */
+a {
+  color: var(--text-accent);
   text-decoration: none;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: 1px solid transparent;
+  transition: color 0.2s ease;
 }
 
-.nav-item:hover, .nav-item.active {
-  background: var(--bg-surface);
-  color: var(--paytm-blue);
-  box-shadow: var(--shadow-sm);
-  border-color: var(--border-color);
+a:hover {
+  text-decoration: underline;
 }
 
-.nav-item.active {
-  border-left: 4px solid var(--paytm-cyan);
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .cockpit-container {
-    grid-template-columns: 200px 1fr;
-  }
-  .soundbox-sidebar {
-    grid-column: span 2;
-  }
-}
-
-@media (max-width: 768px) {
-  .cockpit-container {
-    grid-template-columns: 1fr;
-    padding: 1rem;
-  }
+/* Accessibility helper */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

@@ -1,7 +1,8 @@
 /**
- * Paytm Vyapar API Client
+ * Paytm Vyapar Saathi - Full Real-Time API Client
  */
 const API = {
+  // 1. Agent Voice & Chat
   async sendQuery(queryText) {
     const res = await fetch('/api/agent/chat', {
       method: 'POST',
@@ -11,11 +12,37 @@ const API = {
     return await res.json();
   },
 
+  // 2. Khata Ledger
   async getKhata() {
     const res = await fetch('/api/khata');
     return await res.json();
   },
 
+  async addKhataEntry(customerName, amount, itemDescription = 'Kirana Items', entryType = 'udhaar', phone = null) {
+    const res = await fetch('/api/khata/entry', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        customer_name: customerName,
+        amount: parseFloat(amount),
+        item_description: itemDescription,
+        entry_type: entryType,
+        phone: phone
+      })
+    });
+    return await res.json();
+  },
+
+  async settleKhataCustomer(customerId) {
+    const res = await fetch('/api/khata/settle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ customer_id: parseInt(customerId) })
+    });
+    return await res.json();
+  },
+
+  // 3. Inventory & Smart Restock
   async getInventory() {
     const res = await fetch('/api/inventory');
     return await res.json();
@@ -25,18 +52,81 @@ const API = {
     const res = await fetch('/api/inventory/po', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_name: itemName, quantity })
+      body: JSON.stringify({ item_name: itemName, quantity: parseInt(quantity) })
     });
     return await res.json();
   },
 
+  async addInventoryItem(itemData) {
+    const res = await fetch('/api/inventory/item', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(itemData)
+    });
+    return await res.json();
+  },
+
+  // 4. Growth Campaigns & Festive Forecast
   async getGrowth() {
     const res = await fetch('/api/growth');
     return await res.json();
   },
 
+  // 5. Merchant Credit Underwriting & Instant Disbursal
   async getCredit() {
     const res = await fetch('/api/credit');
+    return await res.json();
+  },
+
+  async disburseLoan(amount = 75000) {
+    const res = await fetch('/api/credit/disburse', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount: parseFloat(amount) })
+    });
+    return await res.json();
+  },
+
+  // 6. Transactions & Soundbox Telemetry
+  async getTransactions(limit = 100) {
+    const res = await fetch(`/api/transactions?limit=${limit}`);
+    return await res.json();
+  },
+
+  async simulateTransaction(amount, phone = '+91 9810998877', paymentMode = 'UPI_Soundbox') {
+    const res = await fetch('/api/transactions/simulate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        amount: parseFloat(amount),
+        customer_phone: phone,
+        payment_mode: paymentMode
+      })
+    });
+    return await res.json();
+  },
+
+  // 7. Dynamic Chatbot with Full App Context
+  async sendChatMessage(message, sessionId = 'default_merchant') {
+    const res = await fetch('/api/chatbot/message', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: message, session_id: sessionId })
+    });
+    return await res.json();
+  },
+
+  async getChatContext() {
+    const res = await fetch('/api/chatbot/context');
+    return await res.json();
+  },
+
+  async clearChatMemory(sessionId = 'default_merchant') {
+    const res = await fetch('/api/chatbot/clear', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: '', session_id: sessionId })
+    });
     return await res.json();
   }
 };
