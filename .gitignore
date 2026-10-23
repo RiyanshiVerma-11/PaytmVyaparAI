@@ -15,3 +15,8 @@ backend/vyapar.db-journal
 .idea/
 .DS_Store
 Thumbs.db
+
+# Local Analysis & Findings (Never push to remote)
+finding_project*
+finding_project plan.md
+
