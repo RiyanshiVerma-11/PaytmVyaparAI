@@ -17,10 +17,21 @@ from services.transaction_service import TransactionService
 from services.chatbot_service import ChatbotService
 from agent.react_agent import ReactAgent
 
+from fastapi.middleware.cors import CORSMiddleware
+
 # Initialize DB
 init_db()
 
 app = FastAPI(title="Paytm Vyapar Saathi", version="1.0.0")
+
+# Enable CORS for external frontends (e.g. Vercel, localhost)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Request Models
 class ChatQuery(BaseModel):
