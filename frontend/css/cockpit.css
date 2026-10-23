@@ -1,0 +1,476 @@
+/* Flagship Cockpit UI Styles - Matching assets/dashboard_ui.jpg */
+.app-view {
+  display: flex;
+  min-height: 100vh;
+  background-color: var(--bg-app);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* ========================================================
+   1. COLLAPSIBLE ICON SIDEBAR
+   ======================================================== */
+.cockpit-sidebar {
+  width: var(--sidebar-expanded);
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-glass);
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  z-index: 50;
+  box-shadow: var(--shadow-sm);
+}
+
+.cockpit-sidebar.collapsed {
+  width: var(--sidebar-collapsed);
+}
+
+.sidebar-header {
+  height: var(--header-height);
+  padding: 0 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-weight: 800;
+  font-size: 1.25rem;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.sidebar-brand-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--paytm-blue) 0%, var(--paytm-cyan) 100%);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sidebar-collapse-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s;
+}
+
+.sidebar-collapse-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+}
+
+.cockpit-sidebar.collapsed .sidebar-brand-text {
+  display: none;
+}
+
+/* Navigation Links */
+.sidebar-menu {
+  flex: 1;
+  padding: 1.2rem 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  overflow-y: auto;
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.8rem 1rem;
+  border-radius: var(--radius-md);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: var(--transition-smooth);
+  white-space: nowrap;
+}
+
+.sidebar-item:hover {
+  background: var(--bg-card-hover);
+  color: var(--paytm-cyan);
+}
+
+.sidebar-item.active {
+  background: var(--paytm-cyan-subtle);
+  color: var(--paytm-blue);
+  font-weight: 700;
+}
+
+[data-theme="dark"] .sidebar-item.active {
+  color: var(--paytm-cyan);
+}
+
+.sidebar-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cockpit-sidebar.collapsed .sidebar-text {
+  display: none;
+}
+
+.sidebar-footer {
+  padding: 1rem 0.8rem;
+  border-top: 1px solid var(--border-glass);
+}
+
+/* ========================================================
+   2. MAIN CONTENT AREA & HEADER
+   ======================================================== */
+.cockpit-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow-y: auto;
+  height: 100vh;
+}
+
+.top-navbar {
+  height: var(--header-height);
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+/* Search Bar */
+.top-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-glass);
+  padding: 0.55rem 1.2rem;
+  border-radius: 50px;
+  width: 380px;
+  max-width: 100%;
+}
+
+.top-search-bar input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  width: 100%;
+  font-family: inherit;
+}
+
+/* Navbar Actions */
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+/* Dark Mode Switch */
+.theme-switch {
+  display: flex;
+  align-items: center;
+  background: var(--bg-card-subtle);
+  border: 1px solid var(--border-glass);
+  border-radius: 50px;
+  padding: 4px;
+  cursor: pointer;
+  position: relative;
+  width: 62px;
+  height: 32px;
+}
+
+.theme-switch-slider {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--paytm-blue);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .theme-switch-slider {
+  transform: translateX(30px);
+  background: var(--paytm-cyan);
+  color: var(--paytm-navy);
+}
+
+.merchant-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.merchant-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #002970, #00baf2);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+/* ========================================================
+   3. FLAGSHIP 4-CARD DASHBOARD GRID (assets/dashboard_ui.jpg)
+   ======================================================== */
+.dashboard-canvas {
+  padding: 2rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.8rem;
+  max-width: 1600px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.glass-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-xl);
+  padding: 1.8rem;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-smooth);
+  display: flex;
+  flex-direction: column;
+}
+
+.glass-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: rgba(0, 186, 242, 0.3);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.card-heading {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* Card 1: Khata Ledger List */
+.ledger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+.ledger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.1rem;
+  background: var(--bg-card-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.ledger-item:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glass);
+}
+
+.ledger-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.6rem;
+  display: inline-block;
+}
+
+.dot-green { background-color: var(--color-success); }
+.dot-orange { background-color: var(--color-warning); }
+.dot-cyan { background-color: var(--paytm-cyan); }
+.dot-gray { background-color: var(--text-muted); }
+
+/* Card 2: Growth Engine */
+.growth-alert-box {
+  background: rgba(255, 77, 79, 0.08);
+  border: 1.5px solid rgba(255, 77, 79, 0.25);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--color-danger);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 0.4rem;
+}
+
+.alert-subtext {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin-bottom: 1.2rem;
+}
+
+/* Card 3: Low Stock Warnings */
+.stock-warning-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.stock-warning-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.9rem 1.1rem;
+  background: var(--bg-card-subtle);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-glass);
+}
+
+/* Card 4: Pre-Approved Loan Radial Gauge */
+.gauge-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 0 1rem;
+  text-align: center;
+}
+
+.radial-gauge-svg {
+  width: 220px;
+  height: 120px;
+}
+
+.score-display {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--text-primary);
+  margin-top: -30px;
+}
+
+.score-tagline {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--paytm-cyan);
+  margin: 0.8rem 0 0.4rem;
+}
+
+.loan-eligibility-text {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  max-width: 400px;
+  line-height: 1.4;
+}
+
+/* Reorder / Action Buttons */
+.btn-action-cyan {
+  background: var(--paytm-cyan);
+  color: var(--paytm-navy);
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(0, 186, 242, 0.25);
+}
+
+.btn-action-cyan:hover {
+  background: #00a4d6;
+  transform: scale(1.02);
+}
+
+.btn-action-blue {
+  background: var(--paytm-blue);
+  color: white;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius-sm);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-action-blue:hover {
+  background: #001f54;
+}
+
+.btn-full-width {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: var(--radius-md);
+  border: 1.5px solid var(--border-glass);
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 700;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: auto;
+}
+
+.btn-full-width:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--paytm-cyan);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-canvas {
+    grid-template-columns: 1fr;
+  }
+}

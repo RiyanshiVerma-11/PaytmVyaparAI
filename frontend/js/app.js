@@ -1,53 +1,65 @@
 /**
- * Main Application Controller
+ * Flagship Cockpit UI Controller
+ * Strictly matching assets/dashboard_ui.jpg aesthetics & interactions
  */
 document.addEventListener('DOMContentLoaded', () => {
-  // Navigation Tabs
-  const navItems = document.querySelectorAll('.nav-item');
-  const tabPanels = document.querySelectorAll('.tab-panel');
 
-  navItems.forEach(item => {
-    item.addEventListener('click', () => {
-      const targetTab = item.getAttribute('data-tab');
-      navItems.forEach(n => n.classList.remove('active'));
-      tabPanels.forEach(p => p.classList.remove('active'));
+  // 1. COLLAPSIBLE SIDEBAR TOGGLE
+  const sidebar = document.getElementById('cockpitSidebar');
+  const collapseBtn = document.getElementById('sidebarCollapseBtn');
 
-      item.classList.add('active');
-      const targetPanel = document.getElementById(targetTab);
-      if (targetPanel) targetPanel.classList.add('active');
+  if (collapseBtn && sidebar) {
+    collapseBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      const isCollapsed = sidebar.classList.contains('collapsed');
+      localStorage.setItem('paytm_sidebar_collapsed', isCollapsed ? 'true' : 'false');
     });
-  });
 
-  // Voice Mic Setup
-  const micBtn = document.getElementById('micBtn');
-  const voiceStatus = document.getElementById('voiceStatus');
-  const queryInput = document.getElementById('queryInput');
-  const sendBtn = document.getElementById('sendBtn');
-  const thoughtStream = document.getElementById('thoughtStream');
-
-  function addThought(text) {
-    if (!thoughtStream) return;
-    const entry = document.createElement('div');
-    entry.className = 'thought-entry';
-    entry.textContent = `> ${text}`;
-    thoughtStream.appendChild(entry);
-    thoughtStream.scrollTop = thoughtStream.scrollHeight;
+    if (localStorage.getItem('paytm_sidebar_collapsed') === 'true') {
+      sidebar.classList.add('collapsed');
+    }
   }
+
+  // 2. DARK / LIGHT MODE SWITCH
+  const themeSwitch = document.getElementById('themeSwitch');
+  const savedTheme = localStorage.getItem('paytm_theme') || 'light';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  if (themeSwitch) {
+    themeSwitch.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('paytm_theme', newTheme);
+    });
+  }
+
+  // 3. LOGOUT BUTTON
+  const logoutBtn = document.getElementById('sidebarLogoutBtn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      localStorage.removeItem('paytm_merchant_session');
+      const landingEl = document.getElementById('landingView');
+      const appEl = document.getElementById('appView');
+      if (appEl) appEl.style.display = 'none';
+      if (landingEl) landingEl.style.display = 'flex';
+    });
+  }
+
+  // 4. SPEECH & VOICE MIC INTEGRATION
+  const micBtn = document.getElementById('voiceMicTrigger');
+  const voicePulse = document.getElementById('voicePulseIndicator');
 
   const speech = new SpeechEngine(
     (transcript) => {
-      if (queryInput) queryInput.value = transcript;
-      executeAgentQuery(transcript);
+      executeVoiceQuery(transcript);
     },
     (isListening) => {
+      if (voicePulse) {
+        voicePulse.style.display = isListening ? 'flex' : 'none';
+      }
       if (micBtn) {
-        if (isListening) {
-          micBtn.classList.add('listening');
-          voiceStatus.textContent = 'Listening to shopkeeper voice (Hindi/Hinglish)...';
-        } else {
-          micBtn.classList.remove('listening');
-          voiceStatus.textContent = 'Tap Mic or Type command';
-        }
+        micBtn.style.color = isListening ? '#ff4d4f' : 'var(--paytm-blue)';
       }
     }
   );
@@ -56,188 +68,197 @@ document.addEventListener('DOMContentLoaded', () => {
     micBtn.addEventListener('click', () => speech.toggle());
   }
 
-  if (sendBtn && queryInput) {
-    sendBtn.addEventListener('click', () => {
-      const q = queryInput.value.trim();
-      if (q) executeAgentQuery(q);
-    });
-    queryInput.addEventListener('keydown', (e) => {
+  // 5. SEARCH INPUT FOR DIRECT VOICE / TEXT COMMANDS
+  const topSearchInput = document.getElementById('topSearchInput');
+  if (topSearchInput) {
+    topSearchInput.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') {
-        const q = queryInput.value.trim();
-        if (q) executeAgentQuery(q);
+        const q = topSearchInput.value.trim();
+        if (q) executeVoiceQuery(q);
       }
     });
   }
 
-  // Quick Action Chips
-  document.querySelectorAll('.quick-chip').forEach(chip => {
-    chip.addEventListener('click', () => {
-      const text = chip.getAttribute('data-query');
-      if (queryInput) queryInput.value = text;
-      executeAgentQuery(text);
-    });
-  });
-
-  // Execute Agent Query
-  async function executeAgentQuery(queryText) {
-    addThought(`Received Input: "${queryText}"`);
+  // Execute Voice / NLP Query
+  async function executeVoiceQuery(queryText) {
+    showNotification(`🎤 Processing: "${queryText}"`, 'info');
     try {
       const res = await API.sendQuery(queryText);
-      if (res.thoughts) {
-        res.thoughts.forEach(t => addThought(t));
-      }
 
-      // Check for Soundbox payload
+      // Play Soundbox Chime & Voice
       if (res.result && res.result.soundbox_payload) {
         const sp = res.result.soundbox_payload;
-        addThought(`🔊 Soundbox Event: "${sp.speech_text}"`);
-        window.paytmSoundbox.broadcast(sp.speech_text);
+        if (window.paytmSoundbox) {
+          window.paytmSoundbox.broadcast(sp.speech_text);
+        }
+        showNotification(`🔊 Soundbox: ${sp.speech_text}`, 'success');
       }
 
-      // Refresh Dashboard State
-      refreshAll();
+      // Refresh Ledger & Stock State
+      loadDashboardData();
     } catch (err) {
-      addThought(`❌ Error executing agent: ${err.message}`);
+      showNotification(`❌ Error: ${err.message}`, 'error');
     }
   }
 
-  // Render Functions
-  async function refreshAll() {
-    loadKhata();
-    loadInventory();
-    loadGrowth();
-    loadCredit();
+  // 6. DASHBOARD DATA LOADER (Matching assets/dashboard_ui.jpg)
+  async function loadDashboardData() {
+    loadLedgerCard();
+    loadGrowthCard();
+    loadStockCard();
+    loadLoanCard();
   }
 
-  async function loadKhata() {
+  // Card 1: Live Voice Khata Ledger
+  async function loadLedgerCard() {
     try {
       const data = await API.getKhata();
-      const tbody = document.getElementById('khataTableBody');
-      const totalUdhaarEl = document.getElementById('totalPendingUdhaar');
-      
-      let total = 0;
-      if (tbody && data.customers) {
-        tbody.innerHTML = '';
-        data.customers.forEach(c => {
-          total += c.pending_udhaar;
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${c.name}</strong><br><small class="text-muted">${c.phone}</small></td>
-            <td><strong style="color: ${c.pending_udhaar > 0 ? '#ff4d4f' : '#00d26a'}">₹${c.pending_udhaar}</strong></td>
-            <td><span class="badge ${c.churn_risk === 'Normal' ? 'badge-success' : 'badge-danger'}">${c.churn_risk}</span></td>
-            <td>${c.last_visit_date || 'Today'}</td>
-            <td>
-              <a href="sms:${c.phone}?body=Namaste%20${c.name}%20ji,%20Sharma%20Kirana%20se%20aapka%20pending%20udhaar%20Rs.${c.pending_udhaar}%20hai.%20Pay%20via%20Paytm%20UPI" class="btn-sm btn-cyan">📲 SMS Bill</a>
-            </td>
-          `;
-          tbody.appendChild(tr);
-        });
-      }
-      if (totalUdhaarEl) totalUdhaarEl.textContent = `₹${total.toLocaleString()}`;
-    } catch (e) {
+      const listEl = document.getElementById('liveLedgerList');
+      if (!listEl) return;
+
+      listEl.innerHTML = '';
+      const recentCustomers = data.customers ? data.customers.slice(0, 4) : [];
+
+      recentCustomers.forEach((c, idx) => {
+        const dotColors = ['dot-green', 'dot-orange', 'dot-cyan', 'dot-gray'];
+        const types = ['Paid (Cash)', 'Udhaar', 'Online (QR)', 'Udhaar'];
+        const times = ['2 min ago', 'Today, 10:15 AM', 'Yesterday, 6:30 PM', '18 Oct'];
+        
+        const isPaid = c.pending_udhaar === 0;
+        const amountDisplay = isPaid ? `₹${c.total_spent > 0 ? c.total_spent : 2500}` : `₹${c.pending_udhaar}`;
+        const typeDisplay = isPaid ? 'Paid' : 'Udhaar';
+
+        const item = document.createElement('div');
+        item.className = 'ledger-item';
+        item.innerHTML = `
+          <div style="display:flex; align-items:center;">
+            <span class="ledger-dot ${isPaid ? 'dot-green' : 'dot-orange'}"></span>
+            <div>
+              <strong style="font-size:0.95rem;">${c.name}</strong> 
+              <span style="color:var(--text-secondary); font-size:0.85rem;">- ${amountDisplay} - ${typeDisplay}</span>
+            </div>
+          </div>
+          <div style="font-size:0.8rem; color:var(--text-muted);">${c.last_visit_date || times[idx % times.length]}</div>
+        `;
+        listEl.appendChild(item);
+      });
+    } catch(e) {
       console.error(e);
     }
   }
 
-  async function loadInventory() {
+  // Card 2: AI Merchant Growth Engine
+  async function loadGrowthCard() {
     try {
-      const data = await API.getInventory();
-      const listEl = document.getElementById('lowStockList');
-      const allListEl = document.getElementById('allInventoryList');
+      const data = await API.getGrowth();
+      const nameEl = document.getElementById('growthCustomerName');
+      const textEl = document.getElementById('growthAlertSubtext');
+      const offerBtn = document.getElementById('growthSendOfferBtn');
 
-      if (listEl && data.low_stock_items) {
-        listEl.innerHTML = '';
-        if (data.low_stock_items.length === 0) {
-          listEl.innerHTML = '<div class="text-muted">All stock levels healthy!</div>';
-        } else {
-          data.low_stock_items.forEach(item => {
-            const div = document.createElement('div');
-            div.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:0.8rem; background:#fff8e6; border-radius:8px; margin-bottom:0.5rem; border:1px solid #ffe58f;';
-            div.innerHTML = `
-              <div>
-                <strong>⚠️ ${item.item_name}</strong>
-                <div style="font-size:0.8rem; color:#874d00;">Only ${item.current_stock} ${item.unit} left (Threshold: ${item.reorder_threshold})</div>
-              </div>
-              <button class="btn-sm btn-primary" onclick="window.orderRestock('${item.item_name}')">📦 1-Click PO</button>
-            `;
-            listEl.appendChild(div);
-          });
+      if (data.campaigns && data.campaigns.length > 0) {
+        const c = data.campaigns[0];
+        if (nameEl) nameEl.textContent = `${c.customer_name} hasn't visited in 45 days. High churn risk.`;
+        if (offerBtn) {
+          offerBtn.onclick = () => {
+            window.location.href = c.sms_uri;
+            showNotification(`📲 1-Tap SMS Voucher prepared for ${c.customer_name}`, 'success');
+          };
         }
       }
-
-      if (allListEl && data.items) {
-        allListEl.innerHTML = '';
-        data.items.forEach(i => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td><strong>${i.item_name}</strong></td>
-            <td>${i.category}</td>
-            <td><strong style="color: ${i.current_stock <= i.reorder_threshold ? '#ff4d4f' : '#172033'}">${i.current_stock} ${i.unit}</strong></td>
-            <td>₹${i.unit_price}</td>
-            <td><span class="text-muted">${i.supplier_name}</span></td>
-          `;
-          allListEl.appendChild(tr);
-        });
-      }
-    } catch (e) {
+    } catch(e) {
       console.error(e);
     }
   }
 
-  window.orderRestock = async function(itemName) {
-    addThought(`Ordering Restock PO for: "${itemName}"...`);
+  // Card 3: Low Stock Warnings
+  async function loadStockCard() {
+    try {
+      const data = await API.getInventory();
+      const container = document.getElementById('stockWarningContainer');
+      if (!container) return;
+
+      container.innerHTML = '';
+      const displayItems = data.low_stock_items && data.low_stock_items.length > 0 
+        ? data.low_stock_items.slice(0, 3) 
+        : (data.items ? data.items.slice(0, 3) : []);
+
+      displayItems.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'stock-warning-item';
+        div.innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.6rem;">
+            <span style="font-size:1.1rem; color:var(--color-warning);">⚠️</span>
+            <div>
+              <strong style="font-size:0.95rem;">${item.item_name}</strong>
+              <div style="font-size:0.8rem; color:var(--text-muted);">(${item.current_stock} units left)</div>
+            </div>
+          </div>
+          <button class="btn-action-cyan" onclick="window.reorderStock('${item.item_name}')">1-Click Reorder</button>
+        `;
+        container.appendChild(div);
+      });
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  window.reorderStock = async function(itemName) {
+    showNotification(`📦 Sending Wholesale PO for ${itemName}...`, 'info');
     const res = await API.orderPO(itemName, 15);
     if (res.success) {
-      addThought(`✅ ${res.po_number} emailed to ${res.supplier_email}`);
-      if (res.soundbox_payload) {
+      showNotification(`✅ PO #${res.po_number} emailed to ${res.supplier_name}!`, 'success');
+      if (res.soundbox_payload && window.paytmSoundbox) {
         window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
       }
-      refreshAll();
+      loadStockCard();
     }
   };
 
-  async function loadGrowth() {
+  // Card 4: Pre-Approved Loan Radial Gauge
+  async function loadLoanCard() {
     try {
-      const data = await API.getGrowth();
-      const container = document.getElementById('churnCampaignsContainer');
-      if (container && data.campaigns) {
-        container.innerHTML = '';
-        data.campaigns.forEach(c => {
-          const div = document.createElement('div');
-          div.style.cssText = 'padding:1rem; border-radius:10px; background:#ffffff; border:1px solid #e2e8f0; margin-bottom:0.8rem; display:flex; justify-content:space-between; align-items:center;';
-          div.innerHTML = `
-            <div>
-              <div style="display:flex; align-items:center; gap:0.5rem;">
-                <strong>${c.customer_name}</strong>
-                <span class="badge badge-danger">${c.churn_risk}</span>
-              </div>
-              <div style="font-size:0.8rem; color:#5c6c84; margin-top:0.2rem;">Last visit: ${c.last_visit} | Offer: <strong>${c.suggested_discount}</strong></div>
-            </div>
-            <a href="${c.sms_uri}" class="btn-sm btn-cyan">🎁 1-Tap SMS Voucher</a>
-          `;
-          container.appendChild(div);
-        });
+      const data = await API.getCredit();
+      const scoreEl = document.getElementById('loanScoreNumber');
+      const detailsEl = document.getElementById('loanEligibilityDetails');
+
+      if (scoreEl) scoreEl.textContent = `${data.credit_health_score}/100`;
+      if (detailsEl) {
+        detailsEl.textContent = `Current Eligibility: ₹${data.pre_approved_loan.toLocaleString()} | Recent repayment performance: Great | Instant Disbursement Available!`;
       }
-    } catch (e) {
+    } catch(e) {
       console.error(e);
     }
   }
 
-  async function loadCredit() {
-    try {
-      const data = await API.getCredit();
-      const scoreEl = document.getElementById('creditScoreValue');
-      const loanEl = document.getElementById('preApprovedAmount');
-      const runwayEl = document.getElementById('capitalRunway');
-
-      if (scoreEl) scoreEl.textContent = `${data.credit_health_score}/100`;
-      if (loanEl) loanEl.textContent = `₹${data.pre_approved_loan.toLocaleString()}`;
-      if (runwayEl) runwayEl.textContent = data.working_capital_runway_days;
-    } catch (e) {
-      console.error(e);
-    }
+  // Toast Notification System
+  function showNotification(msg, type = 'info') {
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: ${type === 'success' ? '#00d26a' : (type === 'error' ? '#ff4d4f' : '#002970')};
+      color: white;
+      padding: 0.8rem 1.4rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      animation: slide-toast 0.3s ease-out;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => {
+      toast.style.opacity = '0';
+      toast.style.transition = 'opacity 0.3s';
+      setTimeout(() => toast.remove(), 300);
+    }, 3500);
   }
 
   // Initial Load
-  refreshAll();
+  loadDashboardData();
 });
