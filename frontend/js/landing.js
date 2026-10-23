@@ -28,9 +28,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Auto-launch into cockpit if hash or param is present
-  if (window.location.hash === '#dashboard' || window.location.hash === '#cockpit' || window.location.search.includes('cockpit')) {
-    switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');
+  function checkHash() {
+    const validViews = ['dashboard', 'khata', 'inventory', 'stock', 'history', 'analytics'];
+    const hashClean = (window.location.hash || '').replace('#', '');
+    if (validViews.includes(hashClean) || window.location.hash === '#cockpit' || window.location.search.includes('cockpit')) {
+      switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');
+      const target = hashClean === 'stock' ? 'inventory' : hashClean;
+      if (target && target !== 'dashboard' && target !== 'cockpit') {
+        setTimeout(() => {
+          if (window.switchView) window.switchView(target);
+        }, 100);
+      }
+    }
   }
+
+  checkHash();
+  window.addEventListener('hashchange', checkHash);
 
   function openAuthModal() {
     if (authModal) {

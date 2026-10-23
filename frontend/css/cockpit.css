@@ -1850,7 +1850,7 @@
   }
 
   .cockpit-view-section {
-    padding: 8px 10px 88px 10px !important;
+    padding: 4px 6px 74px 6px !important;
   }
 
   /* 2x2 Clean Grid on Phones - All 4 vital numbers instantly visible */
@@ -2023,6 +2023,12 @@
     width: auto !important;
     max-width: none !important;
     height: calc(100vh - 84px) !important;
+  }
+
+  body:not(.in-cockpit) .mobile-bottom-nav,
+  #appView[style*="display: none"] .mobile-bottom-nav,
+  #appView[style*="display:none"] .mobile-bottom-nav {
+    display: none !important;
   }
 
   .mobile-bottom-nav {
@@ -2328,65 +2334,91 @@
     gap: 2px !important;
   }
 
-  /* Stock Tab Header & Controls on Mobile */
+  /* ========================================================
+     ZERO-WASTE SPATIAL LAYOUT FOR ALL TABS ON MOBILE
+     (Stock, Khata, Madad / Growth, Transactions)
+     ======================================================== */
   .section-banner {
-    padding: 10px 12px !important;
-    margin-bottom: 10px !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 2px 2px 6px 2px !important;
+    margin-bottom: 6px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
     gap: 8px !important;
-    border-radius: 8px !important;
   }
 
   .section-banner-title h2 {
-    font-size: 1.05rem !important;
-    margin-bottom: 2px !important;
+    font-size: 0.96rem !important;
+    font-weight: 800 !important;
+    margin: 0 !important;
+    color: #0F172A !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 5px !important;
   }
 
   .section-banner-title p {
-    font-size: 0.72rem !important;
-    line-height: 1.3 !important;
+    display: none !important; /* Eliminate bulky marketing paragraphs on phones */
   }
 
   .section-banner .btn-primary-gradient {
-    padding: 7px 12px !important;
-    font-size: 0.78rem !important;
-    width: 100% !important;
-    justify-content: center !important;
+    padding: 5px 10px !important;
+    font-size: 0.72rem !important;
+    width: auto !important;
+    min-height: 28px !important;
+    border-radius: 6px !important;
+    margin: 0 !important;
+    flex-shrink: 0 !important;
   }
 
+  /* 2x2 Dense Stat Ribbon (Matches Dashboard Glance Strip) */
   .stat-ribbon {
     display: grid !important;
     grid-template-columns: repeat(2, 1fr) !important;
-    gap: 8px !important;
-    margin-bottom: 10px !important;
+    gap: 5px !important;
+    margin-bottom: 6px !important;
   }
 
   .stat-card {
-    padding: 8px 10px !important;
-    gap: 8px !important;
+    padding: 6px 8px !important;
+    gap: 6px !important;
     border-radius: 8px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    box-shadow: 0 1px 3px rgba(0, 20, 50, 0.04) !important;
   }
 
   .stat-icon {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 1rem !important;
-    border-radius: 8px !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 0.88rem !important;
+    border-radius: 6px !important;
   }
 
   .stat-val {
-    font-size: 1.15rem !important;
+    font-size: 1.05rem !important;
+    font-weight: 800 !important;
+    line-height: 1.15 !important;
   }
 
   .stat-lbl {
-    font-size: 0.66rem !important;
-    margin-top: 2px !important;
+    font-size: 0.62rem !important;
+    margin-top: 1px !important;
+    color: #64748B !important;
   }
 
+  /* Filter & Search Toolbar Zero Waste */
   .filter-toolbar {
-    padding: 8px 10px !important;
-    margin-bottom: 10px !important;
-    gap: 8px !important;
+    padding: 5px 6px !important;
+    margin-bottom: 6px !important;
+    gap: 5px !important;
     border-radius: 8px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    box-shadow: 0 1px 3px rgba(0, 20, 50, 0.04) !important;
   }
 
   .filter-group {
@@ -2394,24 +2426,136 @@
     width: 100% !important;
     overflow-x: auto !important;
     flex-wrap: nowrap !important;
-    padding-bottom: 2px !important;
+    padding-bottom: 0 !important;
+    scrollbar-width: none !important;
+  }
+
+  .filter-group::-webkit-scrollbar {
+    display: none !important;
   }
 
   .filter-pill {
-    padding: 4px 10px !important;
-    font-size: 0.72rem !important;
+    padding: 3px 8px !important;
+    font-size: 0.68rem !important;
     white-space: nowrap !important;
     flex-shrink: 0 !important;
+    border-radius: 20px !important;
   }
 
   .search-pill-input {
     width: 100% !important;
-    padding: 4px 10px !important;
-    height: 34px !important;
+    padding: 4px 8px !important;
+    height: 30px !important;
+    border-radius: 20px !important;
   }
 
   .search-pill-input input {
-    font-size: 0.76rem !important;
+    font-size: 0.72rem !important;
+  }
+
+  /* View 2: Bahi-Khata Zero Waste */
+  #view-khata > div[style*="margin-top"] {
+    margin-top: 8px !important;
+  }
+
+  #view-khata h3 {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 5px !important;
+  }
+
+  #khataAuditList {
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+    gap: 5px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  }
+
+  #khataAuditList .pos-feed-row {
+    padding: 6px 8px !important;
+    min-height: 42px !important;
+  }
+
+  /* View 5: AI Growth & Loans (Madad) Zero Waste */
+  #view-analytics > div[style*="display:grid"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 8px !important;
+    margin-top: 6px !important;
+  }
+
+  #view-analytics .glass-card {
+    padding: 8px 10px !important;
+    border-radius: 8px !important;
+    margin-bottom: 6px !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+    box-shadow: 0 1px 4px rgba(0, 20, 50, 0.04) !important;
+  }
+
+  #view-analytics .card-heading {
+    font-size: 0.88rem !important;
+    font-weight: 800 !important;
+    margin-bottom: 4px !important;
+  }
+
+  #view-analytics p {
+    font-size: 0.72rem !important;
+    line-height: 1.3 !important;
+    margin-bottom: 6px !important;
+  }
+
+  #analyticsCampaignsList {
+    gap: 6px !important;
+  }
+
+  #festiveAlertBox {
+    margin-top: 6px !important;
+    padding: 6px 8px !important;
+    border-radius: 6px !important;
+  }
+
+  #festiveTitle {
+    font-size: 0.82rem !important;
+  }
+
+  #festiveDetails {
+    font-size: 0.7rem !important;
+    line-height: 1.25 !important;
+    margin-top: 2px !important;
+  }
+
+  .gauge-container {
+    margin: 0 auto !important;
+    max-width: 170px !important;
+  }
+
+  .radial-gauge-svg {
+    max-height: 70px !important;
+  }
+
+  .score-display {
+    font-size: 1.45rem !important;
+    margin-top: -10px !important;
+  }
+
+  .score-tagline {
+    font-size: 0.66rem !important;
+  }
+
+  #view-analytics [style*="background:var(--bg-surface)"] {
+    padding: 6px 8px !important;
+    margin: 6px 0 !important;
+    border-radius: 6px !important;
+    font-size: 0.72rem !important;
+  }
+
+  #openLoanDisbursalBtn {
+    padding: 7px 10px !important;
+    font-size: 0.8rem !important;
+    min-height: 36px !important;
+    margin-top: 6px !important;
   }
 }
 
@@ -2596,10 +2740,11 @@
 .cockpit-view-section {
   display: none;
   animation: viewFadeIn 0.25s ease-out forwards;
-  padding: 2rem;
-  max-width: 1600px;
-  margin: 0 auto;
+  padding: 6px 10px 24px 10px;
+  max-width: 100%;
+  margin: 0;
   width: 100%;
+  box-sizing: border-box;
 }
 
 .cockpit-view-section.active {
@@ -2616,29 +2761,29 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.8rem;
+  margin-bottom: 10px;
   flex-wrap: wrap;
-  gap: 1.2rem;
+  gap: 10px;
   background: var(--bg-card);
-  padding: 1.5rem 1.8rem;
-  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
   border: 1.5px solid var(--border-glass);
   box-shadow: var(--shadow-sm);
 }
 
 .section-banner-title h2 {
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 900;
   color: var(--text-primary);
-  margin-bottom: 0.3rem;
+  margin-bottom: 0.2rem;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  gap: 0.5rem;
   letter-spacing: -0.02em;
 }
 
 .section-banner-title p {
-  font-size: 0.92rem;
+  font-size: 0.85rem;
   color: var(--text-secondary);
   font-weight: 600;
 }
@@ -2648,13 +2793,13 @@
   color: #ffffff;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.85rem 1.8rem;
-  font-size: 0.95rem;
+  padding: 0.65rem 1.4rem;
+  font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   box-shadow: 0 4px 16px rgba(0, 41, 112, 0.25);
   transition: var(--transition-smooth);
 }
@@ -2668,16 +2813,16 @@
 /* Stat Ribbon - Bold & Unignorable Metrics */
 .stat-ribbon {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-  gap: 1.2rem;
-  margin-bottom: 1.8rem;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
 .stat-card {
   background: var(--bg-card);
   border: 1.5px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  padding: 1.3rem 1.5rem;
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
   display: flex;
   align-items: center;
   gap: 1.2rem;
@@ -2740,13 +2885,13 @@
 .filter-toolbar {
   background: var(--bg-card);
   border: 1.5px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  padding: 1rem 1.4rem;
+  border-radius: var(--radius-md);
+  padding: 8px 14px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1.2rem;
-  margin-bottom: 1.4rem;
+  gap: 10px;
+  margin-bottom: 10px;
   flex-wrap: wrap;
   box-shadow: var(--shadow-sm);
 }

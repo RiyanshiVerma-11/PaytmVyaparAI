@@ -3,6 +3,16 @@
    Dynamic Context & Memory, Hinglish/Hindi Speech, Glassmorphism
    ======================================================== */
 
+/* Strictly hide AI chatbot on public marketing landing page — only active in Cockpit */
+body:not(.in-cockpit) .chatbot-launcher,
+body:not(.in-cockpit) .chatbot-window,
+#landingView:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-launcher,
+#landingView:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-window,
+.landing-view:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-launcher,
+.landing-view:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-window {
+  display: none !important;
+}
+
 /* 1. Small Floating Launcher Icon in Bottom Right */
 .chatbot-launcher {
   position: fixed;

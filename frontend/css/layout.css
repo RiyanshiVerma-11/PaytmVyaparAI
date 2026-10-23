@@ -13,15 +13,26 @@ html {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   scroll-behavior: smooth;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 body {
   font-family: var(--font-family);
-  background-color: var(--bg-app);
+  background-color: #001233;
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.5;
   font-size: 15px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.app-view {
+  background-color: var(--bg-app);
 }
 
 /* Ensure all form controls and buttons inherit the modern font */

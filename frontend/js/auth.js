@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (landingEl) landingEl.style.display = 'none';
     if (appEl) appEl.style.display = 'flex';
+    document.body.classList.add('in-cockpit');
 
     const actualName = name || 'Ramesh Sharma';
     const actualShop = shop || 'Sharma Kirana & General Store';

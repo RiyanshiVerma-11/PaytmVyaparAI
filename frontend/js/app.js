@@ -264,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const appEl = document.getElementById('appView');
       if (appEl) appEl.style.display = 'none';
       if (landingEl) landingEl.style.display = 'flex';
+      document.body.classList.remove('in-cockpit');
       showNotification('Logged out successfully', 'info');
     });
   }
