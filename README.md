@@ -13,7 +13,7 @@
 [![SQLite / PostgreSQL Ready](https://img.shields.io/badge/Database-SQLite%20%2F%20PostgreSQL%20Ready-07405E?style=for-the-badge&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![Web Audio API](https://img.shields.io/badge/Hardware_Audio-Soundbox_Chime_Synthesizer-00BAF2?style=for-the-badge)](https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API)
 [![Render Backend](https://img.shields.io/badge/Render-Live_Backend-46E3B7?style=for-the-badge&logo=render&logoColor=white)](https://paytmvyaparai.onrender.com/)
-[![Vercel Ready](https://img.shields.io/badge/Vercel-Frontend_Proxy_Ready-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://vercel.com/)
+[![Live Vercel Demo](https://img.shields.io/badge/Vercel-Live_Demo_Cockpit-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://paytm-vyapar-ai-chi.vercel.app/)
 
 ---
 
@@ -35,9 +35,9 @@ During peak counter rush (6 PM – 9 PM), shopkeepers cannot open apps, browse n
 
 | Service | Environment | URL | Details |
 |---|---|---|---|
+| **Live Frontend Cockpit** | Production (Vercel) | [https://paytm-vyapar-ai-chi.vercel.app/](https://paytm-vyapar-ai-chi.vercel.app/) | Live interactive merchant cockpit, Soundbox audio synthesizer & speech engine |
 | **Backend API** | Production (Render) | [https://paytmvyaparai.onrender.com/](https://paytmvyaparai.onrender.com/) | FastAPI, Uvicorn, SQLite persistent store, CORS enabled |
 | **Interactive Swagger Docs** | Production (Render) | [https://paytmvyaparai.onrender.com/docs](https://paytmvyaparai.onrender.com/docs) | Full OpenAPI schema & interactive test suite |
-| **Frontend Application** | Production (Vercel) | Deployable via Root / `frontend` directory | Reverse-proxy rewrites configured in `vercel.json` |
 
 ---
 
