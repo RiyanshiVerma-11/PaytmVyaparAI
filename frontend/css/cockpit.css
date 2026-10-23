@@ -1755,35 +1755,94 @@
   }
 
   .top-navbar {
-    padding: 0 12px !important;
-    height: 56px !important;
+    padding: 0 10px !important;
+    height: 54px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+    background: #FFFFFF !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+    box-shadow: 0 1px 4px rgba(0, 20, 50, 0.05) !important;
   }
 
+  /* Completely hide desktop mic button & search on mobile */
+  #desktopVoiceMicBtn,
+  .desktop-voice-bar-btn,
   .top-search-bar {
     display: none !important;
   }
 
-  /* Compact Initials Avatar on Mobile Screens */
-  .merchant-profile-text-wrap {
-    display: none !important;
+  .mobile-top-brand {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-shrink: 0 !important;
   }
 
+  .top-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
+  }
+
+  .lang-toggle-btn {
+    height: 32px !important;
+    padding: 0 8px !important;
+    font-size: 0.78rem !important;
+    border-radius: 6px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .top-icon-btn {
+    width: 32px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+  }
+
+  /* Compact Initials Avatar in Top Right Corner */
   .merchant-profile-btn {
     padding: 0 !important;
+    margin: 0 !important;
     background: transparent !important;
     border: none !important;
     border-radius: 50% !important;
     box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+  }
+
+  .merchant-profile-text-wrap,
+  .merchant-profile-btn #headerMerchantName,
+  .merchant-profile-btn #headerMerchantShop,
+  .merchant-profile-btn div:not(.merchant-avatar) {
+    display: none !important;
   }
 
   .merchant-avatar {
-    width: 38px !important;
-    height: 38px !important;
-    font-size: 0.95rem !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 0.85rem !important;
     font-weight: 800 !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #002970, #00BAF2) !important;
+    color: #FFFFFF !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 2px 8px rgba(0, 41, 112, 0.25) !important;
+    border: 2px solid #FFFFFF !important;
     cursor: pointer !important;
-    box-shadow: 0 2px 10px rgba(0, 41, 112, 0.3) !important;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0 !important;
+    transition: transform 0.15s ease;
   }
 
   .merchant-avatar:active {
@@ -1853,9 +1912,86 @@
     justify-content: center !important;
   }
 
-  .pos-feed-row,
+  /* Bahi-Khata Ledger Row Fix on Mobile (NO OVERLAP) */
+  .pos-feed-row {
+    height: auto !important;
+    min-height: 52px !important;
+    padding: 8px 10px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+    box-sizing: border-box !important;
+  }
+
+  .pos-row-left {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+  }
+
+  .pos-customer-meta {
+    display: flex !important;
+    flex-direction: column !important;
+    min-width: 0 !important;
+    flex: 1 !important;
+  }
+
+  .pos-customer-name {
+    font-size: 0.88rem !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+  }
+
+  .pos-customer-sub {
+    font-size: 0.7rem !important;
+    color: #64748B !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    display: block !important;
+  }
+
+  .pos-row-right {
+    flex: 0 0 auto !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+
+  /* Hide redundant date timestamp on small mobile screens to prevent overlap */
+  .pos-row-right .pos-time-tag {
+    display: none !important;
+  }
+
+  .pos-amount-tag {
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    padding: 3px 6px !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+  }
+
+  .pos-btn-action-sm {
+    min-height: 30px !important;
+    height: 30px !important;
+    padding: 4px 8px !important;
+    font-size: 0.74rem !important;
+    font-weight: 600 !important;
+    border-radius: 6px !important;
+    white-space: nowrap !important;
+  }
+
   .pos-stock-row {
-    padding: 10px 8px !important;
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 8px 10px !important;
   }
 
   .pos-credit-strip {

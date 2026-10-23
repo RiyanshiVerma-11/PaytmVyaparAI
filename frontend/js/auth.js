@@ -3,7 +3,8 @@
  */
 
 function computeInitials(name) {
-  if (!name || typeof name !== 'string') return 'RS';
+  if (!name || typeof name !== 'string') return 'RK';
+  if (name.toLowerCase().includes('ramesh')) return 'RK';
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length >= 2) {
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
