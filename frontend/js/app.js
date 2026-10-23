@@ -945,31 +945,59 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========================================================
   // 8. VIEW 3: INVENTORY & SMART REORDER
   // ========================================================
+  const DEFAULT_MOCK_INVENTORY_ITEMS = [
+    { item_name: 'Aashirvaad Shudh Chakki Atta 5kg', category: 'Flour', current_stock: 2, reorder_threshold: 6, unit: 'Bag', unit_price: 240, wholesale_price: 215, supplier_name: 'Gupta Oil & Grains Traders', supplier_email: 'orders@guptatraders.mock' },
+    { item_name: 'Amul Butter 100g', category: 'Dairy', current_stock: 3, reorder_threshold: 10, unit: 'Pack', unit_price: 58, wholesale_price: 51, supplier_name: 'Delhi Dairy Wholesale Hub', supplier_email: 'orders@delhidairy.mock' },
+    { item_name: 'Fortune Refined Oil 1L', category: 'Oil & Ghee', current_stock: 2, reorder_threshold: 8, unit: 'Pouch', unit_price: 145, wholesale_price: 130, supplier_name: 'Gupta Oil & Grains Traders', supplier_email: 'orders@guptatraders.mock' },
+    { item_name: 'Maggi 2-Minute Noodles', category: 'Snacks', current_stock: 6, reorder_threshold: 24, unit: 'Pack', unit_price: 14, wholesale_price: 11.5, supplier_name: 'Nestle Regional Distributor', supplier_email: 'restock@nestledistributor.mock' },
+    { item_name: 'Tata Salt 1kg', category: 'Groceries', current_stock: 19, reorder_threshold: 10, unit: 'Pouch', unit_price: 28, wholesale_price: 23, supplier_name: 'National FMCG Suppliers', supplier_email: 'orders@nationalfmcg.mock' },
+    { item_name: 'Surf Excel Quick Wash 1kg', category: 'Detergent', current_stock: 7, reorder_threshold: 5, unit: 'Pack', unit_price: 135, wholesale_price: 118, supplier_name: 'Delhi FMCG Depot', supplier_email: 'orders@delhifmcg.mock' },
+    { item_name: 'Parle-G Biscuits', category: 'Biscuits', current_stock: 8, reorder_threshold: 15, unit: 'Pack', unit_price: 10, wholesale_price: 8.2, supplier_name: 'National FMCG Suppliers', supplier_email: 'orders@nationalfmcg.mock' },
+    { item_name: 'Taj Mahal Tea 250g', category: 'Beverages', current_stock: 14, reorder_threshold: 8, unit: 'Box', unit_price: 160, wholesale_price: 138, supplier_name: 'National FMCG Suppliers', supplier_email: 'orders@nationalfmcg.mock' }
+  ];
+
   async function loadInventoryView() {
     try {
       const data = await API.getInventory();
-      inventoryCache = data;
-
-      // Update stat cards
-      const lowCount = data.low_stock_count || 0;
-      const totalSkus = data.items ? data.items.length : 0;
-      let totalValue = 0;
-      (data.items || []).forEach(i => {
-        totalValue += (i.current_stock || 0) * (i.unit_price || 0);
-      });
-
-      const invLowStockCountEl = document.getElementById('invLowStockCount');
-      const invTotalSkusEl = document.getElementById('invTotalSkus');
-      const invTotalValEl = document.getElementById('invTotalVal');
-
-      if (invLowStockCountEl) invLowStockCountEl.textContent = lowCount;
-      if (invTotalSkusEl) invTotalSkusEl.textContent = totalSkus;
-      if (invTotalValEl) invTotalValEl.textContent = `₹${Math.round(totalValue).toLocaleString()}`;
-
-      renderInventoryTable();
+      if (data && data.items && data.items.length > 0) {
+        inventoryCache = data;
+      } else if (!inventoryCache.items || inventoryCache.items.length === 0) {
+        inventoryCache = {
+          items: DEFAULT_MOCK_INVENTORY_ITEMS,
+          low_stock_items: DEFAULT_MOCK_INVENTORY_ITEMS.filter(i => i.current_stock <= i.reorder_threshold),
+          low_stock_count: DEFAULT_MOCK_INVENTORY_ITEMS.filter(i => i.current_stock <= i.reorder_threshold).length
+        };
+      }
     } catch(e) {
-      console.error('Error loading inventory view:', e);
+      console.warn('Backend unavailable or starting, using default seed inventory:', e);
+      if (!inventoryCache.items || inventoryCache.items.length === 0) {
+        inventoryCache = {
+          items: DEFAULT_MOCK_INVENTORY_ITEMS,
+          low_stock_items: DEFAULT_MOCK_INVENTORY_ITEMS.filter(i => i.current_stock <= i.reorder_threshold),
+          low_stock_count: DEFAULT_MOCK_INVENTORY_ITEMS.filter(i => i.current_stock <= i.reorder_threshold).length
+        };
+      }
     }
+
+    // Update stat cards
+    const lowCount = inventoryCache.low_stock_count !== undefined 
+      ? inventoryCache.low_stock_count 
+      : (inventoryCache.items || []).filter(i => i.current_stock <= i.reorder_threshold).length;
+    const totalSkus = inventoryCache.items ? inventoryCache.items.length : 0;
+    let totalValue = 0;
+    (inventoryCache.items || []).forEach(i => {
+      totalValue += (i.current_stock || 0) * (i.unit_price || 0);
+    });
+
+    const invLowStockCountEl = document.getElementById('invLowStockCount');
+    const invTotalSkusEl = document.getElementById('invTotalSkus');
+    const invTotalValEl = document.getElementById('invTotalVal');
+
+    if (invLowStockCountEl) invLowStockCountEl.textContent = lowCount;
+    if (invTotalSkusEl) invTotalSkusEl.textContent = totalSkus;
+    if (invTotalValEl) invTotalValEl.textContent = `₹${Math.round(totalValue).toLocaleString()}`;
+
+    renderInventoryTable();
   }
 
   function renderInventoryTable() {
@@ -992,12 +1020,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     if (filtered.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">No products match your filter.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:1.5rem; color:var(--text-muted); font-size:0.8rem;">No products match your filter.</td></tr>`;
       return;
     }
 
     filtered.forEach(item => {
       const tr = document.createElement('tr');
+      tr.className = 'inv-table-row';
       const isLow = item.current_stock <= item.reorder_threshold;
       const marginPct = Math.round(((item.unit_price - item.wholesale_price) / item.unit_price) * 100);
 
@@ -1006,34 +1035,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const fillPercent = Math.min(100, Math.round((item.current_stock / targetStock) * 100));
 
       tr.innerHTML = `
-        <td>
-          <strong>${item.item_name}</strong>
-          <div style="font-size:0.78rem; color:var(--text-muted);">Packaging: ${item.unit || 'Pack'}</div>
+        <td class="inv-col-product">
+          <strong class="inv-product-name">${item.item_name}</strong>
+          <div class="inv-packaging-sub">Packaging: ${item.unit || 'Pack'}</div>
         </td>
-        <td>
-          <span class="badge-status badge-cyan">${item.category || 'General'}</span>
+        <td class="inv-col-category">
+          <span class="badge-status badge-cyan inv-cat-badge">${item.category || 'General'}</span>
         </td>
-        <td style="min-width:140px;">
-          <div style="display:flex; justify-content:space-between; font-size:0.85rem; font-weight:700; margin-bottom:0.25rem;">
-            <span style="color:${isLow ? '#ff4d4f' : '#00d26a'};">${item.current_stock} left</span>
-            <span style="color:var(--text-muted); font-size:0.75rem;">Min: ${item.reorder_threshold}</span>
+        <td class="inv-col-stock">
+          <div class="inv-stock-header">
+            <span class="inv-stock-status" style="color:${isLow ? '#ff4d4f' : '#00d26a'};">${item.current_stock} left</span>
+            <span class="inv-stock-threshold">Min: ${item.reorder_threshold}</span>
           </div>
-          <div style="width:100%; height:6px; background:var(--border-glass); border-radius:3px; overflow:hidden;">
-            <div style="width:${fillPercent}%; height:100%; background:${isLow ? 'linear-gradient(90deg, #ff4d4f, #ff9f1c)' : 'linear-gradient(90deg, #00d26a, #00baf2)'}; border-radius:3px;"></div>
+          <div class="inv-stock-track">
+            <div class="inv-stock-bar" style="width:${fillPercent}%; background:${isLow ? 'linear-gradient(90deg, #ff4d4f, #ff9f1c)' : 'linear-gradient(90deg, #00d26a, #00baf2)'};"></div>
           </div>
         </td>
-        <td style="font-weight:700;">₹${item.unit_price}</td>
-        <td>
-          <span style="color:var(--text-secondary);">₹${item.wholesale_price}</span>
-          <span style="font-size:0.75rem; color:#00d26a; font-weight:700; margin-left:0.3rem;">(${marginPct}% margin)</span>
+        <td class="inv-col-price">
+          <strong class="inv-price-val">₹${item.unit_price}</strong>
         </td>
-        <td style="font-size:0.85rem;">
-          <div>${item.supplier_name || 'Wholesale Supplier'}</div>
-          <div style="font-size:0.75rem; color:var(--text-muted);">${item.supplier_email || 'orders@distributor.mock'}</div>
+        <td class="inv-col-cost">
+          <span class="inv-wholesale-val">₹${item.wholesale_price}</span>
+          <span class="inv-margin-tag">(${marginPct}%)</span>
         </td>
-        <td style="text-align:right;">
-          <button class="pos-btn-action-sm" style="padding:0.5rem 1.1rem; font-size:0.82rem;" onclick="window.reorderStock('${item.item_name}', 15)">
-            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर करें' : 'Order Karein'} (15)
+        <td class="inv-col-supplier">
+          <div class="inv-supplier-name" title="${item.supplier_name || 'Wholesale Supplier'}">${item.supplier_name || 'Wholesale Supplier'}</div>
+          <div class="inv-supplier-contact" title="${item.supplier_email || ''}">${item.supplier_email || 'orders@distributor.mock'}</div>
+        </td>
+        <td class="inv-col-action" style="text-align:right;">
+          <button class="pos-btn-action-sm inv-btn-reorder" onclick="window.reorderStock('${item.item_name}', 15)">
+            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर' : 'Order'} (15)
           </button>
         </td>
       `;
