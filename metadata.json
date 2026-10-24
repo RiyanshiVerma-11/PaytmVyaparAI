@@ -1,0 +1,7 @@
+{
+  "name": "Paytm Vyapar Saathi — Autonomous AI Business Copilot & Intelligent Soundbox",
+  "description": "Zero-touch Hindi & Hinglish voice Khata, automated wholesale restock emails, and instant working capital loan underwriting for Indian retail merchants.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "paytm-vyapar-saathi",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx esbuild frontend/js/profit-chart.jsx --bundle --outfile=frontend/js/profit-chart.js --minify && python3 server.py",
+    "start": "python3 server.py",
+    "build": "npx esbuild frontend/js/profit-chart.jsx --bundle --outfile=frontend/js/profit-chart.js --minify && python3 -m py_compile server.py backend/database.py",
+    "lint": "python3 -m py_compile server.py backend/database.py"
+  },
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "recharts": "^3.10.1"
+  }
+}

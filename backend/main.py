@@ -78,6 +78,7 @@ class SimulateTxnRequest(BaseModel):
     amount: float
     customer_phone: str = "+91 9810998877"
     payment_mode: str = "UPI_Soundbox"
+    item_tag: str = None
 
 class LoanDisburseRequest(BaseModel):
     amount: float = 50000.0
@@ -172,9 +173,13 @@ async def disburse_credit_loan(req: LoanDisburseRequest):
 async def get_transactions(limit: int = 100):
     return JSONResponse(content=TransactionService.get_all_transactions(limit))
 
+@app.get("/api/transactions/profit-trends")
+async def get_profit_trends(days: int = 7):
+    return JSONResponse(content=TransactionService.get_daily_profit_trends(days))
+
 @app.post("/api/transactions/simulate")
 async def simulate_transaction(req: SimulateTxnRequest):
-    res = TransactionService.simulate_payment(req.amount, req.customer_phone, req.payment_mode)
+    res = TransactionService.simulate_payment(req.amount, req.customer_phone, req.payment_mode, req.item_tag)
     return JSONResponse(content=res)
 
 

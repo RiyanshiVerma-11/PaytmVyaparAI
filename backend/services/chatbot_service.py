@@ -456,6 +456,48 @@ class ChatbotService:
                 suggestions = dynamic_sugg + ["Udhaar darj karein", "Low stock check"]
 
         # ========================================================
+        # INTENT 1B: QUICK COUNTER MICRO-SALE (CHHOTA GALLA: ₹15 Dahi, ₹20 Doodh)
+        # ========================================================
+        elif has_amount and not has_known_customer and any(w in q for w in [
+            "dahi", "curd", "doodh", "milk", "chai", "biscuit", "parle", "bread", "chips",
+            "anda", "egg", "toffee", "namkeen", "cash", "galla", "bikri", "sale",
+            "दही", "दूध", "चाय", "बिस्कुट", "ब्रेड", "अंडा", "गल्ला", "नकद", "बिक्री", "कैश"
+        ]):
+            thoughts.append("Action detected: Quick Counter Micro-Sale (Zero Customer Name Required)")
+            amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,5}(?:\.\d+)?\b)', q)
+            amount = float(amt_match.group(1)) if amt_match else 20.0
+
+            micro_item_map = {
+                "dahi": "Dahi", "curd": "Dahi", "दही": "Dahi",
+                "doodh": "Doodh", "milk": "Doodh", "दूध": "Doodh",
+                "chai": "Chai Pack", "चाय": "Chai Pack",
+                "biscuit": "Biscuit", "parle": "Parle-G", "बिस्कुट": "Biscuit",
+                "bread": "Bread", "ब्रेड": "Bread",
+                "chips": "Chips/Namkeen", "namkeen": "Chips/Namkeen",
+                "anda": "Eggs", "egg": "Eggs", "अंडा": "Eggs",
+                "maggi": "Maggi", "मैगी": "Maggi"
+            }
+            item_tag = "Counter Item"
+            for k, label in micro_item_map.items():
+                if k in q:
+                    item_tag = label
+                    break
+
+            sim_res = TransactionService.simulate_payment(amount, f"Micro: {item_tag} ₹{int(amount)}", "Cash_Micro", item_tag)
+            action_taken = "MICRO_SALE_LOGGED"
+            data_payload = sim_res
+            soundbox_payload = sim_res.get("soundbox_payload")
+            est_profit = round(amount * 0.21, 1)
+
+            reply = f"⚡ **Chhota Galla Micro-Sale Darj!** (No Customer Name Needed)\n\n" \
+                    f"• **Item:** {item_tag}\n" \
+                    f"• **Sale Amount:** ₹{int(amount)}\n" \
+                    f"• **Est. Margin Profit (~21%):** +₹{est_profit}\n" \
+                    f"• **7-Day Profit Chart:** Updated Live\n\n" \
+                    f"🔊 *Soundbox:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
+            suggestions = ["20 rupaye doodh cash", "15 rupaye dahi", "Khata ledger dekhein", "Stock check"]
+
+        # ========================================================
         # INTENT 2: INVENTORY & SUPPLIER RESTOCK
         # ========================================================
         elif any(w in q for w in ["stock", "khatam", "supplier", "order", "reorder", "po", "inventory", "tel", "oil", "butter", "atta", "maggi", "salt", "स्टॉक", "माल", "खत्म", "सप्लायर", "ऑर्डर", "तेल", "मक्खन", "आटा", "मैगी", "नमक", "फॉर्च्यून", "अमूल"]):

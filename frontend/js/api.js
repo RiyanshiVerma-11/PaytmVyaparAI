@@ -7,13 +7,14 @@ const RENDER_BACKEND_URL = 'https://paytmvyaparai.onrender.com';
 const isLocalhost = typeof window !== 'undefined' && Boolean(
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
-  window.location.hostname === '[::1]'
+  window.location.hostname === '[::1]' ||
+  window.location.hostname.endsWith('.run.app')
 );
 
 const API_BASE = (
   (typeof window !== 'undefined' && window.PAYTM_API_BASE) || 
   (typeof localStorage !== 'undefined' && localStorage.getItem('PAYTM_API_BASE')) || 
-  (isLocalhost && (window.location.port === '8000' || !window.location.port) ? '' : (isLocalhost ? 'http://127.0.0.1:8000' : RENDER_BACKEND_URL))
+  (isLocalhost && (window.location.port === '8000' || window.location.port === '3000' || !window.location.port) ? '' : (isLocalhost ? 'http://127.0.0.1:8000' : RENDER_BACKEND_URL))
 ).replace(/\/$/, '');
 
 function endpoint(path) {
@@ -137,14 +138,20 @@ const API = {
     return await res.json();
   },
 
-  async simulateTransaction(amount, phone = '+91 9810998877', paymentMode = 'UPI_Soundbox') {
+  async getProfitTrends(days = 7) {
+    const res = await fetch(endpoint(`/api/transactions/profit-trends?days=${days}`));
+    return await res.json();
+  },
+
+  async simulateTransaction(amount, phone = '+91 9810998877', paymentMode = 'UPI_Soundbox', itemTag = null) {
     const res = await fetch(endpoint('/api/transactions/simulate'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         amount: parseFloat(amount),
         customer_phone: phone,
-        payment_mode: paymentMode
+        payment_mode: paymentMode,
+        item_tag: itemTag
       })
     });
     return await res.json();

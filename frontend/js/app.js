@@ -246,6 +246,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof loadDashboardData === 'function') loadDashboardData();
     if (typeof renderKhataCustomersTable === 'function') renderKhataCustomersTable();
     if (typeof renderInventoryTable === 'function') renderInventoryTable();
+    window.dispatchEvent(new CustomEvent('paytm-lang-changed', { detail: { lang } }));
   }
 
   window.setLanguage = setLanguage;
@@ -492,6 +493,9 @@ document.addEventListener('DOMContentLoaded', () => {
     loadGrowthCard();
     loadStockCard();
     loadLoanCard();
+    if (typeof window.refreshProfitTrendsChart === 'function') {
+      window.refreshProfitTrendsChart();
+    }
   }
 
   // Card 1: Live Voice Khata Ledger
