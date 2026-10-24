@@ -376,12 +376,15 @@ function DigitalKhataQRSection({ isHindi }) {
         </div>
 
         {/* Main 2-Column Layout: Left Controls + Customer List | Right Printable Paytm Standee */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))',
-          gap: '1.25rem',
-          alignItems: 'stretch'
-        }}>
+        <div
+          className="digital-khata-responsive-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+            gap: '1.25rem',
+            alignItems: 'stretch'
+          }}
+        >
           {/* Left Column: Customer Selection & QR Configuration */}
           <div style={{
             display: 'flex',
@@ -1266,12 +1269,15 @@ function ProfitTrendsWidget() {
           </div>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-          gap: '1.2rem',
-          alignItems: 'stretch'
-        }}>
+        <div
+          className="profit-chart-responsive-grid"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
+            gap: '1.2rem',
+            alignItems: 'stretch'
+          }}
+        >
           <div style={{ minHeight: '260px', height: '270px', width: '100%', background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '10px 8px 4px 0' }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartMode === 'profit' ? (

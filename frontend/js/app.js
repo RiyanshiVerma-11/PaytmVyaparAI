@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="pos-row-right">
             <span class="pos-amount-tag pos-amount-coral">₹${c.pending_udhaar.toLocaleString('en-IN')} ${isHindi ? 'उधार' : 'Udhaar'}</span>
             <span class="pos-time-tag">${c.last_visit_date || 'Today'}</span>
-            <div style="display:flex; align-items:center; gap:5px;">
+            <div class="pos-action-btn-group" style="display:flex; align-items:center; gap:4px;">
               <button class="pos-btn-action-sm pos-btn-settle-emerald" 
                       title="${isHindi ? 'पूरा पैसा आ गया (खाता चुकता)' : 'Mark full amount paid'}"
                       onclick="window.settleKhataDirect(${c.id}, '${c.name}', ${c.pending_udhaar}, this)">

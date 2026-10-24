@@ -19,7 +19,11 @@ backend/vyapar.db-journal
 .DS_Store
 Thumbs.db
 
-# Local Analysis & Findings (Never push to remote)
+# Node
+node_modules/
+package-lock.json
+
+# Local Analysis & Findings
 finding_project*
 finding_project plan.md
 
