@@ -1336,8 +1336,9 @@
         <div class="simulator-card">
           <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
             <div>
-              <h3 style="font-size:1.15rem; font-weight:800; color:var(--paytm-blue); display:flex; align-items:center; gap:0.5rem;">
+              <h3 style="font-size:1.15rem; font-weight:800; color:var(--paytm-blue); display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap;">
                 <span>⚡</span> Real-Time Soundbox QR Payment Simulator
+                <span class="badge-status badge-cyan" style="font-size:0.72rem; padding:0.2rem 0.6rem;">Paytm IoT MQTT Sandbox</span>
               </h3>
               <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.2rem;">
                 Simulate a customer scanning your Paytm QR code in real-time. Hear the Soundbox chime and verify live telemetry!
@@ -1473,8 +1474,9 @@
 
           <!-- Instant Underwriting & Loan Disbursal Card -->
           <div class="glass-card" style="padding:1.5rem; display:flex; flex-direction:column;">
-            <div class="card-heading" style="margin-bottom:1rem;">
-              <span>🏛️</span> Paytm Pre-Approved Loan Underwriting
+            <div class="card-heading" style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+              <span><span>🏛️</span> Paytm Pre-Approved Loan Underwriting</span>
+              <span class="badge-status badge-cyan" style="font-size:0.72rem; padding:0.2rem 0.6rem;">Paytm Capital API Sandbox</span>
             </div>
 
             <div class="gauge-container" style="margin:0.5rem 0;">
@@ -1508,6 +1510,9 @@
             <button id="openLoanDisbursalBtn" class="btn-primary-gradient" style="padding:0.9rem; font-size:1rem; width:100%; margin-top:auto;">
               🚀 1-Click Instant Disbursal to Bank
             </button>
+            <div style="text-align:center; font-size:0.72rem; color:var(--text-secondary); margin-top:0.4rem;">
+              Simulates Paytm Merchant Lending Disbursal API (<code>POST /v2/lending/disburse</code>) to verified account
+            </div>
           </div>
 
         </div>

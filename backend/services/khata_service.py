@@ -31,6 +31,27 @@ class KhataService:
         phone_10 = get_phone_last10(phone) if phone else None
         clean_name = (customer_name or "").strip()
 
+        # Strict Validation: Never write fake/empty ledger entries
+        if not clean_name:
+            conn.close()
+            return {
+                "success": False,
+                "error": "Customer name is required for Bahi-Khata ledger entry.",
+                "message": "Grahak ka naam batana zaroori hai."
+            }
+
+        try:
+            amount = float(amount)
+            if amount <= 0:
+                raise ValueError()
+        except (ValueError, TypeError):
+            conn.close()
+            return {
+                "success": False,
+                "error": "Valid positive transaction amount is required.",
+                "message": "Valid transaction amount batana zaroori hai."
+            }
+
         # Fetch all existing customers for precise matching
         customer = None
         cursor.execute("SELECT * FROM customers")
@@ -55,8 +76,7 @@ class KhataService:
             for c in all_customers:
                 c_10 = get_phone_last10(c["phone"])
                 if c_10 and c_10 == phone_10:
-                    # Do not hijack a different customer's account if names are completely different!
-                    if not clean_name or clean_name.lower() in c["name"].lower() or c["name"].lower() in clean_name.lower() or c["name"].lower() == "valued customer":
+                    if not clean_name or clean_name.lower() in c["name"].lower() or c["name"].lower() in clean_name.lower():
                         customer = c
                         break
 
@@ -67,8 +87,8 @@ class KhataService:
             cust_name = clean_name.title() if clean_name else customer["name"]
             curr_pending = float(customer["pending_udhaar"] or 0)
         else:
-            cust_name = clean_name.title() if clean_name else "Valued Customer"
-            cust_phone = norm_phone or "+91 9810000000"
+            cust_name = clean_name.title()
+            cust_phone = norm_phone or "+91 (Mobile Not Registered)"
             cursor.execute("""
             INSERT INTO customers (name, phone, pending_udhaar, last_visit_date, visit_count, churn_risk)
             VALUES (?, ?, 0, date('now'), 1, 'Normal')

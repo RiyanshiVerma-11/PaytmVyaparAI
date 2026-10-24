@@ -1115,8 +1115,8 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="inv-supplier-contact" title="${item.supplier_email || ''}">${item.supplier_email || 'orders@distributor.mock'}</div>
         </td>
         <td class="inv-col-action" style="text-align:right;">
-          <button class="pos-btn-action-sm inv-btn-reorder" onclick="window.reorderStock('${item.item_name}', 15)">
-            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर' : 'Order'} (15)
+          <button class="pos-btn-action-sm inv-btn-reorder" onclick="window.reorderStock('${item.item_name}', Math.max(5, (${item.reorder_threshold || 10} * 2) - ${item.current_stock || 0}))">
+            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर' : 'Order'} (${Math.max(5, ((item.reorder_threshold || 10) * 2) - (item.current_stock || 0))})
           </button>
         </td>
       `;
