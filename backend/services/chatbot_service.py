@@ -8,6 +8,7 @@ from services.inventory_service import InventoryService
 from services.growth_service import GrowthService
 from services.credit_service import CreditService
 from services.transaction_service import TransactionService
+from agent.react_agent import _hindi_words_to_number
 
 class ChatbotService:
     # In-memory session store: session_id -> { "history": [...], "last_entity": {...}, "created_at": ... }
@@ -377,7 +378,31 @@ class ChatbotService:
                 amount = cust_pending
             else:
                 amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,6}(?:\.\d+)?\b)', q)
-                amount = float(amt_match.group(1)) if amt_match else (cust_pending if cust_pending > 0 else 250.0)
+                amount = None
+                if amt_match:
+                    amount = float(amt_match.group(1))
+                else:
+                    amount = _hindi_words_to_number(q)
+
+                if amount is None or amount <= 0:
+                    reply = f"Kripya {customer_name} ji ke liye amount rashi batayein. Jaise: '{customer_name} 200 jama' ya '{customer_name} 500 udhaar'."
+                    suggestions = [f"{customer_name} 200 jama", f"{customer_name} 500 udhaar", "Khata ledger dekhein"]
+                    session["history"].append({"role": "user", "content": message, "timestamp": datetime.now().isoformat()})
+                    session["history"].append({"role": "assistant", "content": reply, "timestamp": datetime.now().isoformat()})
+                    return {
+                        "reply": reply,
+                        "action_taken": "CLARIFICATION_REQUIRED",
+                        "data": {"customer_name": customer_name, "clarification": "amount"},
+                        "soundbox_payload": {"chime": False, "speech_text": reply},
+                        "suggestions": suggestions,
+                        "thoughts": [f"Missing amount for {customer_name}; asked for clarification."],
+                        "context_summary": {
+                            "pending_udhaar": context["khata"]["total_pending_udhaar"],
+                            "low_stock_count": context["inventory"]["low_stock_count"],
+                            "credit_score": context["credit"]["score"],
+                            "memory_turns": len(session["history"])
+                        }
+                    }
 
             # Settle or Jama phrases are always JAMA; only pure udhaar actions are UDHAAR
             entry_type = "jama" if (is_jama_phrase or is_full_settlement) else "udhaar"
@@ -412,12 +437,25 @@ class ChatbotService:
                 "notice": "Saved to live Paytm Bahi-Khata ledger"
             }
 
-            reply = f"✅ **Entry Darj Ho Gayi Hai!**\n\n" \
-                    f"• **Grahak:** {customer_name}\n" \
-                    f"• **Type:** {entry_type.upper()} ({'Prapt Hue (Hisab Chukta / Jama)' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
-                    f"• **Raqam:** ₹{int(amount):,}\n" \
-                    f"• **Naya Pending Udhaar:** ₹{int(new_bal):,}\n\n" \
-                    f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
+            if entry_type == "jama":
+                if new_bal <= 0:
+                    reply = f"✅ **Hisab Poora Chukta! (Payment Received)**\n\n" \
+                            f"• **Grahak:** {customer_name}\n" \
+                            f"• **Jama Raqam (Received):** ₹{int(amount):,}\n" \
+                            f"• **Baaki Pending Udhaar:** ₹0 (All Clear 🎉)\n\n" \
+                            f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
+                else:
+                    reply = f"✅ **Jama (Payment) Darj Ho Gayi Hai!**\n\n" \
+                            f"• **Grahak:** {customer_name}\n" \
+                            f"• **Jama Raqam (Received):** ₹{int(amount):,}\n" \
+                            f"• **Baaki Pending Udhaar (Remaining):** ₹{int(new_bal):,}\n\n" \
+                            f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
+            else:
+                reply = f"✅ **Udhaar Entry Darj Ho Gayi Hai!**\n\n" \
+                        f"• **Grahak:** {customer_name}\n" \
+                        f"• **Udhaar Raqam:** ₹{int(amount):,}\n" \
+                        f"• **Kul Pending Udhaar:** ₹{int(new_bal):,}\n\n" \
+                        f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
             
             suggestions = ["Khata ledger dekhein", "Stock status check karo", "Customer ko reminder bhejo"]
 

@@ -357,6 +357,110 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function syncKhataTransactionDOM(txData) {
+    if (!txData) return;
+    const custName = txData.customer_name || txData.customer || '';
+    const newBal = txData.new_pending_balance !== undefined ? Number(txData.new_pending_balance) : null;
+    const amt = Number(txData.amount || 0);
+    const entryType = (txData.entry_type || 'udhaar').toLowerCase();
+    const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
+
+    if (!custName && newBal === null) return;
+
+    // 1. Instantly update in-memory cache
+    if (khataCache && Array.isArray(khataCache.customers)) {
+      const cust = khataCache.customers.find(c => 
+        c.name.toLowerCase() === custName.toLowerCase() ||
+        c.name.toLowerCase().includes(custName.toLowerCase()) ||
+        custName.toLowerCase().includes(c.name.toLowerCase())
+      );
+      if (cust && newBal !== null) {
+        cust.pending_udhaar = newBal;
+        cust.last_visit_date = 'Today';
+      }
+      if (Array.isArray(khataCache.entries) && txData.entry_id) {
+        khataCache.entries.unshift({
+          id: txData.entry_id,
+          customer_name: custName,
+          customer_id: cust ? cust.id : null,
+          amount: amt,
+          entry_type: entryType,
+          item_description: txData.item_description || 'Kirana Items',
+          created_at: 'Just now'
+        });
+      }
+    }
+
+    // 2. Instantly update DOM row on live ledger card
+    const rows = document.querySelectorAll('.pos-feed-row');
+    rows.forEach(row => {
+      const nameEl = row.querySelector('.pos-customer-name');
+      if (nameEl && custName && (
+        nameEl.textContent.trim().toLowerCase() === custName.toLowerCase() ||
+        nameEl.textContent.trim().toLowerCase().includes(custName.toLowerCase()) ||
+        custName.toLowerCase().includes(nameEl.textContent.trim().toLowerCase())
+      )) {
+        if (newBal !== null && newBal <= 0) {
+          row.style.transition = 'all 0.4s ease';
+          row.style.opacity = '0';
+          row.style.transform = 'scale(0.95)';
+          setTimeout(() => {
+            row.remove();
+            const listEl = document.getElementById('liveLedgerList');
+            if (listEl && listEl.querySelectorAll('.pos-feed-row').length === 0) {
+              listEl.innerHTML = `
+                <div style="padding:1.4rem 1rem; color:#059669; text-align:center; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; margin:6px 0;">
+                  <div style="font-size:1.2rem; margin-bottom:4px; font-weight:800; color:#059669;">Zero Due</div>
+                  <strong style="font-size:0.95rem; display:block; color:#065F46;">${isHindi ? 'कोई बाकी उधार नहीं है!' : 'No Pending Udhaar!'}</strong>
+                  <span style="font-size:0.8rem; color:#047857;">${isHindi ? 'सभी ग्राहकों का हिसाब चुकता है। पूरा खाता नीचे देखें।' : 'All customer accounts are clear & settled.'}</span>
+                </div>`;
+            }
+          }, 400);
+        } else if (newBal !== null) {
+          const amtTag = row.querySelector('.pos-amount-tag');
+          if (amtTag) {
+            amtTag.textContent = isHindi ? `₹${Math.round(newBal).toLocaleString('en-IN')} उधार` : `₹${Math.round(newBal).toLocaleString('en-IN')} Udhaar`;
+            amtTag.style.transition = 'transform 0.3s ease, background 0.3s ease';
+            amtTag.style.transform = 'scale(1.1)';
+            setTimeout(() => { amtTag.style.transform = 'none'; }, 300);
+          }
+        }
+      }
+    });
+
+    // 3. Instant metric tags & pills update
+    if (khataCache && Array.isArray(khataCache.customers)) {
+      const customers = khataCache.customers;
+      const totalPending = customers.reduce((sum, c) => sum + (Number(c.pending_udhaar) || 0), 0);
+      const pendingCount = customers.filter(c => (Number(c.pending_udhaar) || 0) > 0).length;
+
+      const glancePendingEl = document.getElementById('glancePendingUdhaar');
+      if (glancePendingEl) glancePendingEl.textContent = `₹${Math.round(totalPending).toLocaleString('en-IN')}`;
+
+      const glanceCountEl = document.getElementById('glanceUdhaarCount');
+      if (glanceCountEl) glanceCountEl.textContent = isHindi ? `कुल ${pendingCount} ग्राहक` : `${pendingCount} Grahak`;
+
+      const cardPendingPill = document.getElementById('cardKhataPendingPill');
+      if (cardPendingPill) cardPendingPill.textContent = isHindi ? `₹${Math.round(totalPending).toLocaleString('en-IN')} उधार` : `₹${Math.round(totalPending).toLocaleString('en-IN')} Udhaar`;
+
+      const chipPending = document.getElementById('chipPendingUdhaar');
+      if (chipPending) chipPending.textContent = `₹${Math.round(totalPending).toLocaleString('en-IN')}`;
+
+      const chipActive = document.getElementById('chipActiveGrahak');
+      if (chipActive) chipActive.textContent = isHindi ? `कुल ${pendingCount} ग्राहक` : `${pendingCount} Grahak`;
+
+      const totalPendingEl = document.getElementById('khataTotalPending');
+      if (totalPendingEl) totalPendingEl.textContent = `₹${Math.round(totalPending).toLocaleString('en-IN')}`;
+      const customerCountEl = document.getElementById('khataCustomerCount');
+      if (customerCountEl) customerCountEl.textContent = pendingCount;
+    }
+
+    if (typeof renderKhataCustomersTable === 'function') renderKhataCustomersTable();
+    if (typeof renderKhataAuditList === 'function') renderKhataAuditList();
+    if (typeof window.refreshDigitalKhataQR === 'function') window.refreshDigitalKhataQR();
+  }
+
+  window.syncKhataTransactionDOM = syncKhataTransactionDOM;
   window.switchView = switchView;
   window.loadDashboardData = loadDashboardData;
   window.loadLedgerCard = loadLedgerCard;
@@ -491,11 +595,18 @@ document.addEventListener('DOMContentLoaded', () => {
         window.showUndoToast(entryId, custName, amt);
       }
 
+      // Optimistic in-place DOM sync for immediate real-time update without refresh
+      const txData = (res.result && res.result.customer_name) ? res.result : (res.data || null);
+      if (txData && typeof syncKhataTransactionDOM === 'function') {
+        syncKhataTransactionDOM(txData);
+      }
+
       // Immediately refresh all views
       await loadDashboardData();
       if (typeof loadKhataView === 'function') await loadKhataView();
       if (typeof renderKhataAuditList === 'function') renderKhataAuditList();
       if (typeof loadHistoryView === 'function') await loadHistoryView();
+      if (typeof window.refreshDigitalKhataQR === 'function') window.refreshDigitalKhataQR();
 
     } catch (err) {
       showNotification(`Error: ${err.message}`, 'error');
@@ -506,12 +617,21 @@ document.addEventListener('DOMContentLoaded', () => {
   // 6. VIEW 1: DASHBOARD OVERVIEW DATA LOADER
   // ========================================================
   async function loadDashboardData() {
-    loadLedgerCard();
+    await loadLedgerCard(false);
     loadGrowthCard();
     loadStockCard();
     loadLoanCard();
     if (typeof window.refreshProfitTrendsChart === 'function') {
       window.refreshProfitTrendsChart();
+    }
+    if (typeof window.refreshDigitalKhataQR === 'function') {
+      window.refreshDigitalKhataQR();
+    }
+    if (typeof renderKhataCustomersTable === 'function') {
+      renderKhataCustomersTable();
+    }
+    if (typeof renderKhataAuditList === 'function') {
+      renderKhataAuditList();
     }
   }
 
@@ -1030,8 +1150,11 @@ document.addEventListener('DOMContentLoaded', () => {
           if (res.soundbox_payload && window.paytmSoundbox) {
             window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
           }
-          loadKhataView();
-          loadDashboardData();
+          if (typeof syncKhataTransactionDOM === 'function') {
+            syncKhataTransactionDOM(res);
+          }
+          await loadKhataView();
+          await loadDashboardData();
         }
       } catch(err) {
         showNotification(`Error: ${err.message}`, 'error');

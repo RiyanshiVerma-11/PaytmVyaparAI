@@ -198,7 +198,13 @@ async def chat_with_agent(req: ChatQuery):
 
 @app.get("/api/khata")
 async def get_khata():
-    return JSONResponse(content=KhataService.get_all_entries())
+    return JSONResponse(
+        content=KhataService.get_all_entries(),
+        headers={
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache"
+        }
+    )
 
 @app.post("/api/khata/entry")
 async def add_khata_entry(req: KhataEntryRequest):

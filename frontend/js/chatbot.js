@@ -306,19 +306,28 @@
           window.paytmSoundbox.broadcast(data.soundbox_payload.speech_text);
         }
 
-        // 4. Dynamically Refresh Main App Views & Context
+        // 4. Optimistic In-Place DOM Sync for Real-Time Update Without Refresh
+        const txData = data.data || (data.result && data.result.data) || data.result || null;
+        if (txData && typeof window.syncKhataTransactionDOM === 'function') {
+          window.syncKhataTransactionDOM(txData);
+        }
+
+        // 5. Dynamically Refresh Main App Views & Context
         this.refreshContext();
         if (typeof window.loadDashboardData === 'function') {
           await window.loadDashboardData();
         }
-        if (typeof window.loadLedgerCard === 'function') {
-          await window.loadLedgerCard(false);
+        if (typeof window.loadKhataView === 'function') {
+          await window.loadKhataView();
         }
         if (typeof window.renderKhataCustomersTable === 'function') {
           window.renderKhataCustomersTable();
         }
         if (typeof window.renderKhataAuditList === 'function') {
           window.renderKhataAuditList();
+        }
+        if (typeof window.refreshDigitalKhataQR === 'function') {
+          window.refreshDigitalKhataQR();
         }
         if (window.showNotification && data.action_taken) {
           window.showNotification(`${replyText.split('\n')[0].replace(/[#*]/g, '')}`, 'success');

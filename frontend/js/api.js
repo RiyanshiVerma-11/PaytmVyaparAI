@@ -48,7 +48,13 @@ const API = {
 
   // 2. Khata Ledger
   async getKhata() {
-    const res = await fetch(endpoint('/api/khata'));
+    const res = await fetch(endpoint(`/api/khata?_t=${Date.now()}`), {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    });
     return await res.json();
   },
 
