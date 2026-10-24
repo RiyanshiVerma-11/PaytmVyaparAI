@@ -2370,21 +2370,115 @@
     grid-template-columns: 1fr !important;
     gap: 12px !important;
     width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
   #digitalKhataQrStudioCard,
   .pos-profit-trends-card {
-    padding: 12px 10px !important;
+    padding: 10px 10px !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
+    overflow: hidden !important;
+  }
+
+  .chhota-galla-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    padding: 10px 10px !important;
+    overflow: hidden !important;
+  }
+
+  .micro-galla-btn-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  .micro-galla-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding: 6px 8px !important;
+    border-radius: 8px !important;
+    border: 1px solid #CBD5E1 !important;
+    background: #FFFFFF !important;
+    cursor: pointer !important;
+    font-size: 0.74rem !important;
+    font-weight: 700 !important;
+    color: #0F172A !important;
+    min-width: 0 !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    gap: 4px !important;
+  }
+
+  .micro-galla-btn .micro-btn-label {
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+    text-align: left !important;
+  }
+
+  .micro-galla-btn .micro-btn-margin {
+    font-size: 0.68rem !important;
+    font-weight: 800 !important;
+    color: #059669 !important;
+    background: #ECFDF5 !important;
+    padding: 1px 4px !important;
+    border-radius: 4px !important;
+    flex-shrink: 0 !important;
+  }
+
+  .profit-chart-mode-toggle {
+    width: 100% !important;
+    display: flex !important;
+    box-sizing: border-box !important;
+    margin-top: 4px !important;
+  }
+
+  .profit-chart-mode-toggle button {
+    flex: 1 1 0 !important;
+    text-align: center !important;
+    font-size: 0.72rem !important;
+    padding: 6px 4px !important;
+    min-width: 0 !important;
+    white-space: normal !important;
+    line-height: 1.2 !important;
+  }
+
+  .profit-summary-ribbon {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 6px !important;
+    padding: 8px 10px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+  }
+
+  .profit-chart-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
   }
 
   #printableKhataStandeeCard {
     padding: 12px 10px !important;
     width: 100% !important;
     max-width: 100% !important;
+    min-width: 0 !important;
     box-sizing: border-box !important;
   }
 
@@ -2594,6 +2688,7 @@
     font-weight: 700 !important;
     line-height: 1.2 !important;
     display: -webkit-box !important;
+    line-clamp: 2 !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
@@ -4169,11 +4264,37 @@
     margin: 0 !important;
   }
 
-  #view-dashboard .pos-bento-card {
+  #view-dashboard .pos-bento-card,
+  #view-dashboard #profitTrendsRechartsRoot .pos-bento-card,
+  #view-dashboard #profitTrendsRechartsRoot .pos-profit-trends-card,
+  #view-dashboard #digitalKhataQrStudioCard {
     padding: 10px 10px !important;
     border-radius: 8px !important;
     border: 1.5px solid var(--border-glass) !important;
     overflow: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #view-dashboard #profitTrendsRechartsRoot .profit-chart-responsive-grid,
+  #view-dashboard #profitTrendsRechartsRoot .digital-khata-responsive-grid {
+    grid-template-columns: 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    gap: 10px !important;
+  }
+
+  #view-dashboard #profitTrendsRechartsRoot .profit-chart-box,
+  #view-dashboard #profitTrendsRechartsRoot .chhota-galla-card,
+  #view-dashboard #profitTrendsRechartsRoot .micro-galla-btn-grid {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
   }
 
   /* Floating Chatbot Bubble Launcher in Bottom Right */

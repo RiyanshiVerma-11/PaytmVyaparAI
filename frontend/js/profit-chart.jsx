@@ -310,64 +310,71 @@ function DigitalKhataQRSection({ isHindi }) {
         className="pos-bento-card"
         style={{
           gridColumn: '1 / -1',
-          padding: '1.25rem 1.4rem',
           marginTop: '0.2rem',
-          fontVariantNumeric: 'tabular-nums'
+          fontVariantNumeric: 'tabular-nums',
+          width: '100%',
+          maxWidth: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box'
         }}
       >
         {/* Top Header */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-          <div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '10px', marginBottom: '1rem', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+          <div style={{ minWidth: 0, flex: '1 1 240px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
+              <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', wordBreak: 'break-word' }}>
                 {isHindi
                   ? 'डिजिटल बही-खाता QR जनरेटर और प्रिंट स्टैंडी (Digital Khata QR)'
                   : 'Personalized Digital Khata QR Generator & Print Standee'}
               </h2>
-              <span style={{ fontSize: '0.75rem', color: '#0284C7', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.75rem', color: '#0284C7', fontWeight: 700, wordBreak: 'break-all' }}>
                 · UPI ID: {merchant.upi_id || '8171008964@ptaxis'}
               </span>
             </div>
-            <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#475569' }}>
+            <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.4, wordBreak: 'break-word' }}>
               {isHindi
                 ? 'दुकान के काउंटर के लिए या किसी भी उधार ग्राहक के लिए पर्सनलाइज्ड QR बनाएं और प्रिंट करें — ग्राहक स्कैन करके अपना बकाया देख सकते हैं और तुरंत UPI से पेमेंट कर सकते हैं।'
                 : 'Generate and print a counter standee or customer-specific Khata QR. Customers scan to view their itemized pending balance and settle via UPI in one tap.'}
             </p>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => setScanModalOpen(true)}
               style={{
-                padding: '8px 14px',
+                flex: '1 1 auto',
+                padding: '8px 12px',
                 borderRadius: '8px',
                 border: '1px solid #0284C7',
                 background: '#F0F9FF',
                 color: '#0369A1',
                 fontWeight: 700,
-                fontSize: '0.8rem',
+                fontSize: '0.78rem',
                 cursor: 'pointer',
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
+                textAlign: 'center'
               }}
             >
-              {isHindi ? 'ग्राहक स्कैन व्यू देखें (Customer Preview)' : 'Preview Customer Scan View'}
+              {isHindi ? 'ग्राहक स्कैन व्यू (Customer Preview)' : 'Preview Customer Scan View'}
             </button>
 
             <button
               type="button"
               onClick={handlePrintStandee}
               style={{
-                padding: '8px 16px',
+                flex: '1 1 auto',
+                padding: '8px 14px',
                 borderRadius: '8px',
                 border: 'none',
                 background: 'linear-gradient(135deg, #002970, #00BAF2)',
                 color: '#FFFFFF',
                 fontWeight: 800,
-                fontSize: '0.8rem',
+                fontSize: '0.78rem',
                 cursor: 'pointer',
                 whiteSpace: 'nowrap',
-                boxShadow: '0 4px 12px rgba(0, 41, 112, 0.2)'
+                boxShadow: '0 4px 12px rgba(0, 41, 112, 0.2)',
+                textAlign: 'center'
               }}
             >
               {isHindi ? 'QR स्टैंडी प्रिंट करें (Print QR)' : 'Print Digital Khata QR'}
@@ -1155,33 +1162,33 @@ function ProfitTrendsWidget() {
   }, [trendData, days, summary, isHindi]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
       {/* SECTION A: 7-Day Daily Profit Trends & Chhota Galla */}
-      <div className="pos-bento-card pos-profit-trends-card" style={{ gridColumn: '1 / -1', padding: '1.25rem 1.4rem', fontVariantNumeric: 'tabular-nums' }}>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '12px', marginBottom: '1rem' }}>
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
+      <div className="pos-bento-card pos-profit-trends-card" style={{ gridColumn: '1 / -1', fontVariantNumeric: 'tabular-nums', width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '1rem', width: '100%', maxWidth: '100%', boxSizing: 'border-box' }}>
+          <div style={{ minWidth: 0, flex: '1 1 240px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: '#0F172A', wordBreak: 'break-word' }}>
                 {isHindi ? '7-दिन का मुनाफा और छोटा गल्ला (Daily Profit Trends)' : '7-Day Daily Profit Trends & Zero-Typing Micro-Sales'}
               </h2>
-              <span style={{ fontSize: '0.76rem', color: '#059669', fontWeight: 700 }}>
+              <span style={{ fontSize: '0.74rem', color: '#059669', fontWeight: 700, whiteSpace: 'nowrap' }}>
                 · {summary.dod_growth_pct >= 0 ? `+${summary.dod_growth_pct}%` : `${summary.dod_growth_pct}%`} {isHindi ? 'आज की ग्रोथ' : 'vs Yesterday'}
               </span>
             </div>
-            <p style={{ margin: '3px 0 0', fontSize: '0.8rem', color: '#475569' }}>
+            <p style={{ margin: '3px 0 0', fontSize: '0.78rem', color: '#475569', lineHeight: 1.4, wordBreak: 'break-word' }}>
               {isHindi
                 ? 'हर ₹15 दही या ₹20 दूध के लिए ग्राहक का नाम सेव करने की जरूरत नहीं — QR से ऑटो-कैप्चर या 1-टैप छोटा गल्ला इस्तेमाल करें।'
                 : 'No need to save customer names for ₹15 Dahi or ₹20 Milk — auto-captured from Soundbox QR scans + 1-Tap Counter Cash Galla.'}
             </p>
           </div>
 
-          <div style={{ display: 'inline-flex', background: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0' }}>
+          <div className="profit-chart-mode-toggle" style={{ display: 'inline-flex', background: '#F1F5F9', padding: '3px', borderRadius: '8px', border: '1px solid #E2E8F0', flexWrap: 'wrap', gap: '2px', maxWidth: '100%', boxSizing: 'border-box' }}>
             <button
               type="button"
               onClick={() => setChartMode('profit')}
               style={{
-                padding: '6px 12px',
-                fontSize: '0.78rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 borderRadius: '6px',
                 border: 'none',
@@ -1197,8 +1204,8 @@ function ProfitTrendsWidget() {
               type="button"
               onClick={() => setChartMode('breakdown')}
               style={{
-                padding: '6px 12px',
-                fontSize: '0.78rem',
+                padding: '6px 10px',
+                fontSize: '0.76rem',
                 fontWeight: 700,
                 borderRadius: '6px',
                 border: 'none',
@@ -1208,62 +1215,65 @@ function ProfitTrendsWidget() {
                 color: chartMode === 'breakdown' ? '#FFFFFF' : '#475569'
               }}
             >
-              {isHindi ? 'QR बनाम छोटा गल्ला (₹15/₹20)' : 'UPI QR vs Micro-Sales (₹15/₹20)'}
+              {isHindi ? 'QR बनाम छोटा गल्ला' : 'UPI QR vs Micro-Sales'}
             </button>
           </div>
         </div>
 
-        <div style={{
+        <div className="profit-summary-ribbon" style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))',
-          gap: '10px',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 130px), 1fr))',
+          gap: '8px',
           marginBottom: '1rem',
           padding: '10px 12px',
           background: '#F8FAFC',
           borderRadius: '10px',
-          border: '1px solid #E2E8F0'
+          border: '1px solid #E2E8F0',
+          width: '100%',
+          maxWidth: '100%',
+          boxSizing: 'border-box'
         }}>
-          <div>
-            <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
               {isHindi ? '7-दिन का शुद्ध मुनाफा' : '7-Day Net Profit'}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#059669' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#059669', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ₹{Number(summary.total_7d_profit).toLocaleString('en-IN')}
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748B', marginLeft: '6px' }}>
-                ({summary.avg_margin_pct}% {isHindi ? 'मार्जिन' : 'margin'})
+              <span style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748B', marginLeft: '4px' }}>
+                ({summary.avg_margin_pct}%)
               </span>
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600 }}>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
               {isHindi ? '7-दिन की कुल बिक्री' : '7-Day Total Sales'}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#002970' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#002970', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ₹{Number(summary.total_7d_revenue).toLocaleString('en-IN')}
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600 }}>
-              {isHindi ? 'आज का मुनाफा (Today Profit)' : "Today's Net Profit"}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+              {isHindi ? 'आज का मुनाफा' : "Today's Net Profit"}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#0284C7' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0284C7', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ₹{Number(summary.today_profit).toLocaleString('en-IN')}
-              <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600, marginLeft: '6px' }}>
+              <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600, marginLeft: '4px' }}>
                 / ₹{Number(summary.today_revenue).toLocaleString('en-IN')}
               </span>
             </div>
           </div>
 
-          <div>
-            <div style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600 }}>
-              {isHindi ? 'छोटी बिक्री (₹15 दही / ₹20 दूध)' : 'Chhota Galla Micro-Sales'}
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+              {isHindi ? 'छोटा गल्ला बिक्री' : 'Chhota Galla Micro'}
             </div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 800, color: '#D97706' }}>
+            <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#D97706', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
               ₹{Number(summary.total_7d_micro_sales).toLocaleString('en-IN')}
-              <span style={{ fontSize: '0.74rem', color: '#64748B', fontWeight: 600, marginLeft: '6px' }}>
-                · {summary.total_7d_micro_count} {isHindi ? 'ग्राहक' : 'walk-ins'}
+              <span style={{ fontSize: '0.72rem', color: '#64748B', fontWeight: 600, marginLeft: '4px' }}>
+                · {summary.total_7d_micro_count} {isHindi ? 'बिल' : 'items'}
               </span>
             </div>
           </div>
@@ -1275,13 +1285,16 @@ function ProfitTrendsWidget() {
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 280px), 1fr))',
             gap: '1.2rem',
-            alignItems: 'stretch'
+            alignItems: 'stretch',
+            width: '100%',
+            maxWidth: '100%',
+            boxSizing: 'border-box'
           }}
         >
-          <div style={{ minHeight: '260px', height: '270px', width: '100%', background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '10px 8px 4px 0' }}>
+          <div className="profit-chart-box" style={{ minHeight: '260px', height: '270px', width: '100%', maxWidth: '100%', minWidth: 0, background: '#FFFFFF', borderRadius: '10px', border: '1px solid #E2E8F0', padding: '10px 4px 4px 0', boxSizing: 'border-box', overflow: 'hidden' }}>
             <ResponsiveContainer width="100%" height="100%">
               {chartMode === 'profit' ? (
-                <ComposedChart data={days} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
+                <ComposedChart data={days} margin={{ top: 10, right: 28, left: -14, bottom: 0 }}>
                   <defs>
                     <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#00BAF2" stopOpacity={0.25} />
@@ -1289,80 +1302,90 @@ function ProfitTrendsWidget() {
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11, fontWeight: 600 }} axisLine={{ stroke: '#CBD5E1' }} tickLine={false} />
-                  <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} />
-                  <YAxis yAxisId="right" orientation="right" tick={{ fill: '#059669', fontSize: 11, fontWeight: 700 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} />
+                  <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} axisLine={{ stroke: '#CBD5E1' }} tickLine={false} />
+                  <YAxis yAxisId="left" tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} width={36} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fill: '#059669', fontSize: 10, fontWeight: 700 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} width={36} />
                   <Tooltip content={<CustomProfitTooltip isHindi={isHindi} />} />
-                  <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
+                  <Legend wrapperStyle={{ fontSize: '11px', fontWeight: 600, paddingLeft: '6px', paddingRight: '6px' }} />
                   <Area yAxisId="left" type="monotone" dataKey="revenue" name={isHindi ? 'कुल बिक्री (Sales ₹)' : 'Daily Sales Revenue (₹)'} stroke="#00BAF2" strokeWidth={2} fillOpacity={1} fill="url(#revenueFill)" />
-                  <Bar yAxisId="right" dataKey="profit" name={isHindi ? 'शुद्ध मुनाफा (Net Profit ₹)' : 'Net Take-Home Profit (₹)'} fill="#059669" radius={[6, 6, 0, 0]} barSize={26} />
+                  <Bar yAxisId="right" dataKey="profit" name={isHindi ? 'शुद्ध मुनाफा (Net Profit ₹)' : 'Net Take-Home Profit (₹)'} fill="#059669" radius={[6, 6, 0, 0]} barSize={22} />
                   <Line yAxisId="right" type="monotone" dataKey="profit" name={isHindi ? 'मुनाफा ट्रेंड' : 'Profit Trend Line'} stroke="#002970" strokeWidth={2.5} dot={{ r: 4, fill: '#002970', stroke: '#FFFFFF', strokeWidth: 1.5 }} />
                 </ComposedChart>
               ) : (
-                <ComposedChart data={days} margin={{ top: 10, right: 18, left: 0, bottom: 0 }}>
+                <ComposedChart data={days} margin={{ top: 10, right: 28, left: -14, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                  <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 11, fontWeight: 600 }} axisLine={{ stroke: '#CBD5E1' }} tickLine={false} />
-                  <YAxis tick={{ fill: '#475569', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} />
+                  <XAxis dataKey="label" tick={{ fill: '#475569', fontSize: 10, fontWeight: 600 }} axisLine={{ stroke: '#CBD5E1' }} tickLine={false} />
+                  <YAxis tick={{ fill: '#475569', fontSize: 10 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₹${v}`} width={36} />
                   <Tooltip content={<CustomProfitTooltip isHindi={isHindi} />} />
-                  <Legend wrapperStyle={{ fontSize: '12px', fontWeight: 600 }} />
-                  <Bar dataKey="upi_revenue" stackId="a" name={isHindi ? 'ऑटो Soundbox QR (₹)' : 'Auto Soundbox QR Sales (₹)'} fill="#002970" barSize={28} />
-                  <Bar dataKey="micro_revenue" stackId="a" name={isHindi ? 'छोटा गल्ला: ₹15 दही / ₹20 दूध (₹)' : 'Chhota Galla Micro-Sales (₹)'} fill="#F59E0B" radius={[6, 6, 0, 0]} barSize={28} />
+                  <Legend wrapperStyle={{ fontSize: '11px', fontWeight: 600, paddingLeft: '6px', paddingRight: '6px' }} />
+                  <Bar dataKey="upi_revenue" stackId="a" name={isHindi ? 'ऑटो Soundbox QR (₹)' : 'Auto Soundbox QR Sales (₹)'} fill="#002970" barSize={24} />
+                  <Bar dataKey="micro_revenue" stackId="a" name={isHindi ? 'छोटा गल्ला (₹)' : 'Chhota Galla Micro (₹)'} fill="#F59E0B" radius={[6, 6, 0, 0]} barSize={24} />
                   <Line type="monotone" dataKey="profit" name={isHindi ? 'शुद्ध मुनाफा (Net Profit ₹)' : 'Net Profit (₹)'} stroke="#059669" strokeWidth={2.5} dot={{ r: 4, fill: '#059669' }} />
                 </ComposedChart>
               )}
             </ResponsiveContainer>
           </div>
 
-          <div style={{
+          <div className="chhota-galla-card" style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between',
             background: '#F8FAFC',
             borderRadius: '10px',
             border: '1px solid #E2E8F0',
-            padding: '12px 14px'
+            padding: '12px 12px',
+            width: '100%',
+            maxWidth: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box'
           }}>
-            <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                <strong style={{ fontSize: '0.88rem', color: '#0F172A' }}>
+            <div style={{ width: '100%', maxWidth: '100%', minWidth: 0, boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
+                <strong style={{ fontSize: '0.86rem', color: '#0F172A', minWidth: 0 }}>
                   {isHindi ? '1-Tap छोटा कैश गल्ला (बिना नाम लिखे)' : '1-Tap "Chhota Galla" (Zero Customer Name)'}
                 </strong>
-                <span style={{ fontSize: '0.72rem', color: '#0284C7', fontWeight: 700 }}>
+                <span style={{ fontSize: '0.72rem', color: '#0284C7', fontWeight: 700, flexShrink: 0 }}>
                   {isHindi ? 'बोलें: "15 रुपये दही"' : 'Or Speak: "15 rupaye dahi"'}
                 </span>
               </div>
-              <p style={{ margin: '0 0 10px', fontSize: '0.76rem', color: '#475569', lineHeight: 1.4 }}>
+              <p style={{ margin: '0 0 10px', fontSize: '0.76rem', color: '#475569', lineHeight: 1.4, wordBreak: 'break-word', overflowWrap: 'break-word' }}>
                 {isHindi
                   ? 'फुटकर नकद ग्राहकों (₹15 दही, ₹20 दूध) का नाम मत पूछिए—बस 1 टैप करें या माइक में बोलें, मुनाफा तुरंत ग्राफ में जुड़ जाएगा:'
                   : 'Do not ask walk-in cash customers for their name—tap an item below (or speak into Soundbox) to log instant margin:'}
               </p>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '7px', marginBottom: '12px' }}>
+              <div className="micro-galla-btn-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '6px', marginBottom: '12px', width: '100%', boxSizing: 'border-box' }}>
                 {MICRO_BUTTONS.map((btn) => {
                   const isBusy = loadingTag === btn.itemTag;
                   return (
                     <button
                       key={btn.itemTag}
                       type="button"
+                      className="micro-galla-btn"
                       disabled={Boolean(loadingTag)}
                       onClick={() => handleQuickMicroSale(btn)}
                       style={{
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '8px 10px',
+                        padding: '6px 8px',
                         background: isBusy ? '#E0F2FE' : '#FFFFFF',
                         border: '1px solid #CBD5E1',
                         borderRadius: '8px',
                         cursor: 'pointer',
-                        fontSize: '0.78rem',
+                        fontSize: '0.75rem',
                         fontWeight: 700,
                         color: '#0F172A',
-                        whiteSpace: 'nowrap'
+                        minWidth: 0,
+                        width: '100%',
+                        boxSizing: 'border-box',
+                        gap: '4px'
                       }}
                     >
-                      <span>{isHindi ? btn.labelHi : btn.labelEn}</span>
-                      <span style={{ fontSize: '0.7rem', color: '#059669', fontWeight: 700 }}>
+                      <span className="micro-btn-label" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', minWidth: 0, flex: '1 1 auto', textAlign: 'left' }}>
+                        {isHindi ? btn.labelHi : btn.labelEn}
+                      </span>
+                      <span className="micro-btn-margin" style={{ fontSize: '0.68rem', color: '#059669', fontWeight: 800, background: '#ECFDF5', padding: '1px 4px', borderRadius: '4px', flexShrink: 0 }}>
                         {isBusy ? '...' : btn.margin}
                       </span>
                     </button>
@@ -1376,15 +1399,19 @@ function ProfitTrendsWidget() {
               paddingTop: '8px',
               fontSize: '0.74rem',
               color: '#334155',
-              lineHeight: 1.45
+              lineHeight: 1.45,
+              width: '100%',
+              boxSizing: 'border-box',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word'
             }}>
               <div style={{ fontWeight: 800, color: '#002970', marginBottom: '4px' }}>
                 {isHindi ? 'दुकानदार के लिए 3 स्मार्ट तरीके (0 मैनुअल टाइपिंग):' : '3 Smart Moves So You Never Type Every ₹15 Customer:'}
               </div>
-              <div>
+              <div style={{ marginBottom: '3px' }}>
                 <strong>1. Auto QR Stream:</strong> {isHindi ? '₹15/₹20 के UPI पेमेंट साउंडबॉक्स से अपने-आप जुड़ते हैं।' : 'Every ₹15/₹20 UPI Soundbox scan auto-logs with ~18% category margin.'}
               </div>
-              <div>
+              <div style={{ marginBottom: '3px' }}>
                 <strong>2. 1-Tap / Voice Galla:</strong> {isHindi ? 'नकद बिक्री पर "+₹15 दही" दबाएं या बोलें—ग्राहक का नाम जरूरी नहीं।' : 'For cash walk-ins, tap "+₹15 Dahi" or say "15 rupaye dahi"—no customer name needed.'}
               </div>
               <div>
