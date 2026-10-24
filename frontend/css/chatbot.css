@@ -1,35 +1,26 @@
 /* ========================================================
    PAYTM VYAPAR AI CHATBOT — WCAG AAA UNIGNORABLE FLOATING COPILOT
    Dynamic Context & Memory, Hinglish/Hindi Speech, Glassmorphism
+   Available across both Landing Page & Live Cockpit
    ======================================================== */
 
-/* Strictly hide AI chatbot on public marketing landing page — only active in Cockpit */
-body:not(.in-cockpit) .chatbot-launcher,
-body:not(.in-cockpit) .chatbot-window,
-#landingView:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-launcher,
-#landingView:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-window,
-.landing-view:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-launcher,
-.landing-view:not([style*="display: none"]):not([style*="display:none"]) ~ .chatbot-window {
-  display: none !important;
-}
-
-/* 1. Small Floating Launcher Icon in Bottom Right */
+/* 1. Floating Launcher Icon in Bottom Right */
 .chatbot-launcher {
   position: fixed;
-  bottom: 26px;
-  right: 26px;
-  width: 60px;
-  height: 60px;
+  bottom: 24px;
+  right: 24px;
+  width: 58px;
+  height: 58px;
   border-radius: 50%;
   background: linear-gradient(135deg, #001233 0%, #002970 50%, #0056b3 100%);
   color: #ffffff;
   border: 2px solid #00baf2;
   box-shadow: 0 8px 25px rgba(0, 41, 112, 0.4), 0 0 20px rgba(0, 186, 242, 0.4);
   cursor: pointer;
-  display: flex;
+  display: flex !important;
   align-items: center;
   justify-content: center;
-  z-index: 9999;
+  z-index: 99999;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
   user-select: none;
 }
@@ -478,20 +469,43 @@ body:not(.in-cockpit) .chatbot-window,
   background: linear-gradient(135deg, #001f54 0%, #004494 100%);
 }
 
-/* Responsive adjustments for Mobile Cockpit */
+/* Responsive adjustments for Mobile */
 @media (max-width: 768px) {
-  /* On mobile with bottom navigation, hide the floating bubble launcher so it doesn't block buttons or overlap bottom nav */
+  /* Floating chatbot bubble launcher in bottom right */
   .chatbot-launcher {
-    display: none !important;
+    display: flex !important;
+    position: fixed !important;
+    bottom: 20px !important;
+    right: 14px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #002970 0%, #00BAF2 100%) !important;
+    box-shadow: 0 4px 14px rgba(0, 41, 112, 0.35) !important;
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+
+  /* When inside cockpit on mobile, float cleanly above bottom nav bar (60px high) */
+  body.in-cockpit .chatbot-launcher {
+    bottom: 74px !important;
+    right: 14px !important;
   }
 
   .chatbot-window {
     right: 8px !important;
     left: 8px !important;
     width: auto !important;
-    bottom: 68px !important;
+    bottom: 16px !important;
     height: calc(100vh - 84px) !important;
     max-height: 580px !important;
     border-radius: 16px !important;
+    z-index: 100000 !important;
+  }
+
+  body.in-cockpit .chatbot-window {
+    bottom: 72px !important;
   }
 }

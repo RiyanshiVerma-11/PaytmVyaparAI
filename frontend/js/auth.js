@@ -377,6 +377,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (appEl) appEl.style.display = 'flex';
     document.body.classList.add('in-cockpit');
 
+    const launcher = document.getElementById('chatbotLauncher');
+    if (launcher) launcher.style.display = 'flex';
+
     const actualName = name || 'Ramesh Sharma';
     const actualShop = shop || 'Sharma Kirana Store';
     const initials = computeInitials(actualName);
@@ -589,7 +592,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.body.classList.remove('in-cockpit');
     window.location.hash = '';
     const launcher = document.getElementById('chatbotLauncher');
-    if (launcher) launcher.style.display = 'none';
+    if (launcher) launcher.style.display = 'flex';
     if (window.showNotification) {
       window.showNotification('Logged out successfully / सफलतापूर्वक लॉग आउट हो गया', 'info');
     }

@@ -2389,7 +2389,19 @@
   }
 
   .chatbot-launcher {
-    display: none !important;
+    display: flex !important;
+    position: fixed !important;
+    bottom: 70px !important;
+    right: 14px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #002970 0%, #00BAF2 100%) !important;
+    box-shadow: 0 4px 14px rgba(0, 41, 112, 0.35) !important;
+    z-index: 9998 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
   }
 
   .chatbot-window {
@@ -3029,7 +3041,7 @@
 }
 
 /* Responsive adjustment for tablets / POS terminals */
-@media (max-width: 1100px) {
+@media (min-width: 769px) and (max-width: 1100px) {
   .dashboard-canvas,
   .pos-bento-cockpit {
     grid-template-columns: 1fr !important;
@@ -4075,7 +4087,7 @@
 }
 
 /* Responsive Breakpoints */
-@media (max-width: 1024px) {
+@media (min-width: 769px) and (max-width: 1024px) {
   .dashboard-canvas {
     grid-template-columns: 1fr;
     padding: 1rem;
@@ -4112,5 +4124,75 @@
 #view-dashboard #profitTrendsRechartsRoot .digital-khata-responsive-grid > div {
   border: 1.5px solid var(--border-glass) !important;
 }
+
+/* ========================================================
+   FINAL AUTHORITATIVE MOBILE OVERRIDES (<= 768px)
+   Guarantees 100% Alignment of Bottom Cards with Top Glance Cards
+   and Unignorable Floating Chatbot Launcher in Bottom Right
+   ======================================================== */
+@media (max-width: 768px) {
+  #view-dashboard,
+  .cockpit-view-section {
+    padding: 6px 12px 84px 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    overflow-x: hidden !important;
+  }
+
+  #view-dashboard .pos-glance-strip,
+  #view-dashboard .pos-bento-cockpit {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    margin: 0 0 8px 0 !important;
+    padding: 0 !important;
+  }
+
+  #view-dashboard .pos-bento-cockpit {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+
+  #view-dashboard .pos-bento-card,
+  #view-dashboard .col-khata,
+  #view-dashboard .col-growth,
+  #view-dashboard .col-inventory,
+  #view-dashboard .pos-credit-strip,
+  #view-dashboard #profitTrendsRechartsRoot {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  #view-dashboard .pos-bento-card {
+    padding: 10px 10px !important;
+    border-radius: 8px !important;
+    border: 1.5px solid var(--border-glass) !important;
+    overflow: hidden !important;
+  }
+
+  /* Floating Chatbot Bubble Launcher in Bottom Right */
+  .chatbot-launcher {
+    display: flex !important;
+    position: fixed !important;
+    bottom: 74px !important;
+    right: 14px !important;
+    width: 48px !important;
+    height: 48px !important;
+    border-radius: 50% !important;
+    background: linear-gradient(135deg, #002970 0%, #00BAF2 100%) !important;
+    box-shadow: 0 4px 14px rgba(0, 41, 112, 0.35) !important;
+    z-index: 99999 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+  }
+}
+
 
 
