@@ -32,13 +32,15 @@
       };
     }
 
-    // Trigger on initial cockpit enter button
-    const enterCockpitBtn = document.getElementById('launchCockpitBtn');
-    if (enterCockpitBtn) {
-      enterCockpitBtn.addEventListener('click', () => {
-        setTimeout(triggerStaggeredMotion, 80);
-      });
-    }
+    // Trigger on initial cockpit enter buttons
+    ['authNavBtn', 'demoLaunchBtn', 'launchCockpitBtn'].forEach(id => {
+      const btn = document.getElementById(id);
+      if (btn) {
+        btn.addEventListener('click', () => {
+          setTimeout(triggerStaggeredMotion, 80);
+        });
+      }
+    });
 
     // If cockpit already active, trigger once
     const cockpit = document.getElementById('cockpitView');

@@ -362,6 +362,7 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.setItem('paytm_merchant_session', JSON.stringify(session));
 
     if (authModal) authModal.classList.remove('active');
+    if (window.updateNavAuthState) window.updateNavAuthState();
     switchToCockpit(name, shop, isDemo);
   }
 
@@ -571,6 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
   window.handleMerchantLogout = function() {
     window.closeMerchantProfileModal();
     localStorage.removeItem('paytm_merchant_session');
+    if (window.updateNavAuthState) window.updateNavAuthState();
     const landingEl = document.getElementById('landingView');
     const appEl = document.getElementById('appView');
     if (appEl) appEl.style.display = 'none';

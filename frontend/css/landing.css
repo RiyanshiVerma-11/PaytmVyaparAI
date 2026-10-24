@@ -704,13 +704,9 @@
   .landing-nav > div:last-child {
     gap: 6px !important;
   }
-  #loginNavBtn {
-    padding: 0.45rem 0.75rem !important;
-    font-size: 0.78rem !important;
-  }
-  #launchCockpitBtn {
+  #authNavBtn, .btn-nav-auth {
     padding: 0.45rem 0.85rem !important;
-    font-size: 0.78rem !important;
+    font-size: 0.8rem !important;
     white-space: nowrap !important;
   }
 

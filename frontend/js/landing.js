@@ -4,10 +4,56 @@
 document.addEventListener('DOMContentLoaded', () => {
   const launchBtn = document.getElementById('launchCockpitBtn');
   const loginNavBtn = document.getElementById('loginNavBtn');
+  const authNavBtn = document.getElementById('authNavBtn');
+  const authNavBtnText = document.getElementById('authNavBtnText');
   const authModal = document.getElementById('authOverlay');
   const demoLaunchBtn = document.getElementById('demoLaunchBtn');
 
-  // Launch Cockpit Directly
+  // Unified Auth Nav Click & Dynamic Button State
+  function updateNavAuthState() {
+    try {
+      const saved = localStorage.getItem('paytm_merchant_session');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s && s.name && authNavBtnText) {
+          authNavBtnText.textContent = 'Open Cockpit →';
+          if (authNavBtn) {
+            authNavBtn.title = `Logged in as ${s.name} (${s.shopName || 'Store'})`;
+          }
+          return;
+        }
+      }
+    } catch (e) {}
+    if (authNavBtnText) {
+      authNavBtnText.textContent = 'Sign In / Up';
+    }
+  }
+
+  window.updateNavAuthState = updateNavAuthState;
+  updateNavAuthState();
+
+  window.handleAuthNavClick = function() {
+    try {
+      const saved = localStorage.getItem('paytm_merchant_session');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s && s.name && window.switchToCockpit) {
+          window.switchToCockpit(s.name, s.shopName || 'Store', s.isDemo || false);
+          return;
+        }
+      }
+    } catch (e) {}
+    openAuthModal('signin');
+  };
+
+  if (authNavBtn) {
+    authNavBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.handleAuthNavClick();
+    });
+  }
+
+  // Launch Cockpit Directly (Backward Compatibility)
   if (launchBtn) {
     launchBtn.addEventListener('click', () => {
       switchToCockpit('Ramesh Sharma', 'Sharma Kirana & General Store');

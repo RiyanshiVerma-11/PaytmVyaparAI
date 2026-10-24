@@ -45,10 +45,11 @@
         <a href="#scale">Architecture & Scale</a>
       </div>
 
-      <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
-        <button id="loginNavBtn" class="btn-hero-secondary" style="padding:0.6rem 1.1rem; font-size:0.88rem;">Merchant Sign In</button>
-        <button id="signupNavBtn" class="btn-hero-secondary" style="padding:0.6rem 1.1rem; font-size:0.88rem; background:rgba(0,186,242,0.15); border-color:var(--paytm-cyan); color:#00BAF2;" onclick="window.openAuthModal && window.openAuthModal('signup')">Sign Up Shop</button>
-        <button id="launchCockpitBtn" class="btn-hero-primary" style="padding:0.6rem 1.3rem; font-size:0.88rem;">Open Cockpit</button>
+      <div class="landing-nav-actions" style="display:flex; align-items:center; gap:0.75rem;">
+        <button id="authNavBtn" class="btn-hero-primary btn-nav-auth" onclick="window.handleAuthNavClick ? window.handleAuthNavClick() : window.openAuthModal('signin')">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:2px;"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+          <span id="authNavBtnText">Sign In / Up</span>
+        </button>
       </div>
     </nav>
 
@@ -385,7 +386,7 @@
             </div>
           </div>
 
-          <button id="lendingApplyCta" class="btn-hero-primary" style="margin-top:auto; justify-content:center; width:100%;" onclick="document.getElementById('launchCockpitBtn').click()">
+          <button id="lendingApplyCta" class="btn-hero-primary" style="margin-top:auto; justify-content:center; width:100%;" onclick="window.handleAuthNavClick ? window.handleAuthNavClick() : window.switchToCockpit('Ramesh Sharma', 'Sharma Kirana Store')">
             Claim Working Capital in Cockpit
           </button>
         </div>
@@ -565,7 +566,7 @@
           <span>🔑</span> Sign In
         </button>
         <button type="button" class="auth-tab-btn" data-tab="signup" id="tabBtnSignUp">
-          <span>🏪</span> New Shop
+          <span>🏪</span> Register New Shop
         </button>
         <button type="button" class="auth-tab-btn" data-tab="forgot" id="tabBtnForgot">
           <span>📬</span> OTP Login
@@ -591,6 +592,14 @@
           <div id="signInErrorMsg" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
 
           <button type="submit" id="btnSignInSubmit" class="btn-auth-submit">Sign In to Cockpit</button>
+
+          <!-- Real Product Footer Switch: New Account? Register -->
+          <div class="auth-toggle-footer">
+            <span>New Account?</span>
+            <button type="button" class="auth-toggle-link" onclick="window.switchAuthTab('signup')">
+              Register New Shop →
+            </button>
+          </div>
         </form>
       </div>
 
@@ -648,6 +657,14 @@
           <div id="signUpErrorMsg" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
 
           <button type="submit" id="btnSignUpSubmit" class="btn-auth-submit">Create Store Account & Enter</button>
+
+          <!-- Real Product Footer Switch: Already have an account? Sign In -->
+          <div class="auth-toggle-footer">
+            <span>Already have an account?</span>
+            <button type="button" class="auth-toggle-link" onclick="window.switchAuthTab('signin')">
+              Sign In to Cockpit →
+            </button>
+          </div>
         </form>
       </div>
 
@@ -669,6 +686,13 @@
           <button type="button" id="btnSendOtp" class="btn-auth-submit" onclick="window.handleSendLoginOtp()">
             <span>📨</span> Send Login OTP via Email
           </button>
+
+          <div class="auth-toggle-footer">
+            <span>Remember your Password or PIN?</span>
+            <button type="button" class="auth-toggle-link" onclick="window.switchAuthTab('signin')">
+              Sign In with Password →
+            </button>
+          </div>
         </div>
 
         <!-- Step 2: Verify OTP -->
