@@ -182,6 +182,65 @@ const API = {
       body: JSON.stringify({ message: '', session_id: sessionId })
     });
     return await res.json();
+  },
+
+  // 8. Demo Merchant Management for Evaluators
+  async resetDemoData() {
+    const res = await fetch(endpoint('/api/demo/reset'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return await res.json();
+  },
+
+  async getDemoStatus() {
+    const res = await fetch(endpoint('/api/demo/status'));
+    return await res.json();
+  },
+
+  // 9. Merchant Authentication & Multi-Tenancy
+  async registerMerchant(merchantData) {
+    const res = await fetch(endpoint('/api/auth/register'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(merchantData)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Registration failed');
+    return data;
+  },
+
+  async loginMerchant(loginId, password) {
+    const res = await fetch(endpoint('/api/auth/login'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login_id: loginId, password: password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    return data;
+  },
+
+  async sendForgotPasswordOtp(loginId) {
+    const res = await fetch(endpoint('/api/auth/forgot-password/send-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login_id: loginId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to send OTP');
+    return data;
+  },
+
+  async verifyForgotPasswordOtp(loginId, otp, newPassword = null) {
+    const res = await fetch(endpoint('/api/auth/forgot-password/verify-otp'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ login_id: loginId, otp: otp, new_password: newPassword })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Invalid or expired OTP');
+    return data;
   }
 };
 

@@ -19,15 +19,21 @@
 
 ## 1. Executive Summary
 
+> 🏆 **Notice for Evaluators & Judges:**  
+> **“A fully populated demo merchant is provided so judges can test the complete product without manual onboarding.”**  
+> * **Demo Merchant:** Sharma Kirana Store (Sector 18, Noida)
+> * **Demo Credentials:** `ramesh.kirana@paytm.com` | PIN: `1234` (Or 1-click **"Continue as Demo Merchant"**)
+> * **Reset Demo Data:** Available in the top navbar and Merchant Profile modal to instantly restore original balances, inventory, and ledger history at any time.
+
 **Paytm Vyapar Saathi** transforms the iconic **Paytm Soundbox** from a passive payment confirmation speaker into an **active, proactive digital business partner (Munshi + Inventory Guardian + CFO)** for 30 million Indian Kirana and retail merchants.
 
 During peak counter rush (6 PM – 9 PM), shopkeepers cannot open apps, browse nested menus, or type on keyboards. Unrecorded credit transactions (*udhaar*), missed reorders, and unnoticed customer churn cost Indian retail merchants an estimated ₹1.2 Lakh Crore annually.
 
 **Paytm Vyapar Saathi solves this via voice-first ambient intelligence:**
-1. **Zero-Typing Vernacular Ledger:** The merchant speaks naturally in Hindi, Hinglish, or English.
+1. **Zero-Typing Vernacular Ledger:** The merchant speaks naturally in Hindi, Hinglish, or English with strict entity resolution (no silent fallbacks).
 2. **Instant Physical Trust:** The Soundbox plays its iconic dual-tone chime and confirms the action aloud in vernacular Hindi (*"Paytm par Manoj Verma ji ka ₹1,000 jama ho gaya"*).
-3. **Automated Supply Chain:** Stock is automatically tracked, and supplier Purchase Orders (POs) are drafted and dispatched via production SMTP.
-4. **Pre-Approved Working Capital:** Soundbox transaction velocity and ledger recovery rates feed directly into a 0–100 Credit Health Score, underwriting instant collateral-free loans.
+3. **Automated Supply Chain:** Stock is automatically tracked, and supplier Purchase Orders (POs) are drafted and dispatched with simulation demo badges.
+4. **Transparent Underwriting:** Real transaction velocity and ledger recovery rates feed directly into a 0–100 Credit Health Score (0 artificial floor) with a transparent 5-factor breakdown.
 
 ---
 
@@ -47,22 +53,31 @@ During peak counter rush (6 PM – 9 PM), shopkeepers cannot open apps, browse n
 
 ### Pillar 1: Grow Their Business (Merchant Growth AI)
 * **Zero-Effort QR Telemetry CRM:** Inactive regular customers are automatically detected from incoming Paytm QR payments with zero manual typing.
-* **Customer Win-Back Engine:** Detects inactive regulars (*"Customer #9811 hasn't visited in 30 days"*) and crafts 1-tap native SMS discount vouchers with embedded UPI deep-links.
-* **Festive Surge Forecaster:** Predicts seasonal demand spikes 7 days before major Indian festivals (Diwali, Navratri, Eid, Holi) to lock in bulk wholesale pricing.
+* **Dynamic RFM Churn Detection:** Computes recency, frequency, and monetary metrics on actual transactions to score churn risk dynamically.
+* **Customer Win-Back Engine:** Detects inactive regulars (*"Customer #9811 hasn't visited in 30 days"*) and crafts 1-tap native SMS discount vouchers with embedded UPI deep-links (clearly labeled with demo draft badges).
+* **Dynamic Festive Surge Forecaster:** Analyzes 14-day transaction velocity and daily turnover to forecast seasonal restock requirements rather than static templates.
 
 ### Pillar 2: Manage Operations (Autonomous Copilot)
-* **Hands-Free Voice Khata:** Merchants speak natural Hindi/Hinglish commands (*"Ramesh bhai ko ₹450 ka refine tel udhaar diya"* or *"मनोज वर्मा 1000 पैड"*).
-* **Automated Supplier Email POs (SMTP):** Sends formal, professional reorders directly to wholesale distributors when inventory hits reorder thresholds.
-* **60-Second Daily Profit Pulse:** End-of-day audio debrief through the Soundbox and automated branded P&L statements emailed to the merchant.
+* **Hands-Free Voice Khata (Zero Silent Fallbacks):** Merchants speak natural Hindi/Hinglish commands (*"Ramesh bhai ko ₹450 ka refine tel udhaar diya"* or *"मनोज वर्मा 1000 पैड"*). If a customer or product is unknown, the copilot explicitly asks for clarification rather than silently inventing records.
+* **Automated Supplier Email POs (SMTP):** Dispatches formal wholesale reorders directly to distributors when inventory falls below threshold, badged with explicit Demo Mode tracking.
+* **Real SKU Unit Economics & Profit Pulse:** End-of-day debrief calculates actual gross profit using stored wholesale cost vs retail selling prices for each SKU.
 
 ### Pillar 3: Serve Customers Better (Trust & Transparency)
 * **Two-Way Soundbox Voice Handshake:** Dual-frequency chime (440Hz / 880Hz) + vernacular voice repetition guarantees 100% mutual trust between shopkeeper and customer.
+* **Financial Confirmation Cards:** Visual confirmation cards showing amount, party name, item, date, and status are rendered before and upon saving every ledger entry, PO, or loan draw.
 * **Digital E-Bills & Statements:** Clear itemized receipts sent via 1-tap native SMS with direct UPI payment links (`upi://pay`).
 * **1-Tap Fail-Safe Undo:** 5-second on-screen safety countdown allows instant cancellation if voice input was misheard.
 
 ### Pillar 4: Beyond Payments (Paytm Lending Rails)
-* **0–100 Merchant Credit Health Score:** Real-time cashflow consistency and ledger recovery rates underwrite collateral-free loans of ₹50,000 to ₹3,00,000.
-* **Instant Disbursal Execution:** Voice-triggered working capital draws (*"₹50,000 लोन निकाल लो"*) credited immediately to store balance.
+* **Transparent 0–100 Credit Health Score:** Evaluates 5 mathematical factors with zero artificial score floor:
+  - **Transaction Volume:** Up to 30 pts based on 30-day inflow.
+  - **Payment Frequency:** Up to 10 pts based on active trading days.
+  - **Repayment Recovery:** Up to 35 pts based on timely khata recoveries.
+  - **Customer Retention:** Up to 15 pts based on repeat buyer ratio.
+  - **Business Stability:** Up to 10 pts based on merchant tenure.
+* **Insufficient History Protection:** Displays *"Insufficient transaction history for underwriting."* when transaction data is missing.
+* **Explicit Prototype Assumptions:** Pre-approved loan limits (₹50k – ₹3L) and interest rates (1.2% – 1.5% flat monthly) are transparently labeled as prototype parameters.
+* **Simulated Disbursal Execution:** Instant loan draws are executed with clear simulation notices (*"Loan approved in simulation. No real funds disbursed."*).
 
 ---
 

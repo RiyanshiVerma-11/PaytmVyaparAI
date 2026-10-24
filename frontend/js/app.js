@@ -1404,16 +1404,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Update stat cards
       const scoreEl = document.getElementById('analyticsScore');
+      const scoreTaglineEl = document.getElementById('analyticsScoreTagline');
       const loanAmountEl = document.getElementById('analyticsLoanAmount');
       const runwayEl = document.getElementById('analyticsRunway');
       const modalLoanAmountDisplay = document.getElementById('loanModalAmountDisplay');
+      const rateEl = document.getElementById('loanInterestRateDisplay');
+      const tenureEl = document.getElementById('loanTenureDisplay');
+      const emiEl = document.getElementById('loanEmiDisplay');
 
-      if (scoreEl) scoreEl.textContent = `${creditData.credit_health_score}/100`;
-      if (loanAmountEl) loanAmountEl.textContent = `₹${creditData.pre_approved_loan.toLocaleString()}`;
-      if (modalLoanAmountDisplay) modalLoanAmountDisplay.textContent = `₹${creditData.pre_approved_loan.toLocaleString()}`;
+      if (creditData.status === 'insufficient_data') {
+        if (scoreEl) scoreEl.textContent = `0/100`;
+        if (scoreTaglineEl) scoreTaglineEl.textContent = `Insufficient transaction history for underwriting.`;
+        if (loanAmountEl) loanAmountEl.textContent = `₹0`;
+        if (modalLoanAmountDisplay) modalLoanAmountDisplay.textContent = `₹0`;
+      } else {
+        if (scoreEl) scoreEl.textContent = `${creditData.credit_health_score}/100`;
+        if (scoreTaglineEl) scoreTaglineEl.textContent = `${creditData.rating} • Zero Paperwork`;
+        if (loanAmountEl) loanAmountEl.textContent = `₹${Number(creditData.pre_approved_loan).toLocaleString('en-IN')}`;
+        if (modalLoanAmountDisplay) modalLoanAmountDisplay.textContent = `₹${Number(creditData.pre_approved_loan).toLocaleString('en-IN')}`;
+      }
+
       if (runwayEl) runwayEl.textContent = `${creditData.working_capital_runway_days} Days`;
+      if (rateEl && creditData.interest_rate) rateEl.textContent = creditData.interest_rate;
+      if (tenureEl && creditData.tenure_months) tenureEl.textContent = `${creditData.tenure_months} Months (Daily EDI auto-split)`;
+      if (emiEl && creditData.monthly_emi) emiEl.textContent = `₹${Number(creditData.monthly_emi).toLocaleString('en-IN')} / month`;
 
-      // Render Churn Campaigns
+      // Render Transparent Mathematical Underwriting Factors
+      const factorsContainer = document.getElementById('creditUnderwritingFactorsList');
+      if (factorsContainer && creditData.factors) {
+        factorsContainer.innerHTML = Object.entries(creditData.factors).map(([k, f]) => {
+          const factorLabels = {
+            cashflow_volume: "Cashflow Volume (30D)",
+            cashflow_frequency: "Payment Frequency",
+            repayment_recovery: "Khata Repayment Discipline",
+            customer_retention: "Customer Retention Ratio",
+            store_stability: "Store Vintage & Breadth"
+          };
+          const title = factorLabels[k] || k.replace(/_/g, ' ');
+          return `
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.78rem; padding: 4px 0; border-bottom: 1px dashed rgba(255,255,255,0.08);">
+              <span style="color:var(--text-secondary);">${title}:</span>
+              <span>
+                <strong style="color:var(--text-primary);">${f.score}/${f.max} pts</strong>
+                <span style="font-size:0.7rem; color:var(--paytm-cyan); margin-left:4px;">(${f.label})</span>
+              </span>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Render Churn Campaigns with Clear Simulation Badges
       const campaignsList = document.getElementById('analyticsCampaignsList');
       if (campaignsList) {
         campaignsList.innerHTML = '';
@@ -1437,11 +1477,15 @@ document.addEventListener('DOMContentLoaded', () => {
                   ${c.customer_name} 
                   <span class="badge-status ${c.churn_risk === 'At-Risk' ? 'badge-orange' : 'badge-red'}" style="margin-left:0.4rem;">${c.churn_risk}</span>
                 </div>
-                <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:0.2rem;">
-                  Last visit: ${c.last_visit} • Inactive for 30+ days
+                <div style="font-size:0.78rem; color:var(--text-secondary); margin-top:0.2rem;">
+                  Last visit: ${c.last_visit || 'Recent'} • Inactive for ${c.days_inactive || 30}+ days
                 </div>
-                <div style="font-size:0.8rem; color:var(--paytm-cyan); font-weight:700; margin-top:0.2rem;">
-                  Offer: ${c.suggested_discount}
+                <div style="font-size:0.78rem; color:var(--paytm-cyan); font-weight:700; margin-top:0.2rem;">
+                  Suggested Voucher: ${c.suggested_discount}
+                </div>
+                <div style="font-size:0.7rem; color:#64748B; margin-top:0.2rem;">
+                  <span class="badge-dot" style="display:inline-block; width:5px; height:5px; border-radius:50%; background:#10B981; margin-right:4px;"></span>
+                  ${c.action_badge || 'Simulated SMS draft (Native device URI)'}
                 </div>
               </div>
               <a href="${c.sms_uri}" target="_blank" class="pos-btn-action-sm" style="text-decoration:none; padding:0.5rem 1rem; font-size:0.85rem;" onclick="window.paytmSoundbox.broadcast('Customer win-back offer sent to ${c.customer_name}')">
@@ -1461,8 +1505,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (fTitle) fTitle.textContent = `${fa.festival} — ${fa.surge_multiplier}`;
         if (fDetails) {
           fDetails.innerHTML = `
-            <strong>In ${fa.days_left} days:</strong> ${fa.recommendation}<br>
-            <span style="color:var(--paytm-cyan); font-weight:700;">High demand items:</span> ${fa.high_demand_items.join(', ')}
+            <strong>Seasonal Surge:</strong> ${fa.surge_multiplier} • <em>${fa.velocity_basis || 'Calculated from transaction velocity'}</em><br>
+            <div style="margin-top:4px;">${fa.recommendation}</div>
+            <div style="margin-top:4px;"><span style="color:var(--paytm-cyan); font-weight:700;">High demand items:</span> ${fa.high_demand_items.join(', ')}</div>
           `;
         }
       }

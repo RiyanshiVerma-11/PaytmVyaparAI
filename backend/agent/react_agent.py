@@ -549,12 +549,24 @@ class ReactAgent:
 
             res = KhataService.record_entry(matched_cust["name"], amount, item_desc, entry_type)
             reply = cls._format_tool_response("record_khata_entry", {"customer_name": matched_cust["name"], "amount": amount}, res)
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = {
+                "action": "UDHAAR_CREDIT" if entry_type == "udhaar" else "JAMA_PAYMENT",
+                "action_label": "खाता उधार दर्ज (Credit Entry)" if entry_type == "udhaar" else "खाता जमा दर्ज (Payment Received)",
+                "entity": matched_cust["name"],
+                "item_description": item_desc,
+                "amount": amount,
+                "date": now_str,
+                "status": "SAVED_TO_DATABASE",
+                "simulation_badge": "Live Paytm Bahi-Khata Ledger"
+            }
             return {
                 "query": query,
                 "action_name": "RECORD_KHATA_ENTRY",
                 "thoughts": thoughts + [f"Recorded {entry_type} of ₹{int(amount)} for {matched_cust['name']}."],
                 "result": res,
                 "reply": reply,
+                "confirmation_card": confirmation_card,
                 "soundbox_payload": res.get("soundbox_payload")
             }
 
@@ -569,41 +581,55 @@ class ReactAgent:
             inv_items = [dict(r) for r in cur.fetchall()]
             conn.close()
 
-            # Vernacular Kirana synonyms for accurate item matching
-            SYNONYMS = {
-                "namak": "salt",
-                "salt": "salt",
-                "tel": "oil",
-                "oil": "oil",
-                "makhan": "butter",
-                "butter": "butter",
-                "doodh": "milk",
-                "atta": "atta",
-                "biscuit": "parle",
-                "chai": "tea",
-                "patti": "tea"
+            # Dynamically derive synonyms and phonetic tokens from actual inventory database records
+            synonym_map = {}
+            for it in inv_items:
+                it_name = it["item_name"].lower()
+                for token in re.findall(r'[a-zA-Z]{3,}', it_name):
+                    synonym_map[token] = it["item_name"]
+
+            # Vernacular Kirana translations mapped dynamically to catalog SKUs
+            VERNACULAR_KEYWORDS = {
+                "tel": ["oil", "refined", "mustard"],
+                "oil": ["oil", "refined"],
+                "namak": ["salt"],
+                "salt": ["salt"],
+                "makhan": ["butter", "amul"],
+                "butter": ["butter", "amul"],
+                "doodh": ["milk", "dairy"],
+                "atta": ["atta", "chakki", "flour"],
+                "aata": ["atta", "chakki", "flour"],
+                "biscuit": ["parle", "biscuit"],
+                "chai": ["tea", "taj", "mahal"],
+                "tea": ["tea", "taj"],
+                "patti": ["tea", "taj"],
+                "surf": ["surf", "excel", "detergent"],
+                "maggi": ["maggi", "noodles"],
+                "maggie": ["maggi", "noodles"]
             }
+            for vern_k, target_tokens in VERNACULAR_KEYWORDS.items():
+                for it in inv_items:
+                    it_name_lower = it["item_name"].lower()
+                    if any(t in it_name_lower for t in target_tokens):
+                        synonym_map[vern_k] = it["item_name"]
 
             target_item = None
-            for it in inv_items:
-                it_lower = it["item_name"].lower()
-                # Direct word match (>3 chars)
-                words = [w for w in it_lower.split() if len(w) > 3]
-                if any(w in q for w in words):
-                    target_item = it["item_name"]
+            for syn_k, actual_name in synonym_map.items():
+                if re.search(r'\b' + re.escape(syn_k) + r'\b', q):
+                    target_item = actual_name
                     break
-                # Check through vernacular synonyms
-                for syn_k, syn_v in SYNONYMS.items():
-                    if re.search(r'\b' + re.escape(syn_k) + r'\b', q) and syn_v in it_lower:
+
+            if not target_item:
+                for it in inv_items:
+                    words = [w for w in it["item_name"].lower().split() if len(w) > 3]
+                    if any(w in q for w in words):
                         target_item = it["item_name"]
                         break
-                if target_item:
-                    break
 
             # NO SILENT FAKE DEFAULTS: Ask which item to order if missing!
             if not target_item:
                 low_stock = [i["item_name"] for i in inv_items if i["current_stock"] <= i["reorder_threshold"]]
-                low_str = ", ".join(low_stock[:2]) if low_stock else "Fortune Oil, Amul Butter"
+                low_str = ", ".join(low_stock[:2]) if low_stock else "Fortune Refined Oil 1L, Amul Butter 100g"
                 reply = f"Aap kaunsa item supplier ko order karna chahte hain? Abhi dukan mein {low_str} ka stock kam hai."
                 return {
                     "query": query,
@@ -620,28 +646,64 @@ class ReactAgent:
 
             res = InventoryService.create_supplier_po(target_item, quantity, merchant_id)
             reply = cls._format_tool_response("create_supplier_po", {"item_name": target_item}, res)
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = {
+                "action": "SUPPLIER_PURCHASE_ORDER",
+                "action_label": "सप्लायर रीऑर्डर PO (Wholesale Restock)",
+                "entity": target_item,
+                "amount": res.get("total_cost", 0),
+                "quantity": res.get("quantity"),
+                "date": now_str,
+                "status": res.get("email_status", "DISPATCHED_TO_OUTBOX"),
+                "simulation_badge": "PO created and queued for supplier email (Demo Mode)"
+            }
             return {
                 "query": query,
                 "action_name": "CREATE_SUPPLIER_PO",
                 "thoughts": thoughts + [f"Dispatched PO for {target_item}."],
                 "result": res,
                 "reply": reply,
+                "confirmation_card": confirmation_card,
                 "soundbox_payload": res.get("soundbox_payload")
             }
 
         # 3. Credit Health / Loan Disbursal
         if any(w in q for w in ["loan", "credit", "score", "capital", "paise"]):
             if any(w in q for w in ["disburse", "le lo", "transfer", "nikal", "daal do", "chahiye"]):
-                amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+(?:\.\d+)?)', q)
-                amount = float(amt_match.group(1)) if amt_match else 50000.0
+                amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रु\.?|रूपये)?\s*(\d+(?:\.\d+)?)', q)
+                if not amt_match:
+                    health = CreditService.get_merchant_credit_health(merchant_id)
+                    max_loan = int(health.get("pre_approved_loan", 0))
+                    reply = f"Aap kitna working capital loan amount nikalna chahte hain? Aapki pre-approved limit ₹{max_loan:,} tak hai. Kripya amount batayein (jaise: '₹50,000 loan nikal lo')."
+                    return {
+                        "query": query,
+                        "action_name": "CLARIFICATION_REQUIRED",
+                        "thoughts": thoughts + ["Missing loan disbursal amount; requested clarification without defaulting."],
+                        "result": {"clarification_needed": "loan_amount", "pre_approved_limit": max_loan},
+                        "reply": reply,
+                        "soundbox_payload": {"chime": False, "speech_text": reply}
+                    }
+
+                amount = float(amt_match.group(1))
                 res = CreditService.disburse_loan(amount, merchant_id)
                 reply = cls._format_tool_response("disburse_loan", {"amount": amount}, res)
+                now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+                confirmation_card = {
+                    "action": "LOAN_DISBURSAL",
+                    "action_label": "वर्किंग कैपिटल लोन डिसबर्सल (Working Capital Loan)",
+                    "entity": res.get("bank_account", "Paytm Payments Bank"),
+                    "amount": amount,
+                    "date": now_str,
+                    "status": "APPROVED_IN_SIMULATION",
+                    "simulation_badge": "Loan approved in simulation. No real funds disbursed."
+                }
                 return {
                     "query": query,
                     "action_name": "DISBURSE_LOAN",
                     "thoughts": thoughts + [f"Processed working capital loan of ₹{amount}."],
                     "result": res,
                     "reply": reply,
+                    "confirmation_card": confirmation_card,
                     "soundbox_payload": res.get("soundbox_payload")
                 }
             else:

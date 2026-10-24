@@ -45,9 +45,10 @@
         <a href="#scale">Architecture & Scale</a>
       </div>
 
-      <div style="display:flex; align-items:center; gap:1rem;">
-        <button id="loginNavBtn" class="btn-hero-secondary" style="padding:0.6rem 1.4rem; font-size:0.9rem;">Log In</button>
-        <button id="launchCockpitBtn" class="btn-hero-primary" style="padding:0.6rem 1.5rem; font-size:0.9rem;">Open Dashboard</button>
+      <div style="display:flex; align-items:center; gap:0.75rem; flex-wrap:wrap;">
+        <button id="loginNavBtn" class="btn-hero-secondary" style="padding:0.6rem 1.1rem; font-size:0.88rem;">Merchant Sign In</button>
+        <button id="signupNavBtn" class="btn-hero-secondary" style="padding:0.6rem 1.1rem; font-size:0.88rem; background:rgba(0,186,242,0.15); border-color:var(--paytm-cyan); color:#00BAF2;" onclick="window.openAuthModal && window.openAuthModal('signup')">Sign Up Shop</button>
+        <button id="launchCockpitBtn" class="btn-hero-primary" style="padding:0.6rem 1.3rem; font-size:0.88rem;">Open Cockpit</button>
       </div>
     </nav>
 
@@ -530,37 +531,180 @@
        2. PAYTM MERCHANT AUTHENTICATION MODAL
        ======================================================== -->
   <div id="authOverlay" class="auth-overlay">
-    <div class="auth-card">
-      <button id="authCloseBtn" class="auth-close">&times;</button>
+    <div class="auth-card" style="max-width: 490px; max-height: 92vh; overflow-y: auto;">
+      <button id="authCloseBtn" class="auth-close" title="Close">&times;</button>
       
-      <div class="auth-header">
+      <div class="auth-header" style="margin-bottom: 1.2rem;">
         <div class="auth-logo">
           <span class="paytm-cyan-part">Pay</span>tm <span style="font-weight:400;">Business</span>
         </div>
-        <div class="auth-subtitle">Sign in to your Merchant AI Dashboard</div>
+        <div class="auth-subtitle">Soundbox 4.0 Pro Merchant Gateway</div>
       </div>
 
-      <form id="authForm">
-        <div class="auth-form-group">
-          <label class="auth-label">Registered Merchant Email or Mobile</label>
-          <input type="text" id="authEmail" class="auth-input" placeholder="e.g. ramesh.kirana@paytm.com" value="ramesh.kirana@paytm.com" required>
+      <!-- Prominent Judge & Evaluator Demo Callout -->
+      <div style="background: rgba(0, 186, 242, 0.08); border: 1.5px dashed var(--paytm-cyan); border-radius: 8px; padding: 10px 12px; margin-bottom: 1rem; font-size: 0.78rem;">
+        <div style="font-weight: 800; color: #002970; display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+          <span style="display: flex; align-items: center; gap: 5px;">⚖️ Preloaded Demo Store (Sharma Kirana)</span>
+          <span class="badge badge-cyan" style="font-size: 0.65rem;">HACKATHON EVALUATION</span>
         </div>
-
-        <div class="auth-form-group">
-          <label class="auth-label">Merchant Security PIN / Password</label>
-          <input type="password" class="auth-input" value="••••••••" required>
+        <p style="margin: 0 0 6px; font-size: 0.72rem; color: #475569; line-height: 1.35;">
+          A fully populated demo merchant is provided so judges can test the complete product without manual onboarding.
+        </p>
+        <div style="display: flex; justify-content: space-between; font-size: 0.74rem; background: #FFFFFF; padding: 5px 8px; border-radius: 6px; border: 1px solid #CBD5E1; margin-bottom: 8px;">
+          <span><strong>Email:</strong> <code>ramesh.kirana@paytm.com</code></span>
+          <span><strong>PIN:</strong> <code>1234</code></span>
         </div>
-
-        <button type="submit" class="btn-auth-submit">Sign In to Cockpit</button>
-      </form>
-
-      <div class="auth-divider">
-        <span>OR DEMO ACCESS</span>
+        <button type="button" id="demoQuickBtn" class="btn-demo-quick" style="padding: 7px 10px; font-size: 0.8rem; margin: 0;">
+          <span>🚀</span> Continue as Demo Merchant (Sharma Kirana Store)
+        </button>
       </div>
 
-      <button id="demoQuickBtn" class="btn-demo-quick">
-        <span>🏪</span> One-Click Demo: Ramesh Sharma Kirana Store
-      </button>
+      <!-- Auth Navigation Tabs -->
+      <div class="auth-tabs" id="authNavTabs">
+        <button type="button" class="auth-tab-btn active" data-tab="signin" id="tabBtnSignIn">
+          <span>🔑</span> Sign In
+        </button>
+        <button type="button" class="auth-tab-btn" data-tab="signup" id="tabBtnSignUp">
+          <span>🏪</span> New Shop
+        </button>
+        <button type="button" class="auth-tab-btn" data-tab="forgot" id="tabBtnForgot">
+          <span>📬</span> OTP Login
+        </button>
+      </div>
+
+      <!-- TAB 1: SIGN IN -->
+      <div class="auth-tab-content active" id="tabContentSignIn">
+        <form id="authForm">
+          <div class="auth-form-group">
+            <label class="auth-label">Merchant Email or Mobile</label>
+            <input type="text" id="authEmail" class="auth-input" placeholder="e.g. ramesh.kirana@paytm.com or 9811223344" value="ramesh.kirana@paytm.com" required autocomplete="username">
+          </div>
+
+          <div class="auth-form-group" style="margin-bottom: 0.6rem;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.45rem;">
+              <label class="auth-label" style="margin-bottom: 0;">Security PIN / Password</label>
+              <button type="button" class="auth-link-btn" onclick="window.switchAuthTab('forgot')">Forgot Password? (OTP)</button>
+            </div>
+            <input type="password" id="authPassword" class="auth-input" placeholder="Enter PIN or Password" value="1234" required autocomplete="current-password">
+          </div>
+
+          <div id="signInErrorMsg" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
+
+          <button type="submit" id="btnSignInSubmit" class="btn-auth-submit">Sign In to Cockpit</button>
+        </form>
+      </div>
+
+      <!-- TAB 2: REGISTER NEW SHOP -->
+      <div class="auth-tab-content" id="tabContentSignUp">
+        <form id="registerForm" onsubmit="window.handleMerchantRegister(event)">
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 0.9rem; line-height: 1.4;">
+            Create a live multi-tenant account for your retail store. Your transactions, inventory, and ledger will be completely isolated.
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.7rem;">
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Shopkeeper Name</label>
+              <input type="text" id="regName" class="auth-input" placeholder="e.g. Vikram Verma" required>
+            </div>
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Shop / Business Name</label>
+              <input type="text" id="regShopName" class="auth-input" placeholder="e.g. Verma Kirana Store" required>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.7rem;">
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Mobile Number</label>
+              <input type="tel" id="regPhone" class="auth-input" placeholder="+91 98112 00000" required>
+            </div>
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Store Category</label>
+              <select id="regCategory" class="auth-input" style="padding: 0.8rem 0.5rem;">
+                <option value="Kirana & Groceries">Kirana & Groceries</option>
+                <option value="Dairy & Milk">Dairy & Milk</option>
+                <option value="FMCG & Departmental">FMCG & Departmental</option>
+                <option value="Pharmacy & Health">Pharmacy & Health</option>
+                <option value="General Retail">General Retail</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="auth-form-group">
+            <label class="auth-label">Email Address (For Invoices & PO Restocks)</label>
+            <input type="email" id="regEmail" class="auth-input" placeholder="e.g. shop@gmail.com" required>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; margin-bottom: 0.8rem;">
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Create Security Password</label>
+              <input type="password" id="regPassword" class="auth-input" placeholder="Min 4 characters" required minlength="4">
+            </div>
+            <div class="auth-form-group" style="margin-bottom: 0;">
+              <label class="auth-label">Paytm UPI VPA (Optional)</label>
+              <input type="text" id="regUpi" class="auth-input" placeholder="e.g. shop@ptaxis">
+            </div>
+          </div>
+
+          <div id="signUpErrorMsg" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
+
+          <button type="submit" id="btnSignUpSubmit" class="btn-auth-submit">Create Store Account & Enter</button>
+        </form>
+      </div>
+
+      <!-- TAB 3: FORGOT PASSWORD / EMAIL OTP LOGIN -->
+      <div class="auth-tab-content" id="tabContentForgot">
+        <!-- Step 1: Request OTP -->
+        <div id="forgotStepRequest">
+          <div style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 1rem; line-height: 1.4;">
+            Forgot your PIN? Enter your registered email or mobile to receive a 6-digit one-time login OTP via real Gmail SMTP.
+          </div>
+
+          <div class="auth-form-group">
+            <label class="auth-label">Registered Email or Mobile Number</label>
+            <input type="text" id="forgotLoginId" class="auth-input" placeholder="e.g. ramesh.kirana@paytm.com" value="ramesh.kirana@paytm.com" required>
+          </div>
+
+          <div id="forgotRequestError" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
+
+          <button type="button" id="btnSendOtp" class="btn-auth-submit" onclick="window.handleSendLoginOtp()">
+            <span>📨</span> Send Login OTP via Email
+          </button>
+        </div>
+
+        <!-- Step 2: Verify OTP -->
+        <div id="forgotStepVerify" style="display: none;">
+          <div style="padding: 10px 12px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 8px; margin-bottom: 1rem; font-size: 0.78rem;">
+            <div style="font-weight: 700; color: #059669; display: flex; align-items: center; justify-content: space-between;">
+              <span>✅ OTP Dispatched via Gmail SMTP!</span>
+              <span id="liveOtpBadge" style="background: #059669; color: white; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-family: monospace; letter-spacing: 1px;"></span>
+            </div>
+            <div style="color: #475569; margin-top: 3px;" id="otpRecipientNotice">Check your inbox for the 6-digit verification code.</div>
+          </div>
+
+          <div class="auth-form-group">
+            <label class="auth-label">Enter 6-Digit OTP Code</label>
+            <input type="text" id="inputOtpCode" class="auth-input" placeholder="e.g. 584920" maxlength="6" style="font-size: 1.3rem; letter-spacing: 5px; text-align: center; font-weight: 800;" required>
+          </div>
+
+          <div class="auth-form-group">
+            <label class="auth-label">Set New Password (Optional)</label>
+            <input type="password" id="inputOtpNewPassword" class="auth-input" placeholder="Leave blank to keep current password">
+          </div>
+
+          <div id="forgotVerifyError" style="display: none; padding: 8px 10px; background: #FFF1F2; border: 1px solid #FECDD3; border-radius: 6px; color: #E11D48; font-size: 0.78rem; font-weight: 600; margin-bottom: 0.8rem;"></div>
+
+          <button type="button" id="btnVerifyOtp" class="btn-auth-submit" onclick="window.handleVerifyLoginOtp()">
+            <span>🚀</span> Verify OTP & Enter Cockpit
+          </button>
+
+          <div style="text-align: center; margin-top: 0.8rem;">
+            <button type="button" class="auth-link-btn" onclick="document.getElementById('forgotStepVerify').style.display='none'; document.getElementById('forgotStepRequest').style.display='block';">
+              ← Change Email / Resend Code
+            </button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -648,7 +792,22 @@
           <button type="button" class="btn-demo-quick" style="flex: 1; margin-top: 0; justify-content: center; min-width: 80px;" onclick="window.closeMerchantProfileModal()">Cancel</button>
         </div>
 
+        <!-- Reset Demo Data Section -->
         <div style="margin-top: 1rem; padding-top: 0.9rem; border-top: 1px dashed var(--border-glass); display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+          <div>
+            <div style="font-weight: 700; font-size: 0.82rem; color: var(--text-primary); display: flex; align-items: center; gap: 5px;">
+              <span>🔄</span> Demo Merchant Data Management
+            </div>
+            <div style="font-size: 0.72rem; color: var(--text-secondary); margin-top: 2px;">
+              Restore Sharma Kirana baseline ledger, inventory & transactions
+            </div>
+          </div>
+          <button type="button" class="btn-reset-demo" onclick="window.handleResetDemoData && window.handleResetDemoData()" style="padding: 7px 14px; background: #FFF1F2; border: 1px solid #FECDD3; color: #E11D48; border-radius: 8px; font-weight: 700; font-size: 0.78rem; cursor: pointer;">
+            🔄 Reset Demo Data
+          </button>
+        </div>
+
+        <div style="margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px dashed var(--border-glass); display: flex; justify-content: space-between; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
           <div style="font-size: 0.82rem; color: var(--text-secondary);">
             Logged in as <strong id="profileSignedAsText" style="color: var(--text-primary);">Ramesh Sharma</strong>
           </div>
@@ -776,17 +935,25 @@
             <span class="lang-toggle-inactive" data-lang="hi">हि</span>
           </button>
 
+          <!-- Quick Reset Demo Button for Judges -->
+          <button class="top-icon-btn" onclick="window.handleResetDemoData && window.handleResetDemoData()" title="Reset Demo Data to Initial Baseline (डेमो डेटा रीसेट करें)" style="color: #0284C7;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+          </button>
+
           <!-- Notification Bell (Dynamic Risk Alert) -->
           <button class="top-icon-btn" onclick="window.broadcastRiskAlert ? window.broadcastRiskAlert() : window.paytmSoundbox.broadcast('Paytm Vyapar AI live sync active')" title="Notifications & Churn Alerts">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notification-dot"></span>
           </button>
 
-          <!-- Merchant Profile -->
+          <!-- Merchant Profile with Visible Demo Badge -->
           <div class="merchant-profile-btn" id="merchantProfileBtn" title="View & Edit Profile / Settings" onclick="window.openMerchantProfileModal && window.openMerchantProfileModal()">
             <div class="merchant-avatar" id="headerMerchantAvatar">RK</div>
             <div class="merchant-profile-text-wrap">
-              <div id="headerMerchantName" style="font-size:0.9rem; font-weight:700;">Ramesh Sharma</div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <div id="headerMerchantName" style="font-size:0.9rem; font-weight:700;">Ramesh Sharma</div>
+                <span class="demo-badge-pill" style="display:inline-flex; align-items:center; gap:4px; padding:2px 7px; border-radius:12px; background:rgba(0,186,242,0.12); border:1px solid rgba(0,186,242,0.35); color:#0056B3; font-size:0.68rem; font-weight:800; white-space:nowrap;"><span style="width:6px; height:6px; border-radius:50%; background:#00BAF2; animation:pulse-glow 1.2s infinite alternate;"></span> Demo Merchant</span>
+              </div>
               <div id="headerMerchantShop" style="font-size:0.75rem; color:var(--text-secondary);">Sharma Kirana Store ▾</div>
             </div>
           </div>
@@ -1490,27 +1657,42 @@
                 <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--border-glass)" stroke-width="18" stroke-linecap="round"/>
                 <path d="M 20 100 A 80 80 0 0 1 165 50" fill="none" stroke="var(--paytm-cyan)" stroke-width="18" stroke-linecap="round"/>
               </svg>
-              <div class="score-display" style="font-size:2.2rem;">88/100</div>
-              <div class="score-tagline">Tier-1 Prime Merchant • 0 Paperwork</div>
+              <div class="score-display" id="analyticsScore" style="font-size:2.2rem;">88/100</div>
+              <div class="score-tagline" id="analyticsScoreTagline">Tier-1 Prime Merchant • 0 Paperwork</div>
             </div>
 
-            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); margin:1rem 0; font-size:0.85rem;">
+            <!-- Mathematical Underwriting Factor Breakdown -->
+            <div style="background:var(--bg-surface); padding:0.85rem 1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); margin:0.8rem 0; font-size:0.82rem;">
+              <div style="font-weight:800; color:var(--text-primary); margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+                <span>📊 Transparent Underwriting Factors</span>
+                <span style="font-size:0.7rem; color:var(--paytm-cyan); font-weight:700;">Exact Score Drivers</span>
+              </div>
+              <div id="creditUnderwritingFactorsList" style="display:flex; flex-direction:column; gap:0.35rem;">
+                <!-- Populated dynamically: volume, frequency, recovery, retention, stability -->
+              </div>
+            </div>
+
+            <div style="background:var(--bg-surface); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border-glass); margin:0.4rem 0 0.8rem; font-size:0.85rem;">
               <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
                 <span style="color:var(--text-secondary);">Pre-Approved Limit:</span>
                 <strong id="loanModalAmountDisplay" style="color:var(--paytm-cyan); font-size:1rem;">₹75,000</strong>
               </div>
               <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
                 <span style="color:var(--text-secondary);">Interest Rate:</span>
-                <strong>1.1% / month flat</strong>
+                <strong id="loanInterestRateDisplay">0.95% / month flat</strong>
               </div>
               <div style="display:flex; justify-content:space-between; margin-bottom:0.4rem;">
                 <span style="color:var(--text-secondary);">Repayment Tenure:</span>
-                <strong>12 Months (Daily EDI auto-split)</strong>
+                <strong id="loanTenureDisplay">12 Months (Daily EDI auto-split)</strong>
               </div>
               <div style="display:flex; justify-content:space-between;">
                 <span style="color:var(--text-secondary);">Estimated Monthly EMI:</span>
-                <strong>₹6,938 / month</strong>
+                <strong id="loanEmiDisplay">₹6,843 / month</strong>
               </div>
+            </div>
+
+            <div style="padding:0.6rem 0.8rem; background:rgba(0,186,242,0.06); border:1px dashed rgba(0,186,242,0.3); border-radius:8px; font-size:0.72rem; color:var(--text-secondary); text-align:center; margin-bottom:0.8rem;">
+              💡 <strong>Prototype Assumptions:</strong> Loan limits (0.75x–2.0x cashflow) and interest rates are illustrative sandbox modeling parameters for Paytm Lending Rails.
             </div>
 
             <button id="openLoanDisbursalBtn" class="btn-primary-gradient" style="padding:0.9rem; font-size:1rem; width:100%; margin-top:auto;">

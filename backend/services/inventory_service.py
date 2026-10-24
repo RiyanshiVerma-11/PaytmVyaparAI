@@ -64,9 +64,16 @@ class InventoryService:
         expected_delivery = (datetime.now() + timedelta(days=2)).strftime("%Y-%m-%d")
 
         # 4. Compile authentic RFC-5322 MIME Email
+        smtp_host = os.getenv("SMTP_HOST")
+        smtp_port = int(os.getenv("SMTP_PORT", 587))
+        smtp_user = os.getenv("SMTP_USER")
+        smtp_pass = (os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD") or "").replace(" ", "").strip()
+        from_name = os.getenv("SMTP_FROM_NAME", "Vyapar Saathi")
+
         msg = EmailMessage()
         msg["Subject"] = f"URGENT RESTOCK PO #{po_num} - {shop_title}, {shop_address.split(',')[0]}"
-        msg["From"] = merchant_email
+        msg["From"] = f"{from_name} <{smtp_user}>" if smtp_user else merchant_email
+        msg["Reply-To"] = merchant_email
         msg["To"] = item["supplier_email"]
         
         body_text = (
@@ -98,17 +105,12 @@ class InventoryService:
         msg.set_content(body_text)
 
         # 5. Real SMTP Attempt or Validated Local B2B Outbox
-        smtp_host = os.getenv("SMTP_HOST")
-        smtp_port = int(os.getenv("SMTP_PORT", 587))
-        smtp_user = os.getenv("SMTP_USER")
-        smtp_pass = os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD")
-
         email_status = "DISPATCHED_TO_OUTBOX"
         smtp_note = "Compiled RFC-5322 MIME dispatch saved to verified B2B Outbox (Set SMTP_HOST in .env for live gateway)."
 
         if smtp_host and smtp_user and smtp_pass:
             try:
-                server = smtplib.SMTP(smtp_host, smtp_port, timeout=5)
+                server = smtplib.SMTP(smtp_host, smtp_port, timeout=8)
                 server.starttls()
                 server.login(smtp_user, smtp_pass)
                 server.send_message(msg)

@@ -16,13 +16,14 @@ try:
 except Exception:
     pass
 
-from database import init_db
+from database import init_db, reset_demo_data
 from services.khata_service import KhataService
 from services.inventory_service import InventoryService
 from services.growth_service import GrowthService
 from services.credit_service import CreditService
 from services.transaction_service import TransactionService
 from services.chatbot_service import ChatbotService
+from services.auth_service import AuthService
 from agent.react_agent import ReactAgent
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -88,7 +89,70 @@ class ChatbotMessageRequest(BaseModel):
     message: str
     session_id: str = "default_merchant"
 
-# Routes
+class RegisterMerchantRequest(BaseModel):
+    name: str
+    shop_name: str
+    email: str
+    phone: str
+    password: str
+    upi_id: str = None
+    address: str = None
+
+class LoginMerchantRequest(BaseModel):
+    login_id: str
+    password: str
+
+class SendOtpRequest(BaseModel):
+    login_id: str
+
+class VerifyOtpRequest(BaseModel):
+    login_id: str
+    otp: str
+    new_password: str = None
+
+# Routes: Merchant Authentication & Multi-Tenant Access
+@app.post("/api/auth/register")
+async def register_merchant(req: RegisterMerchantRequest):
+    try:
+        res = AuthService.register_merchant(
+            req.name, req.shop_name, req.email, req.phone, req.password, req.upi_id, req.address
+        )
+        return JSONResponse(content=res)
+    except ValueError as ve:
+        return JSONResponse(status_code=400, content={"success": False, "message": str(ve)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Server error: {e}"})
+
+@app.post("/api/auth/login")
+async def login_merchant(req: LoginMerchantRequest):
+    try:
+        res = AuthService.login_merchant(req.login_id, req.password)
+        return JSONResponse(content=res)
+    except ValueError as ve:
+        return JSONResponse(status_code=401, content={"success": False, "message": str(ve)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Server error: {e}"})
+
+@app.post("/api/auth/forgot-password/send-otp")
+async def send_forgot_password_otp(req: SendOtpRequest):
+    try:
+        res = AuthService.send_login_otp(req.login_id)
+        return JSONResponse(content=res)
+    except ValueError as ve:
+        return JSONResponse(status_code=404, content={"success": False, "message": str(ve)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Server error: {e}"})
+
+@app.post("/api/auth/forgot-password/verify-otp")
+async def verify_forgot_password_otp(req: VerifyOtpRequest):
+    try:
+        res = AuthService.verify_login_otp(req.login_id, req.otp, req.new_password)
+        return JSONResponse(content=res)
+    except ValueError as ve:
+        return JSONResponse(status_code=400, content={"success": False, "message": str(ve)})
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"success": False, "message": f"Server error: {e}"})
+
 @app.get("/api/merchant/profile")
 async def get_merchant_profile(merchant_id: int = 1):
     from database import get_connection
@@ -181,6 +245,32 @@ async def get_profit_trends(days: int = 7):
 async def simulate_transaction(req: SimulateTxnRequest):
     res = TransactionService.simulate_payment(req.amount, req.customer_phone, req.payment_mode, req.item_tag)
     return JSONResponse(content=res)
+
+# Demo Management Endpoints for Hackathon Judges
+@app.post("/api/demo/reset")
+@app.post("/api/merchant/reset-demo")
+async def reset_demo():
+    reset_demo_data()
+    return JSONResponse(content={
+        "success": True,
+        "message": "Demo data reset successfully to Sharma Kirana baseline! / डेमो डेटा रीसेट हो गया।",
+        "demo_merchant": "Ramesh Sharma - Sharma Kirana Store",
+        "mode": "DEMO_RESET_COMPLETE",
+        "notice": "A fully populated demo merchant is provided so judges can test the complete product without manual onboarding."
+    })
+
+@app.get("/api/demo/status")
+async def get_demo_status():
+    return JSONResponse(content={
+        "is_demo_account": True,
+        "demo_merchant_name": "Sharma Kirana Store",
+        "owner": "Ramesh Sharma",
+        "demo_notice": "A fully populated demo merchant is provided so judges can test the complete product without manual onboarding.",
+        "auth_credentials": {
+            "email": "ramesh.kirana@paytm.com",
+            "pin": "1234"
+        }
+    })
 
 
 # Static files & Frontend

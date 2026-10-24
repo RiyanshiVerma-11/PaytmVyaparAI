@@ -124,17 +124,20 @@ class TransactionService:
         cls._ensure_recent_7day_seed(conn)
         cursor = conn.cursor()
 
-        # Calculate weighted average retail-to-wholesale margin from inventory table
-        cursor.execute("SELECT unit_price, wholesale_price FROM inventory WHERE unit_price > 0")
+        # 1. Build exact item margin lookup from inventory table (unit_price vs wholesale_price)
+        cursor.execute("SELECT item_name, unit_price, wholesale_price FROM inventory WHERE unit_price > 0")
         inv_rows = cursor.fetchall()
-        if inv_rows:
-            margins = [
-                max(0.08, (float(r["unit_price"]) - float(r["wholesale_price"])) / float(r["unit_price"]))
-                for r in inv_rows
-            ]
-            avg_store_margin = sum(margins) / len(margins)
+        sku_margin_map = {}
+        for r in inv_rows:
+            up = float(r["unit_price"])
+            wp = float(r["wholesale_price"])
+            margin = max(0.05, (up - wp) / up) if up > 0 else 0.165
+            sku_margin_map[r["item_name"].lower()] = margin
+
+        if sku_margin_map:
+            avg_store_margin = sum(sku_margin_map.values()) / len(sku_margin_map)
         else:
-            avg_store_margin = 0.165  # 16.5% default Kirana gross margin
+            avg_store_margin = 0.165
 
         today = datetime.now().date()
         trend_days = []
@@ -172,20 +175,35 @@ class TransactionService:
 
                 day_revenue += amt
 
-                # Determine item-specific or micro-sale margin
-                item_margin = avg_store_margin
-                if amt <= 60 or "micro:" in phone_tag or mode == "Cash_Micro":
-                    micro_count += 1
-                    cash_micro_rev += amt
-                    item_margin = 0.21  # Dairy/curd/snacks carry ~21% counter margin
-                    for k, meta in cls.MICRO_ITEMS_CATALOG.items():
-                        if k in phone_tag:
-                            item_margin = meta["margin_pct"]
-                            break
-                else:
-                    upi_rev += amt
+                # Calculate item-specific profit from actual SKU catalog cost vs selling prices
+                matched_margin = None
+                for sku_k, m_val in sku_margin_map.items():
+                    # Check if SKU words appear in transaction phone/label
+                    sku_words = [w for w in sku_k.split() if len(w) > 3]
+                    if any(w in phone_tag for w in sku_words):
+                        matched_margin = m_val
+                        break
 
-                day_profit += amt * item_margin
+                if matched_margin is None:
+                    if amt <= 60 or "micro:" in phone_tag or mode == "Cash_Micro":
+                        micro_count += 1
+                        cash_micro_rev += amt
+                        matched_margin = 0.21
+                        for k, meta in cls.MICRO_ITEMS_CATALOG.items():
+                            if k in phone_tag:
+                                matched_margin = meta["margin_pct"]
+                                break
+                    else:
+                        upi_rev += amt
+                        matched_margin = avg_store_margin
+                else:
+                    if mode == "Cash_Micro":
+                        cash_micro_rev += amt
+                        micro_count += 1
+                    else:
+                        upi_rev += amt
+
+                day_profit += amt * matched_margin
 
             day_cogs = max(0.0, day_revenue - day_profit)
             margin_pct = round((day_profit / day_revenue) * 100, 1) if day_revenue > 0 else round(avg_store_margin * 100, 1)
@@ -313,6 +331,8 @@ class TransactionService:
 
         return {
             "success": True,
+            "mode": "SIMULATION_SANDBOX",
+            "simulation_badge": "Simulated Paytm QR/Soundbox transaction (Paytm Test Sandbox)",
             "transaction": {
                 "txn_id": txn_id,
                 "amount": amount,

@@ -8,6 +8,12 @@
 
 ## 1. Executive Summary & Integration Thesis
 
+> 🏆 **Notice for Evaluators & Judges:**  
+> **“A fully populated demo merchant is provided so judges can test the complete product without manual onboarding.”**  
+> * **Preloaded Demo Store:** Sharma Kirana Store (MID: `MID_SHARMA_KIRANA_01`)  
+> * **Judge Login Credentials:** `ramesh.kirana@paytm.com` | PIN: `1234` (or 1-click **"Continue as Demo Merchant"**)  
+> * **Sandbox Reset:** Click **"Reset Demo Data"** anytime to return all customer balances, inventory counts, and transaction telemetry back to initial baseline.
+
 PaytmVyaparAI is architected not as an isolated, redundant 3rd-party silo, but as a **native intelligent intelligence layer built directly on Paytm's existing hardware, payments, and financial services stack**.
 
 ```
@@ -24,7 +30,7 @@ PaytmVyaparAI is architected not as an isolated, redundant 3rd-party silo, but a
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                    PAYTM VYAPAR AI: INTELLIGENT AGENT LAYER                 │
 │                                                                             │
-│   • Groq ReAct Dual-Engine: Tool Calling + Zero Silent Fallbacks           │
+│   • Groq ReAct Dual-Engine: Tool Calling + Zero Silent Fallbacks            │
 │   • Mathematical Credit Underwriting (Soundbox Velocity + Khata Ratio)      │
 │   • Kirana Procurement & Deferred Delivery Stock Tracking                   │
 │   • Universal Dynamic UPI Reminders (Native SMS & WhatsApp Deep-Links)      │
@@ -59,14 +65,18 @@ To ensure complete credibility and transparency during judging at Paytm HQ, all 
 
 ### 🟢 Live Production Components
 1. **Groq Dual-Engine ReAct Agent (`qwen/qwen3.8-27b`):** Real-time conversational tool router extracting parameters from vernacular Hindi/Hinglish speech with strict word boundaries.
-2. **Mathematical Underwriting Engine:** Real-time 0–100 scoring calculated from live database cashflow velocity, recovery ratios, and customer retention.
-3. **Universal UPI Payment Deep Links:** Real mobile intent links (`upi://pay?pa=8171008964@ptaxis`) opening Google Pay, PhonePe, and Paytm on consumer smartphones.
-4. **Bahi-Khata Ledger & Deferred Restocking:** Real SQLite database enforcing physical delivery receipts before crediting store inventory.
+2. **Zero Silent Fallbacks:** No default ₹20, ₹250, or ₹50,000 values; if a customer or product is missing, the system explicitly asks for clarification rather than inventing fake data.
+3. **Dynamic Unit Economics & Catalog Synonyms:** Profit trends calculate actual margins from SKU wholesale vs selling prices; aliases are derived from active customer & inventory tables.
+4. **Transparent Mathematical Underwriting Engine:** Real-time 0–100 scoring based on 5 transparent mathematical factors (Volume, Frequency, Recovery, Retention, Stability) with zero artificial score floors. Returns *"Insufficient transaction history for underwriting."* when history is absent.
+5. **Universal UPI Payment Deep Links:** Real mobile intent links (`upi://pay?pa=8171008964@ptaxis`) opening Google Pay, PhonePe, and Paytm on consumer smartphones.
+6. **Bahi-Khata Ledger & Deferred Restocking:** Real SQLite database enforcing physical delivery receipts before crediting store inventory.
+7. **Financial Confirmation Cards:** Visual confirmation cards showing exact party, item, date, and INR amount before committing transactions.
 
-### 🟡 Paytm Developer Sandbox Simulations
+### 🟡 Paytm Developer Sandbox Simulations (Explicitly Labeled)
 1. **Paytm Soundbox 4.0 Hardware Simulation:** Generates Paytm's signature two-tone audio chime and Hindi audio playback using browser audio APIs because physical IoT hardware is connected over private cellular SIMs (APN).
-2. **Merchant Lending Disbursal Simulation:** Executes instant loan verification, updates credit runway, and simulates RTGS/IMPS disbursement adhering strictly to the Paytm Capital API schema.
-3. **B2B Supplier Procurement Email:** Compiles authentic RFC-5322 MIME messages and saves them to the B2B Outbox table, triggering live dispatch when `SMTP_HOST` credentials are provided.
+2. **Merchant Lending Disbursal Simulation:** Executes instant loan verification, updates credit runway, and simulates RTGS/IMPS disbursement labeled *"Loan approved in simulation. No real funds disbursed."* Prototype loan limits and interest rates are clearly disclosed.
+3. **B2B Supplier Procurement Email:** Compiles authentic RFC-5322 MIME messages and saves them to the B2B Outbox table, triggering live dispatch when `SMTP_HOST` credentials are provided (labeled *"PO created and queued for supplier email (Demo Mode)"*).
+4. **Paytm QR Payment Simulator:** Provides one-click customer QR payment generation for judges with a visible *"SIMULATED SOUNDBOX TX"* badge.
 
 ---
 

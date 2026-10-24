@@ -45,8 +45,11 @@ document.addEventListener('DOMContentLoaded', () => {
   checkHash();
   window.addEventListener('hashchange', checkHash);
 
-  function openAuthModal() {
+  function openAuthModal(initialTab = 'signin') {
     if (authModal) {
+      if (window.switchAuthTab) {
+        window.switchAuthTab(initialTab);
+      }
       authModal.classList.add('active');
     }
   }

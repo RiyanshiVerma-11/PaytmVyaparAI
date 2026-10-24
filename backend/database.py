@@ -21,7 +21,10 @@ def init_db():
         name TEXT,
         shop_name TEXT,
         phone TEXT,
-        email TEXT DEFAULT 'sharma.kirana@paytm.mock',
+        email TEXT DEFAULT 'ramesh.kirana@paytm.com',
+        password TEXT DEFAULT '1234',
+        otp TEXT,
+        otp_expiry TEXT,
         upi_id TEXT DEFAULT '8171008964@ptaxis',
         address TEXT,
         bank_name TEXT DEFAULT 'Paytm Payments Bank',
@@ -122,7 +125,10 @@ def init_db():
             except Exception as e:
                 print(f"Migration notice ({table}.{col}): {e}")
 
-    add_col_if_missing("merchants", "email", "TEXT DEFAULT 'sharma.kirana@paytm.mock'")
+    add_col_if_missing("merchants", "email", "TEXT DEFAULT 'ramesh.kirana@paytm.com'")
+    add_col_if_missing("merchants", "password", "TEXT DEFAULT '1234'")
+    add_col_if_missing("merchants", "otp", "TEXT")
+    add_col_if_missing("merchants", "otp_expiry", "TEXT")
     add_col_if_missing("merchants", "bank_name", "TEXT DEFAULT 'Paytm Payments Bank'")
     add_col_if_missing("merchants", "bank_account_masked", "TEXT DEFAULT '•••• 4519'")
     add_col_if_missing("merchants", "ifsc_code", "TEXT DEFAULT 'PYTM0123456'")
@@ -146,10 +152,10 @@ def init_db():
 def seed_data(conn):
     cursor = conn.cursor()
 
-    # Seed Merchant
+    # Seed Merchant (Ramesh Sharma - Demo Merchant)
     cursor.execute("""
-    INSERT INTO merchants (name, shop_name, phone, email, upi_id, address, bank_name, bank_account_masked, ifsc_code, auth_token, credit_health_score, pre_approved_loan_amount, loan_runway_days)
-    VALUES ('Ramesh Sharma', 'Sharma Kirana & General Store', '+91 9811223344', 'sharma.kirana@paytm.mock', '8171008964@ptaxis', 'Shop #14, Main Market, Chandni Chowk, Delhi', 'Paytm Payments Bank', '•••• 4519', 'PYTM0123456', 'merchant_sec_9811223344', 88, 75000, 45)
+    INSERT INTO merchants (name, shop_name, phone, email, password, upi_id, address, bank_name, bank_account_masked, ifsc_code, auth_token, credit_health_score, pre_approved_loan_amount, loan_runway_days)
+    VALUES ('Ramesh Sharma', 'Sharma Kirana Store', '+91 9811223344', 'ramesh.kirana@paytm.com', '1234', '8171008964@ptaxis', 'Shop #14, Sector 18 Market, Noida', 'Paytm Payments Bank', '•••• 4519', 'PYTM0123456', 'merchant_sec_9811223344', 88, 75000, 45)
     """)
 
     # Seed Customers
@@ -213,6 +219,29 @@ def seed_data(conn):
     """, transactions_seed)
 
     conn.commit()
+
+def reset_demo_data(conn=None):
+    """
+    Reset all database tables to pristine baseline demo state for Hackathon judges & evaluations.
+    """
+    should_close = False
+    if conn is None:
+        conn = get_connection()
+        should_close = True
+    
+    cursor = conn.cursor()
+    tables = ["merchants", "customers", "khata_entries", "inventory", "supplier_pos", "transactions"]
+    for tbl in tables:
+        cursor.execute(f"DELETE FROM {tbl}")
+        try:
+            cursor.execute(f"DELETE FROM sqlite_sequence WHERE name='{tbl}'")
+        except Exception:
+            pass
+    conn.commit()
+    seed_data(conn)
+    if should_close:
+        conn.close()
+    return True
 
 if __name__ == "__main__":
     init_db()

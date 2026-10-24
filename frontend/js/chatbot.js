@@ -266,7 +266,7 @@
           if (item.role === 'user') {
             this.appendUserBubble(item.content, false);
           } else {
-            this.appendAssistantBubble(item.content, false);
+            this.appendAssistantBubble(item.content, false, item.actionTaken, item.confirmationCard);
           }
         });
         this.scrollToBottom();
@@ -297,7 +297,8 @@
         this.showTyping(false);
 
         const replyText = data.reply || data.result?.message || 'Ji, process ho gaya.';
-        this.appendAssistantBubble(replyText, true, data.action_taken);
+        const confCard = data.confirmation_card || (data.result && data.result.confirmation_card) || null;
+        this.appendAssistantBubble(replyText, true, data.action_taken, confCard);
 
         // 3. Play Soundbox Audio Chime if action was taken
         if (data.soundbox_payload && window.paytmSoundbox) {
@@ -346,7 +347,7 @@
       }
     }
 
-    appendAssistantBubble(text, saveToHistory = true, actionTaken = null) {
+    appendAssistantBubble(text, saveToHistory = true, actionTaken = null, confirmationCard = null) {
       const bubble = document.createElement('div');
       bubble.className = 'chat-bubble assistant';
       
@@ -362,12 +363,33 @@
         html += `<div class="chat-bubble-action-box">⚡ Action Executed: <strong>${actionTaken}</strong> • Synced with Live DB</div>`;
       }
 
+      if (confirmationCard) {
+        const isSim = Boolean(confirmationCard.simulation);
+        const amountStr = confirmationCard.amount !== undefined ? `₹${Number(confirmationCard.amount || 0).toLocaleString('en-IN')}` : '';
+        html += `
+          <div class="chat-confirmation-card" style="margin-top:10px; padding:12px; background:var(--bg-card); border:1px solid ${isSim ? '#f59e0b' : '#10b981'}; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05); text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+              <span style="font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--paytm-blue, #002970);">📋 ${confirmationCard.action || 'Transaction Confirmation'}</span>
+              <span class="badge ${isSim ? 'badge-amber' : 'badge-green'}" style="font-size:10px; padding:2px 8px; border-radius:12px;">${isSim ? 'DEMO SIMULATION' : 'LIVE LEDGER'}</span>
+            </div>
+            ${amountStr ? `<div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:6px;">${amountStr}</div>` : ''}
+            <div style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+              ${confirmationCard.entity ? `<div><strong>Party:</strong> ${confirmationCard.entity}</div>` : ''}
+              ${confirmationCard.item ? `<div><strong>Item / SKU:</strong> ${confirmationCard.item}</div>` : ''}
+              <div><strong>Date:</strong> ${confirmationCard.date || new Date().toLocaleString('en-IN')}</div>
+              <div><strong>Status:</strong> ${confirmationCard.status || 'Confirmed'}</div>
+            </div>
+            ${confirmationCard.notice ? `<div style="margin-top:8px; padding:6px 10px; background:rgba(245,158,11,0.12); border-left:3px solid #f59e0b; font-size:11px; color:#b45309; border-radius:4px; font-weight:500;">ℹ️ ${confirmationCard.notice}</div>` : ''}
+          </div>
+        `;
+      }
+
       bubble.innerHTML = html;
       this.messagesEl.insertBefore(bubble, this.typingIndicator);
       this.scrollToBottom();
 
       if (saveToHistory) {
-        this.history.push({ role: 'assistant', content: text, time: new Date().toISOString() });
+        this.history.push({ role: 'assistant', content: text, actionTaken, confirmationCard, time: new Date().toISOString() });
         this.saveHistory();
       }
     }
