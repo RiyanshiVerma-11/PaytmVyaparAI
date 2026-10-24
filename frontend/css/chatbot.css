@@ -478,13 +478,20 @@ body:not(.in-cockpit) .chatbot-window,
   background: linear-gradient(135deg, #001f54 0%, #004494 100%);
 }
 
-/* Responsive adjustments */
-@media (max-width: 480px) {
+/* Responsive adjustments for Mobile Cockpit */
+@media (max-width: 768px) {
+  /* On mobile with bottom navigation, hide the floating bubble launcher so it doesn't block buttons or overlap bottom nav */
+  .chatbot-launcher {
+    display: none !important;
+  }
+
   .chatbot-window {
-    right: 10px;
-    left: 10px;
-    width: auto;
-    bottom: 86px;
-    height: 520px;
+    right: 8px !important;
+    left: 8px !important;
+    width: auto !important;
+    bottom: 68px !important;
+    height: calc(100vh - 84px) !important;
+    max-height: 580px !important;
+    border-radius: 16px !important;
   }
 }
