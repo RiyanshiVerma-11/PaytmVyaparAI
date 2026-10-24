@@ -111,6 +111,12 @@ class KhataService:
                     stock_decremented = f"{item['item_name']} (Remaining: {new_stock} {item['unit']})"
                 break
 
+        # Fetch dynamic merchant UPI ID & store details
+        cursor.execute("SELECT shop_name, upi_id FROM merchants LIMIT 1")
+        m_row = cursor.fetchone()
+        shop_title = m_row["shop_name"] if m_row and m_row["shop_name"] else "Sharma Kirana Store"
+        merchant_upi = m_row["upi_id"] if m_row and m_row["upi_id"] else "8171008964@ptaxis"
+
         conn.commit()
         conn.close()
 
@@ -129,7 +135,8 @@ class KhataService:
             else:
                 speech_text = f"Paytm par {cust_name} ji se {amt_spoken} rupaye prapt hue. Baaki udhaar {int(new_pending)} rupaye bache hain."
 
-        sms_msg = f"Namaste {cust_name} ji, Sharma Kirana se aapka Rs.{int(amount)} ka {entry_type} darj hua. Kul baaki: Rs.{int(new_pending)}. Pay via UPI: upi://pay?pa=paytm@sharmakirana&am={int(new_pending)}"
+        upi_link = f"upi://pay?pa={merchant_upi}&am={int(new_pending)}&pn={shop_title.replace(' ', '')}&cu=INR"
+        sms_msg = f"Namaste {cust_name} ji, {shop_title} se aapka Rs.{int(amount)} ka {entry_type} darj hua. Kul baaki: Rs.{int(new_pending)}. Pay via UPI: {upi_link}"
         sms_uri = f"sms:{cust_phone}?body={sms_msg.replace(' ', '%20')}"
 
         return {

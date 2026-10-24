@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
       shopName: shop,
       email: email,
       phone: '+91 98110 54321',
-      vpa: 'paytm@sharmakirana',
+      vpa: '8171008964@ptaxis',
       initials: computeInitials(name),
       token: 'PAYTM_JWT_MOCK_' + Date.now()
     };
@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const shop = rawShop.replace(' ▾', '').trim();
     const email = session.email || 'ramesh.kirana@paytm.com';
     const phone = session.phone || '+91 98110 54321';
-    const vpa = session.vpa || 'paytm@sharmakirana';
+    const vpa = session.vpa || '8171008964@ptaxis';
     const initials = computeInitials(name);
 
     const modalInitials = document.getElementById('modalAvatarInitials');
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const newShop = document.getElementById('profShopName')?.value.trim() || 'Sharma Kirana Store';
     const newEmail = document.getElementById('profMerchantEmail')?.value.trim() || 'ramesh.kirana@paytm.com';
     const newPhone = document.getElementById('profMerchantPhone')?.value.trim() || '+91 98110 54321';
-    const newVpa = document.getElementById('profMerchantVpa')?.value.trim() || 'paytm@sharmakirana';
+    const newVpa = document.getElementById('profMerchantVpa')?.value.trim() || '8171008964@ptaxis';
     const initials = computeInitials(newName);
 
     // Update Header Avatar & Text

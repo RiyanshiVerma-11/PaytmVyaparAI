@@ -82,9 +82,9 @@ class VyaparAgentService:
         else:
             speech_text = f"Paytm par {cust_name} ji se {amt_spoken} rupaye prapt hue."
 
-        # Native 1-Tap SMS URI
-        merchant_upi = "paytm@sharmakirana"
-        sms_msg = f"Namaste {cust_name} ji, Sharma Kirana se aapka Rs.{int(amount)} ka {entry_type} bill darj hua. Kul baaki: Rs.{int(new_pending)}. Pay directly via Paytm UPI: upi://pay?pa={merchant_upi}&am={int(new_pending)}"
+        # Native 1-Tap SMS URI with real testing UPI ID
+        merchant_upi = "8171008964@ptaxis"
+        sms_msg = f"Namaste {cust_name} ji, Sharma Kirana se aapka Rs.{int(amount)} ka {entry_type} bill darj hua. Kul baaki: Rs.{int(new_pending)}. Pay directly via Paytm UPI: upi://pay?pa={merchant_upi}&am={int(new_pending)}&pn=SharmaKirana&cu=INR"
         sms_uri = f"sms:{cust_phone}?body={sms_msg.replace(' ', '%20')}"
 
         return {

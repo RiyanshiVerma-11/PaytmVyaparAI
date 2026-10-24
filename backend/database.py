@@ -22,7 +22,7 @@ def init_db():
         shop_name TEXT,
         phone TEXT,
         email TEXT DEFAULT 'sharma.kirana@paytm.mock',
-        upi_id TEXT,
+        upi_id TEXT DEFAULT '8171008964@ptaxis',
         address TEXT,
         bank_name TEXT DEFAULT 'Paytm Payments Bank',
         bank_account_masked TEXT DEFAULT '•••• 4519',
@@ -149,7 +149,7 @@ def seed_data(conn):
     # Seed Merchant
     cursor.execute("""
     INSERT INTO merchants (name, shop_name, phone, email, upi_id, address, bank_name, bank_account_masked, ifsc_code, auth_token, credit_health_score, pre_approved_loan_amount, loan_runway_days)
-    VALUES ('Ramesh Sharma', 'Sharma Kirana & General Store', '+91 9811223344', 'sharma.kirana@paytm.mock', 'paytm@sharmakirana', 'Shop #14, Main Market, Chandni Chowk, Delhi', 'Paytm Payments Bank', '•••• 4519', 'PYTM0123456', 'merchant_sec_9811223344', 88, 75000, 45)
+    VALUES ('Ramesh Sharma', 'Sharma Kirana & General Store', '+91 9811223344', 'sharma.kirana@paytm.mock', '8171008964@ptaxis', 'Shop #14, Main Market, Chandni Chowk, Delhi', 'Paytm Payments Bank', '•••• 4519', 'PYTM0123456', 'merchant_sec_9811223344', 88, 75000, 45)
     """)
 
     # Seed Customers

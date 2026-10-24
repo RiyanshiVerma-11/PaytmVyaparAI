@@ -25,8 +25,19 @@ document.addEventListener('DOMContentLoaded', () => {
       digits = '91' + digits.substring(1);
     }
     const safeAmount = Math.round(Number(pendingAmount) || 0);
+
+    // Dynamic Merchant VPA & Shop Title (defaults to 8171008964@ptaxis for testing)
+    let merchantVpa = '8171008964@ptaxis';
+    let shopName = 'Sharma Kirana Store';
+    try {
+      const session = JSON.parse(localStorage.getItem('paytm_merchant_session') || '{}');
+      if (session.vpa) merchantVpa = session.vpa;
+      if (session.shopName) shopName = session.shopName;
+    } catch (e) {}
+
+    const upiLink = `upi://pay?pa=${encodeURIComponent(merchantVpa)}&am=${safeAmount}&pn=${encodeURIComponent(shopName)}&cu=INR`;
     const reminderMsg = encodeURIComponent(
-      `Namaste ${customerName || 'Grahak'} ji! Sharma Kirana Store se aapka kul baaki udhaar Rs.${safeAmount} hai. Kripya is Paytm UPI link se bhugtan karein: upi://pay?pa=paytm@sharmakirana&am=${safeAmount}&pn=SharmaKirana. Dhanyawad!`
+      `Namaste ${customerName || 'Grahak'} ji! ${shopName} se aapka kul baaki udhaar Rs.${safeAmount} hai. Kripya is Paytm UPI link se bhugtan karein:\n${upiLink}\n\nDhanyawad!`
     );
     return `https://wa.me/${digits}?text=${reminderMsg}`;
   }
