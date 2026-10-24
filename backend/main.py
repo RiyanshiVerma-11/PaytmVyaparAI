@@ -8,6 +8,14 @@ from pydantic import BaseModel
 # Add current directory to path
 sys.path.append(os.path.dirname(__file__))
 
+# Load environment variables (.env)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+except Exception:
+    pass
+
 from database import init_db
 from services.khata_service import KhataService
 from services.inventory_service import InventoryService

@@ -58,3 +58,11 @@
 - [x] **PostgreSQL Portability**: Standard ANSI SQL schema and types in SQLite (`backend/database.py`) allow zero-friction migration to PostgreSQL with `psycopg2`/`asyncpg`.
 - [x] **Vercel Reverse-Proxy & CORS Architecture**: Configured both root [`vercel.json`](./vercel.json) and [`frontend/vercel.json`](./frontend/vercel.json) with transparent `/api/(.*)` rewrites to live Render backend (`https://paytmvyaparai.onrender.com`), plus auto-detect fallback in [`frontend/js/api.js`](./frontend/js/api.js).
 
+---
+
+### ✅ Phase 7: Dynamic CRM Customer Phone Sync & WhatsApp Redirection
+- [x] **Dynamic Phone Resolution & SQLite Persistence**: Updated [`backend/services/khata_service.py`](./backend/services/khata_service.py) so `record_entry` matches customers by phone first or exact name, and **dynamically updates** the customer's phone in SQLite when recording new entries.
+- [x] **Automated 91-Prefix WhatsApp Link Builder**: Created `buildWhatsAppUrl()` in [`frontend/js/app.js`](./frontend/js/app.js) ensuring 10-digit mobile numbers (e.g. `9897157640`) are normalized with the international country code `91` (`https://wa.me/919897157640`) for WhatsApp Click to Chat.
+- [x] **Removed Static Mock Rows & Prefilled Dummy Values**: Cleared static mock customer HTML rows and hardcoded `value="+91 98101 12233"` from [`frontend/index.html`](./frontend/index.html), ensuring form resets and live feeds are 100% dynamic.
+- [x] **Dynamic AI Growth Engine & Churn Alerts**: Made [`loadGrowthCard`](./frontend/js/app.js) and soundbox notifications dynamically reflect real at-risk customers from the live database.
+

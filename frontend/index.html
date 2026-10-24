@@ -776,8 +776,8 @@
             <span class="lang-toggle-inactive" data-lang="hi">हि</span>
           </button>
 
-          <!-- Notification Bell -->
-          <button class="top-icon-btn" onclick="window.paytmSoundbox.broadcast('Aapke do grahak Manoj aur Rajesh pichle 30 din se nahi aaye')" title="Notifications">
+          <!-- Notification Bell (Dynamic Risk Alert) -->
+          <button class="top-icon-btn" onclick="window.broadcastRiskAlert ? window.broadcastRiskAlert() : window.paytmSoundbox.broadcast('Paytm Vyapar AI live sync active')" title="Notifications & Churn Alerts">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
             <span class="notification-dot"></span>
           </button>
@@ -905,60 +905,11 @@
               <button id="clearDashboardKhataSearch" class="card-search-clear-btn" style="display:none;" title="Clear Search">✕</button>
             </div>
 
-            <!-- Dense Scrollable Feed (Only Pending Udhaar Customers) -->
+            <!-- Dense Scrollable Feed (Only Pending Udhaar Customers - Dynamically Populated from DB) -->
             <div id="liveLedgerList" class="pos-ledger-feed">
-              <div class="pos-feed-row" id="khataRow-3">
-                <div class="pos-row-left">
-                  <span class="pos-dot pos-dot-coral"></span>
-                  <div class="pos-customer-meta">
-                    <span class="pos-customer-name">Manoj Verma</span>
-                    <span class="pos-customer-sub">Atta 5kg, Oil • +91 9899123456</span>
-                  </div>
-                </div>
-                <div class="pos-row-right">
-                  <span class="pos-amount-tag pos-amount-coral">₹1,700 उधार</span>
-                  <span class="pos-time-tag">Today</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
-                    <button class="pos-btn-action-sm pos-btn-settle-emerald" onclick="window.settleKhataDirect(3, 'Manoj Verma', 1700, this)">✓ पैसे मिले</button>
-                    <a href="https://wa.me/919899123456" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" title="WhatsApp Reminder">💬</a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pos-feed-row" id="khataRow-2">
-                <div class="pos-row-left">
-                  <span class="pos-dot pos-dot-coral"></span>
-                  <div class="pos-customer-meta">
-                    <span class="pos-customer-name">Pooja Gupta</span>
-                    <span class="pos-customer-sub">Ration Items • +91 9876543210</span>
-                  </div>
-                </div>
-                <div class="pos-row-right">
-                  <span class="pos-amount-tag pos-amount-coral">₹600 उधार</span>
-                  <span class="pos-time-tag">Yesterday</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
-                    <button class="pos-btn-action-sm pos-btn-settle-emerald" onclick="window.settleKhataDirect(2, 'Pooja Gupta', 600, this)">✓ पैसे मिले</button>
-                    <a href="https://wa.me/919876543210" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" title="WhatsApp Reminder">💬</a>
-                  </div>
-                </div>
-              </div>
-
-              <div class="pos-feed-row" id="khataRow-1">
-                <div class="pos-row-left">
-                  <span class="pos-dot pos-dot-coral"></span>
-                  <div class="pos-customer-meta">
-                    <span class="pos-customer-name">Ramesh Kumar</span>
-                    <span class="pos-customer-sub">Dairy & Groceries • +91 9810112233</span>
-                  </div>
-                </div>
-                <div class="pos-row-right">
-                  <span class="pos-amount-tag pos-amount-coral">₹450 उधार</span>
-                  <span class="pos-time-tag">Oct 23</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
-                    <button class="pos-btn-action-sm pos-btn-settle-emerald" onclick="window.settleKhataDirect(1, 'Ramesh Kumar', 450, this)">✓ पैसे मिले</button>
-                    <a href="https://wa.me/919810112233" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" title="WhatsApp Reminder">💬</a>
-                  </div>
-                </div>
+              <div class="ledger-loading-skeleton" style="padding:1.5rem; text-align:center; color:var(--text-muted); font-size:0.88rem;">
+                <span class="ai-pulse-dot" style="display:inline-block; margin-right:6px;"></span>
+                <span>खाताबही लोड हो रही है... / Loading live ledger...</span>
               </div>
             </div>
 
@@ -1663,7 +1614,7 @@
                 <span>👤 Customer Name (ग्राहक का नाम)</span>
                 <span class="required-star">*</span>
               </label>
-              <input type="text" id="khataInputName" class="form-input-text" placeholder="e.g. Sunil Verma, Manoj" required>
+              <input type="text" id="khataInputName" class="form-input-text" placeholder="e.g. Ramesh Kumar, Sunita" required autocomplete="name">
             </div>
 
             <div class="form-field-group">
@@ -1671,7 +1622,7 @@
                 <span>📱 Mobile Number</span>
                 <span class="badge-sms">WhatsApp / SMS</span>
               </label>
-              <input type="tel" id="khataInputPhone" class="form-input-text" placeholder="+91 98101 12233" value="+91 98101 12233">
+              <input type="tel" id="khataInputPhone" class="form-input-text" placeholder="e.g. 9897157640" autocomplete="tel">
             </div>
           </div>
 
@@ -1680,7 +1631,7 @@
             <label class="form-label">
               <span>🛒 Samaan / Items (सामान का विवरण)</span>
             </label>
-            <input type="text" id="khataInputDesc" class="form-input-text" placeholder="e.g. 1L Tel, 2kg Atta, Groceries" value="General Groceries">
+            <input type="text" id="khataInputDesc" class="form-input-text" placeholder="e.g. 1L Tel, 2kg Atta, Kirana Items">
             
             <div class="item-suggestion-chips">
               <button type="button" class="item-chip" onclick="window.setKhataDesc('Refined Tel & Masale')">Tel & Masale</button>

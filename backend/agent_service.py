@@ -261,12 +261,24 @@ class VyaparAgentService:
             amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+)', q)
             amount = float(amt_match.group(1)) if amt_match else 250.0
 
-            # Extract Customer Name
-            name = "Ramesh Kumar"
-            for n in ["ramesh", "pooja", "manoj", "ananya", "rajesh", "sunil", "sharma", "gupta", "verma"]:
-                if n in q:
-                    name = n.title()
-                    break
+            # Extract Customer Name dynamically from DB
+            name = None
+            try:
+                from database import get_connection
+                _conn = get_connection()
+                _cur = _conn.cursor()
+                _cur.execute("SELECT name FROM customers")
+                for _row in _cur.fetchall():
+                    _cname = _row["name"]
+                    parts = [_cname.lower()] + [p.lower() for p in _cname.split() if len(p) > 2]
+                    if any(p in q for p in parts):
+                        name = _cname
+                        break
+                _conn.close()
+            except Exception:
+                pass
+            if not name:
+                name = "Valued Customer"
 
             # Extract Item
             item_desc = "Kirana Items"

@@ -148,27 +148,36 @@ class ChatbotService:
         suggestions = []
         thoughts = []
 
-        # Customer name aliases (Hindi Devanagari & phonetic Hinglish)
+        # Customer name aliases - dynamically loaded from DB plus Hindi Devanagari mappings
         customer_alias_map = {
-            # Ramesh Kumar
-            "रमेश": "Ramesh Kumar", "रमेश कुमार": "Ramesh Kumar", "रामेश": "Ramesh Kumar",
-            "ramesh": "Ramesh Kumar", "ramesh kumar": "Ramesh Kumar",
-            # Rajesh Chawla
-            "राजेश": "Rajesh Chawla", "राजेश चावला": "Rajesh Chawla", "चावला": "Rajesh Chawla",
-            "rajesh": "Rajesh Chawla", "rajesh chawla": "Rajesh Chawla", "chawla": "Rajesh Chawla",
-            # Pooja Gupta
-            "पूजा": "Pooja Gupta", "पूजा गुप्ता": "Pooja Gupta", "गुप्ता": "Pooja Gupta",
-            "pooja": "Pooja Gupta", "pooja gupta": "Pooja Gupta", "puja": "Pooja Gupta", "puja gupta": "Pooja Gupta",
-            # Manoj Verma
-            "मनोज": "Manoj Verma", "मनोज वर्मा": "Manoj Verma", "वर्मा": "Manoj Verma",
-            "manoj": "Manoj Verma", "manoj verma": "Manoj Verma", "verma": "Manoj Verma",
-            # Ananya Singh
-            "अनन्या": "Ananya Singh", "अनन्या सिंह": "Ananya Singh", "सिंह": "Ananya Singh",
-            "ananya": "Ananya Singh", "ananya singh": "Ananya Singh",
-            # Sunil Yadav
-            "सुनील": "Sunil Yadav", "सुनील यादव": "Sunil Yadav", "यादव": "Sunil Yadav",
-            "sunil": "Sunil Yadav", "sunil yadav": "Sunil Yadav",
+            "रमेश": "Ramesh Kumar", "रमेश कुमार": "Ramesh Kumar",
+            "राजेश": "Rajesh Chawla", "राजेश चावला": "Rajesh Chawla",
+            "पूजा": "Pooja Gupta", "पूजा गुप्ता": "Pooja Gupta",
+            "मनोज": "Manoj Verma", "मनोज वर्मा": "Manoj Verma",
+            "अनन्या": "Ananya Singh", "अनन्या सिंह": "Ananya Singh",
+            "सुनील": "Sunil Yadav", "सुनील यादव": "Sunil Yadav",
         }
+        # Dynamically index all customers from live SQLite DB
+        try:
+            conn = get_connection()
+            cur = conn.cursor()
+            cur.execute("SELECT id, name, phone FROM customers")
+            for row in cur.fetchall():
+                c_name = row["name"]
+                c_lower = c_name.lower().strip()
+                customer_alias_map[c_lower] = c_name
+                parts = c_lower.split()
+                if len(parts) > 0 and len(parts[0]) > 2:
+                    customer_alias_map[parts[0]] = c_name
+                if len(parts) > 1 and len(parts[-1]) > 2:
+                    customer_alias_map[parts[-1]] = c_name
+                if row["phone"]:
+                    digits = ''.join(ch for ch in str(row["phone"]) if ch.isdigit())
+                    if len(digits) >= 10:
+                        customer_alias_map[digits[-10:]] = c_name
+            conn.close()
+        except Exception as e:
+            print("Dynamic customer indexing error:", e)
 
         # ========================================================
         # INTENT 1: KHATA / UDHAAR INQUIRY & REAL-TIME ACTION

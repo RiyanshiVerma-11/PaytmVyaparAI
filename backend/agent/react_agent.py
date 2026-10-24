@@ -20,12 +20,24 @@ class ReactAgent:
             amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+)', q)
             amount = float(amt_match.group(1)) if amt_match else 450.0
 
-            # Customer name extraction
-            customer = "Ramesh Kumar"
-            for n in ["ramesh", "pooja", "manoj", "ananya", "rajesh", "sunil", "sharma", "gupta", "verma"]:
-                if n in q:
-                    customer = n.title()
-                    break
+            # Dynamic customer name extraction from DB
+            customer = None
+            try:
+                from database import get_connection
+                _conn = get_connection()
+                _cur = _conn.cursor()
+                _cur.execute("SELECT name FROM customers")
+                for _row in _cur.fetchall():
+                    _cname = _row["name"]
+                    parts = [_cname.lower()] + [p.lower() for p in _cname.split() if len(p) > 2]
+                    if any(p in q for p in parts):
+                        customer = _cname
+                        break
+                _conn.close()
+            except Exception:
+                pass
+            if not customer:
+                customer = "Valued Customer"
 
             # Item extraction
             item = "1L Refined Oil"

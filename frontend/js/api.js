@@ -13,7 +13,7 @@ const isLocalhost = typeof window !== 'undefined' && Boolean(
 const API_BASE = (
   (typeof window !== 'undefined' && window.PAYTM_API_BASE) || 
   (typeof localStorage !== 'undefined' && localStorage.getItem('PAYTM_API_BASE')) || 
-  (isLocalhost ? '' : RENDER_BACKEND_URL)
+  (isLocalhost && (window.location.port === '8000' || !window.location.port) ? '' : (isLocalhost ? 'http://127.0.0.1:8000' : RENDER_BACKEND_URL))
 ).replace(/\/$/, '');
 
 function endpoint(path) {

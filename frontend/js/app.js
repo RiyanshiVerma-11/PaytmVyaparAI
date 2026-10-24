@@ -15,6 +15,23 @@ document.addEventListener('DOMContentLoaded', () => {
   let inventoryFilter = 'all';
   let historyFilter = 'all';
 
+  // Dynamic WhatsApp Click-to-Chat Link Generator (Ensures valid 91-prefix country format)
+  function buildWhatsAppUrl(rawPhone, customerName, pendingAmount) {
+    if (!rawPhone) return '#';
+    let digits = String(rawPhone).replace(/\D/g, '');
+    if (digits.length === 10) {
+      digits = '91' + digits;
+    } else if (digits.length === 11 && digits.startsWith('0')) {
+      digits = '91' + digits.substring(1);
+    }
+    const safeAmount = Math.round(Number(pendingAmount) || 0);
+    const reminderMsg = encodeURIComponent(
+      `Namaste ${customerName || 'Grahak'} ji! Sharma Kirana Store se aapka kul baaki udhaar Rs.${safeAmount} hai. Kripya is Paytm UPI link se bhugtan karein: upi://pay?pa=paytm@sharmakirana&am=${safeAmount}&pn=SharmaKirana. Dhanyawad!`
+    );
+    return `https://wa.me/${digits}?text=${reminderMsg}`;
+  }
+  window.buildWhatsAppUrl = buildWhatsAppUrl;
+
   // ========================================================
   // 1. COLLAPSIBLE SIDEBAR & RESPONSIVE TOGGLE
   // ========================================================
@@ -78,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
       growthTitle: "AI Growth Engine",
       winbackAlert: "Old Customers",
       growthBadgeAlert: "Old Customer",
-      growthCustomerText: "Manoj Verma hasn't visited in 45 days. High churn risk.",
+      growthCustomerText: "Checking customer activity and churn risk...",
       growthOfferSub: "10% Discount Voucher",
       btnSendOffer: "Offer Bhejo (10% Discount)",
       festiveSurgeTitle: "Diwali High Sales",
@@ -144,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
       growthTitle: "व्यापार ग्रोथ",
       winbackAlert: "पुराने ग्राहक",
       growthBadgeAlert: "पुराने ग्राहक",
-      growthCustomerText: "मनोज वर्मा 45 दिनों से नहीं आए। ग्राहक टूटने का रिस्क है।",
+      growthCustomerText: "ग्राहक सक्रियता और रिस्क की जांच हो रही है...",
       growthOfferSub: "10% छूट कूपन तैयार",
       btnSendOffer: "ऑफर भेजें (10% छूट)",
       festiveSurgeTitle: "दीवाली पर ज्यादा बिक्री",
@@ -561,10 +578,7 @@ document.addEventListener('DOMContentLoaded', () => {
         item.className = 'pos-feed-row';
         item.id = `khataRow-${c.id}`;
 
-        const reminderMsg = encodeURIComponent(
-          `Namaste ${c.name} ji! Sharma Kirana Store se aapka kul baaki udhaar Rs.${c.pending_udhaar} hai. Kripya is Paytm UPI link se bhugtan karein: upi://pay?pa=paytm@sharmakirana&am=${c.pending_udhaar}&pn=SharmaKirana. Dhanyawad!`
-        );
-        const whatsappUrl = `https://wa.me/${(c.phone || '').replace(/[^0-9]/g, '')}?text=${reminderMsg}`;
+        const whatsappUrl = buildWhatsAppUrl(c.phone, c.name, c.pending_udhaar);
 
         const settleBtnText = isHindi ? '✓ पैसे मिले' : '✓ Paid';
 
@@ -639,25 +653,49 @@ document.addEventListener('DOMContentLoaded', () => {
       const offerBtn = document.getElementById('growthSendOfferBtn');
       const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
 
-      if (data.campaigns && data.campaigns.length > 0) {
+      if (data && data.campaigns && data.campaigns.length > 0) {
         const c = data.campaigns[0];
         if (nameEl) {
           nameEl.textContent = isHindi 
-            ? 'मनोज वर्मा 45 दिनों से नहीं आए। ग्राहक टूटने का रिस्क है।'
-            : "Manoj Verma hasn't visited in 45 days. High churn risk.";
+            ? `${c.customer_name} पिछले काफी समय से नहीं आए (${c.churn_risk})।`
+            : `${c.customer_name} (${c.churn_risk}): Last visited ${c.last_visit || 'past month'}.`;
         }
         if (offerBtn) {
-          offerBtn.innerHTML = `<span>📲</span> ${isHindi ? 'ऑफर भेजें (10% छूट)' : 'Offer Bhejo (10% Discount)'}`;
+          const discountText = c.suggested_discount || '10% Discount';
+          offerBtn.innerHTML = `<span>📲</span> ${isHindi ? `ऑफर भेजें (${discountText})` : `Offer Bhejo (${discountText})`}`;
           offerBtn.onclick = () => {
             window.location.href = c.sms_uri;
-            showNotification(isHindi ? '📲 मनोज वर्मा के लिए 10% छूट का एसएमएस तैयार' : '📲 Offer SMS prepared for Manoj Verma', 'success');
+            showNotification(isHindi ? `📲 ${c.customer_name} के लिए ${discountText} का एसएमएस तैयार` : `📲 Offer SMS prepared for ${c.customer_name}`, 'success');
           };
+        }
+      } else {
+        if (nameEl) {
+          nameEl.textContent = isHindi ? 'सभी नियमित ग्राहक समय पर आ रहे हैं!' : 'All regular customers active & visiting!';
         }
       }
     } catch(e) {
       console.error('Error loading growth card:', e);
     }
   }
+
+  // Dynamic Audio Churn & Risk Alert
+  window.broadcastRiskAlert = async function() {
+    try {
+      const growth = await API.getGrowth();
+      if (growth && growth.campaigns && growth.campaigns.length > 0) {
+        const names = growth.campaigns.slice(0, 2).map(c => c.customer_name).join(' aur ');
+        const text = `Aapke grahak ${names} kaafi samay se nahi aaye. Churn risk hai.`;
+        if (window.paytmSoundbox) window.paytmSoundbox.broadcast(text);
+        showNotification(`📢 Alert: ${text}`, 'info');
+      } else {
+        const text = 'Sabhi grahak sakriya hain. Koi churn risk nahi hai.';
+        if (window.paytmSoundbox) window.paytmSoundbox.broadcast(text);
+        showNotification(`✅ ${text}`, 'info');
+      }
+    } catch (err) {
+      if (window.paytmSoundbox) window.paytmSoundbox.broadcast('Paytm Vyapar AI live sync active hai.');
+    }
+  };
 
   // Card 3: Low Stock Warnings
   async function loadStockCard() {
@@ -789,10 +827,7 @@ document.addEventListener('DOMContentLoaded', () => {
       else if (c.churn_risk === 'Dormant') riskBadge = `<span class="badge-status badge-red">Dormant</span>`;
 
       // Polite Hindi WhatsApp Reminder message with UPI Deep Link
-      const reminderMsg = encodeURIComponent(
-        `Namaste ${c.name} ji! Sharma Kirana Store se aapka kul baaki udhaar Rs.${c.pending_udhaar} hai. Kripya is Paytm UPI link se bhugtan karein: upi://pay?pa=paytm@sharmakirana&am=${c.pending_udhaar}&pn=SharmaKirana. Dhanyawad!`
-      );
-      const whatsappUrl = `https://wa.me/${(c.phone || '').replace(/[^0-9]/g, '')}?text=${reminderMsg}`;
+      const whatsappUrl = buildWhatsAppUrl(c.phone, c.name, c.pending_udhaar);
 
       tr.innerHTML = `
         <td>

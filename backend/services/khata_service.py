@@ -1,24 +1,73 @@
 from database import get_connection
 from datetime import datetime
 
+def normalize_phone(raw_phone: str) -> str:
+    if not raw_phone:
+        return ""
+    digits = ''.join(c for c in str(raw_phone) if c.isdigit())
+    if len(digits) == 10:
+        return f"+91 {digits}"
+    elif len(digits) == 11 and digits.startswith("0"):
+        return f"+91 {digits[1:]}"
+    elif len(digits) == 12 and digits.startswith("91"):
+        return f"+91 {digits[2:]}"
+    elif digits:
+        return f"+{digits}" if not str(raw_phone).startswith("+") else str(raw_phone).strip()
+    return str(raw_phone).strip()
+
+def get_phone_last10(raw_phone: str) -> str:
+    if not raw_phone:
+        return ""
+    digits = ''.join(c for c in str(raw_phone) if c.isdigit())
+    return digits[-10:] if len(digits) >= 10 else digits
+
 class KhataService:
     @staticmethod
     def record_entry(customer_name: str, amount: float, item_description: str = "General Items", entry_type: str = "udhaar", phone: str = None):
         conn = get_connection()
         cursor = conn.cursor()
 
-        # Find or create customer
-        cursor.execute("SELECT * FROM customers WHERE name LIKE ? OR phone = ?", (f"%{customer_name}%", phone or ""))
-        customer = cursor.fetchone()
+        norm_phone = normalize_phone(phone) if phone else None
+        phone_10 = get_phone_last10(phone) if phone else None
+        clean_name = (customer_name or "").strip()
+
+        # Fetch all existing customers for precise matching
+        cursor.execute("SELECT * FROM customers")
+        all_customers = [dict(r) for r in cursor.fetchall()]
+
+        customer = None
+
+        # 1. Match by phone number first if provided (highest precision in retail CRM)
+        if phone_10:
+            for c in all_customers:
+                c_10 = get_phone_last10(c["phone"])
+                if c_10 and c_10 == phone_10:
+                    customer = c
+                    break
+
+        # 2. Match by exact full name (case-insensitive) if not matched by phone
+        if not customer and clean_name:
+            target_name_lower = clean_name.lower()
+            for c in all_customers:
+                if c["name"].strip().lower() == target_name_lower:
+                    customer = c
+                    break
+
+        # 3. Match by exact first name if clean_name is a single word and matches exactly one customer
+        if not customer and clean_name and " " not in clean_name:
+            matching_first_names = [c for c in all_customers if c["name"].strip().lower().split()[0] == clean_name.lower()]
+            if len(matching_first_names) == 1:
+                customer = matching_first_names[0]
 
         if customer:
             cust_id = customer["id"]
-            cust_name = customer["name"]
-            cust_phone = phone or customer["phone"]
+            # If a new phone is provided, dynamically update it! Otherwise keep existing
+            cust_phone = norm_phone or customer["phone"]
+            cust_name = clean_name.title() if (clean_name and len(clean_name) >= len(customer["name"])) else customer["name"]
             curr_pending = customer["pending_udhaar"]
         else:
-            cust_name = customer_name.title()
-            cust_phone = phone or "+91 9810000000"
+            cust_name = clean_name.title() if clean_name else "Valued Customer"
+            cust_phone = norm_phone or "+91 9810000000"
             cursor.execute("""
             INSERT INTO customers (name, phone, pending_udhaar, last_visit_date, visit_count, churn_risk)
             VALUES (?, ?, 0, date('now'), 1, 'Normal')
@@ -29,12 +78,12 @@ class KhataService:
         amount = float(amount)
         new_pending = (curr_pending + amount) if entry_type.lower() == "udhaar" else max(0.0, curr_pending - amount)
 
-        # Update customer balance & visit count
+        # Update customer balance, visit count, AND phone & name dynamically
         cursor.execute("""
         UPDATE customers 
-        SET pending_udhaar = ?, last_visit_date = date('now'), visit_count = visit_count + 1
+        SET name = ?, phone = ?, pending_udhaar = ?, last_visit_date = date('now'), visit_count = visit_count + 1
         WHERE id = ?
-        """, (new_pending, cust_id))
+        """, (cust_name, cust_phone, new_pending, cust_id))
 
         # Insert Khata record
         cursor.execute("""
@@ -42,7 +91,7 @@ class KhataService:
         VALUES (?, ?, ?, ?, ?, datetime('now'), 'pending')
         """, (cust_id, cust_name, amount, item_description, entry_type.lower()))
 
-        # Also log to transactions table
+        # Also log to transactions table with dynamic phone
         txn_id = f"TXN_{int(datetime.now().timestamp())}"
         cursor.execute("""
         INSERT INTO transactions (txn_id, amount, customer_phone, payment_mode, timestamp, status)
