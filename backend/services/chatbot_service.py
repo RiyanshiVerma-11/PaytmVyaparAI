@@ -153,6 +153,7 @@ class ChatbotService:
         action_taken = None
         data_payload = None
         soundbox_payload = None
+        confirmation_card = None
         suggestions = []
         thoughts = []
 
@@ -238,16 +239,20 @@ class ChatbotService:
             "kitna", "kitne", "kitni", "kya", "batao", "bataiye", "bata do", "check", "dekho", "dekhein", "dikhao", "status", "summary",
             "कितना", "कितने", "कितनी", "क्या", "बताओ", "बताइए", "बता दो", "चेक", "देखो", "दिखाओ", "स्थिति"
         ])
-        is_udhaar_action = any(w in q for w in [
-            # Hinglish / English - action verbs for writing/giving udhaar
-            "likho", "likh lo", "likh do", "likh", "likhiye",
-            "udhaar diya", "udhaar de do", "udhaar likho", "udhaar likh", "udhari likho",
-            "add kar", "jod do", "le gaya", "le gaye",
-            # Devanagari Hindi
-            "लिखो", "लिख लो", "लिख दो", "लिख लेना", "लिखिये", "लिखिए",
-            "उधार दिया", "उधार दे दो", "उधार लिखो", "उधार लिख", "उधारी लिखो",
-            "जोड़ दो", "जोड़ो", "ले गया", "ले गए"
-        ]) and not is_inquiry
+        is_udhaar_action = (
+            any(w in q for w in [
+                # Hinglish / English - action verbs for writing/giving udhaar
+                "likho", "likh lo", "likh do", "likh", "likhiye",
+                "udhaar diya", "udhaar de do", "udhaar likho", "udhaar likh", "udhari likho",
+                "add kar", "jod do", "le gaya", "le gaye",
+                # Devanagari Hindi
+                "लिखो", "लिख लो", "लिख दो", "लिख लेना", "लिखिये", "लिखिए",
+                "उधार दिया", "उधार दे दो", "उधार लिखो", "उधार लिख", "उधारी लिखो",
+                "जोड़ दो", "जोड़ो", "ले गया", "ले गए"
+            ]) or (
+                has_amount and any(w in q for w in ["udhaar", "udhari", "उधार", "उधारी"])
+            )
+        ) and not is_inquiry
         is_khata_general = any(w in q for w in [
             "khata", "baaki", "bahi", "ledger", "balance", "udhaar", "jama", "hisab", "kitna", "kitne",
             "खाता", "बही", "बाकी", "बैलेंस", "हिसाब", "उधार", "कितना बाकी", "कितना"
@@ -392,6 +397,21 @@ class ChatbotService:
             session["last_action"] = f"{entry_type.title()} of ₹{int(amount)} for {customer_name}"
             new_bal = action_res.get("new_pending_balance", 0)
 
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = {
+                "action": "UDHAAR_CREDIT" if entry_type == "udhaar" else "JAMA_PAYMENT",
+                "action_label": "खाता उधार दर्ज (Credit Entry)" if entry_type == "udhaar" else "खाता जमा दर्ज (Payment Received)",
+                "entity": customer_name,
+                "item_description": item_desc,
+                "item": item_desc,
+                "amount": float(amount),
+                "date": now_str,
+                "status": "SAVED_TO_DATABASE",
+                "simulation": False,
+                "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                "notice": "Saved to live Paytm Bahi-Khata ledger"
+            }
+
             reply = f"✅ **Entry Darj Ho Gayi Hai!**\n\n" \
                     f"• **Grahak:** {customer_name}\n" \
                     f"• **Type:** {entry_type.upper()} ({'Prapt Hue (Hisab Chukta / Jama)' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
@@ -489,6 +509,21 @@ class ChatbotService:
             soundbox_payload = sim_res.get("soundbox_payload")
             est_profit = round(amount * 0.21, 1)
 
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = {
+                "action": "JAMA_PAYMENT",
+                "action_label": "छोटा गल्ला नकद बिक्री (Cash Micro-Sale)",
+                "entity": "Cash Counter Sale",
+                "item_description": item_tag,
+                "item": item_tag,
+                "amount": float(amount),
+                "date": now_str,
+                "status": "SAVED_TO_DATABASE",
+                "simulation": False,
+                "simulation_badge": "Live Paytm Cashflow",
+                "notice": "Logged into transactions ledger"
+            }
+
             reply = f"⚡ **Chhota Galla Micro-Sale Darj!** (No Customer Name Needed)\n\n" \
                     f"• **Item:** {item_tag}\n" \
                     f"• **Sale Amount:** ₹{int(amount)}\n" \
@@ -521,6 +556,19 @@ class ChatbotService:
 
                 po_qty = po_res.get("quantity")
                 po_unit = po_res.get("unit", "units")
+                now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+                confirmation_card = {
+                    "action": "SUPPLIER_PURCHASE_ORDER",
+                    "action_label": "सप्लायर रीऑर्डर PO (Wholesale Restock)",
+                    "entity": target_item,
+                    "item": f"Qty: {po_qty} {po_unit}",
+                    "amount": float(po_res.get("total_cost", 0)),
+                    "date": now_str,
+                    "status": po_res.get("email_preview", {}).get("email_status", "DISPATCHED_TO_OUTBOX"),
+                    "simulation": True,
+                    "simulation_badge": "PO created and queued for supplier email (Demo Mode)",
+                    "notice": "PO created and queued for supplier email (Demo Mode)"
+                }
                 reply = f"📦 **Supplier Purchase Order Dispatched!**\n\n" \
                         f"• **PO Number:** `{po_res.get('po_number')}`\n" \
                         f"• **Item:** {target_item}\n" \
@@ -556,6 +604,19 @@ class ChatbotService:
                 data_payload = disburse_res
                 soundbox_payload = disburse_res.get("soundbox_payload")
                 session["last_action"] = f"Disbursed loan of ₹{context['credit']['pre_approved_amount']:,}"
+                now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+                confirmation_card = {
+                    "action": "LOAN_DISBURSAL",
+                    "action_label": "वर्किंग कैपिटल लोन डिसबर्सल (Working Capital Loan)",
+                    "entity": disburse_res.get("bank_account", "Paytm Payments Bank"),
+                    "item": f"Interest: {disburse_res.get('interest_rate', '1.2% / mo')}",
+                    "amount": float(context["credit"]["pre_approved_amount"]),
+                    "date": now_str,
+                    "status": "APPROVED_IN_SIMULATION",
+                    "simulation": True,
+                    "simulation_badge": "Loan approved in simulation. No real funds disbursed.",
+                    "notice": "Loan approved in simulation. No real funds disbursed."
+                }
 
                 reply = f"🎉 **Mubarak Ho! Working Capital Disbursed!**\n\n" \
                         f"• **Raqam:** ₹{int(context['credit']['pre_approved_amount']):,}\n" \
@@ -647,6 +708,7 @@ class ChatbotService:
             "reply": reply,
             "action_taken": action_taken,
             "data": data_payload,
+            "confirmation_card": confirmation_card,
             "soundbox_payload": soundbox_payload,
             "suggestions": suggestions,
             "thoughts": thoughts,

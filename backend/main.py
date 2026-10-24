@@ -292,6 +292,7 @@ if os.path.exists(FRONTEND_DIR):
         app.mount("/js", StaticFiles(directory=js_dir), name="js")
 
     @app.get("/")
+    @app.get("/index.html")
     async def serve_index():
         return FileResponse(os.path.join(FRONTEND_DIR, "index.html"))
 

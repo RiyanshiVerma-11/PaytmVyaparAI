@@ -12,13 +12,14 @@ ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 
 sys.path.insert(0, BACKEND_DIR)
 
-from database import init_db, get_connection
+from database import init_db, get_connection, reset_demo_data
 from services.khata_service import KhataService
 from services.inventory_service import InventoryService
 from services.growth_service import GrowthService
 from services.credit_service import CreditService
 from services.transaction_service import TransactionService
 from services.chatbot_service import ChatbotService
+from services.auth_service import AuthService
 from agent.react_agent import ReactAgent
 
 init_db()
@@ -84,6 +85,17 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
             elif path == "/api/transactions/profit-trends":
                 days = int(query.get("days", [7])[0])
                 return self._send_json(TransactionService.get_daily_profit_trends(days))
+            elif path == "/api/demo/status":
+                return self._send_json({
+                    "is_demo_account": True,
+                    "demo_merchant_name": "Sharma Kirana Store",
+                    "owner": "Ramesh Sharma",
+                    "demo_notice": "A fully populated demo merchant is provided so judges can test the complete product without manual onboarding.",
+                    "auth_credentials": {
+                        "email": "ramesh.kirana@paytm.com",
+                        "pin": "1234"
+                    }
+                })
             elif path == "/health":
                 return self._send_json({"status": "ok"})
         except Exception as e:
@@ -178,6 +190,50 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
                     body.get("item_tag")
                 )
                 return self._send_json(res)
+            elif path == "/api/auth/register":
+                res = AuthService.register_merchant(
+                    body.get("name", ""),
+                    body.get("shop_name", ""),
+                    body.get("email", ""),
+                    body.get("phone", ""),
+                    body.get("password", ""),
+                    body.get("upi_id"),
+                    body.get("address")
+                )
+                return self._send_json(res)
+            elif path == "/api/auth/login":
+                try:
+                    res = AuthService.login_merchant(
+                        body.get("login_id", ""),
+                        body.get("password", "")
+                    )
+                    return self._send_json(res)
+                except ValueError as ve:
+                    return self._send_json({"success": False, "message": str(ve)}, status=401)
+            elif path == "/api/auth/forgot-password/send-otp":
+                try:
+                    res = AuthService.send_login_otp(body.get("login_id", ""))
+                    return self._send_json(res)
+                except ValueError as ve:
+                    return self._send_json({"success": False, "message": str(ve)}, status=404)
+            elif path == "/api/auth/forgot-password/verify-otp":
+                try:
+                    res = AuthService.verify_login_otp(
+                        body.get("login_id", ""),
+                        body.get("otp", ""),
+                        body.get("new_password")
+                    )
+                    return self._send_json(res)
+                except ValueError as ve:
+                    return self._send_json({"success": False, "message": str(ve)}, status=400)
+            elif path in ["/api/demo/reset", "/api/merchant/reset-demo"]:
+                reset_demo_data()
+                return self._send_json({
+                    "success": True,
+                    "message": "Demo data reset successfully to Sharma Kirana baseline!",
+                    "demo_merchant": "Ramesh Sharma - Sharma Kirana Store",
+                    "mode": "DEMO_RESET_COMPLETE"
+                })
             else:
                 return self._send_json({"error": "Not found"}, status=404)
         except Exception as e:
