@@ -76,7 +76,7 @@
           <!-- Dynamic Live Context Strip -->
           <div class="chatbot-context-strip" id="chatbotContextStrip">
             <div style="display:flex; align-items:center; gap:0.4rem;">
-              <span>🧠 Live Memory:</span>
+              <span>Live Memory:</span>
               <span id="chatbotMemoryLabel">Syncing...</span>
             </div>
             <div class="chatbot-context-badges" id="chatbotContextBadges">
@@ -98,10 +98,10 @@
 
           <!-- Quick Suggestion Chips Bar -->
           <div class="chatbot-suggestions" id="chatbotSuggestions">
-            <div class="chat-suggestion-chip" data-query="Kitna udhaar baaki hai?">📒 Udhaar Status</div>
-            <div class="chat-suggestion-chip" data-query="Kaun sa stock kam hai?">📦 Low Stock</div>
-            <div class="chat-suggestion-chip" data-query="Mera loan score aur limit kitna hai?">🏛️ Loan Score</div>
-            <div class="chat-suggestion-chip" data-query="Soundbox chime test karo">🔊 Test Soundbox</div>
+            <div class="chat-suggestion-chip" data-query="Kitna udhaar baaki hai?">Udhaar Status</div>
+            <div class="chat-suggestion-chip" data-query="Kaun sa stock kam hai?">Low Stock</div>
+            <div class="chat-suggestion-chip" data-query="Mera loan score aur limit kitna hai?">Loan Score</div>
+            <div class="chat-suggestion-chip" data-query="Soundbox chime test karo">Test Soundbox</div>
           </div>
 
           <!-- Input Bar with Voice Mic & Send -->
@@ -197,7 +197,7 @@
           },
           (errMsg) => {
             if (typeof window.showNotification === 'function') {
-              window.showNotification(`🎙️ ${errMsg}`, 'error');
+              window.showNotification(`${errMsg}`, 'error');
             }
           }
         );
@@ -254,7 +254,7 @@
       if (this.history.length === 0) {
         // Welcome message
         this.appendAssistantBubble(
-          "Namaste Ramesh Sharma ji! 🙏 Main **Paytm Vyapar Saathi Copilot** hoon.\n\n" +
+          "Namaste Ramesh Sharma ji! Main **Paytm Vyapar Saathi Copilot** hoon.\n\n" +
           "Mere paas aapki dukan ka **full real-time context** hai:\n" +
           "• **Live Bahi-Khata Ledger** & Customer Balances\n" +
           "• **Kirana Inventory** & 1-Click Wholesale Restock\n" +
@@ -320,7 +320,7 @@
           window.renderKhataAuditList();
         }
         if (window.showNotification && data.action_taken) {
-          window.showNotification(`⚡ ${replyText.split('\n')[0].replace(/[#*]/g, '')}`, 'success');
+          window.showNotification(`${replyText.split('\n')[0].replace(/[#*]/g, '')}`, 'success');
         }
 
         // 5. Update Suggestions if returned
@@ -330,7 +330,7 @@
 
       } catch (err) {
         this.showTyping(false);
-        this.appendAssistantBubble(`❌ Error processing query: ${err.message}. Kripya dobara try karein.`, true);
+        this.appendAssistantBubble(`Error processing query: ${err.message}. Kripya dobara try karein.`, true);
       }
     }
 
@@ -360,7 +360,7 @@
         .replace(/\n• /g, '<br>• ');
 
       if (actionTaken) {
-        html += `<div class="chat-bubble-action-box">⚡ Action Executed: <strong>${actionTaken}</strong> • Synced with Live DB</div>`;
+        html += `<div class="chat-bubble-action-box">Action Executed: <strong>${actionTaken}</strong> • Synced with Live DB</div>`;
       }
 
       if (confirmationCard) {
@@ -369,7 +369,7 @@
         html += `
           <div class="chat-confirmation-card" style="margin-top:10px; padding:12px; background:var(--bg-card); border:1px solid ${isSim ? '#f59e0b' : '#10b981'}; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.05); text-align:left;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-              <span style="font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--paytm-blue, #002970);">📋 ${confirmationCard.action || 'Transaction Confirmation'}</span>
+              <span style="font-weight:700; font-size:12px; text-transform:uppercase; letter-spacing:0.5px; color:var(--paytm-blue, #002970);">${confirmationCard.action || 'Transaction Confirmation'}</span>
               <span class="badge ${isSim ? 'badge-amber' : 'badge-green'}" style="font-size:10px; padding:2px 8px; border-radius:12px;">${isSim ? 'DEMO SIMULATION' : 'LIVE LEDGER'}</span>
             </div>
             ${amountStr ? `<div style="font-size:20px; font-weight:800; color:#10b981; margin-bottom:6px;">${amountStr}</div>` : ''}

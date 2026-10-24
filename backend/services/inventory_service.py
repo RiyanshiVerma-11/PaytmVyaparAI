@@ -25,7 +25,7 @@ class InventoryService:
         }
 
     @staticmethod
-    def create_supplier_po(item_name: str, quantity: int = None, merchant_id: int = 1):
+    def create_supplier_po(item_name: str, quantity: int = None, merchant_id: int = 1, custom_vendor_email: str = None):
         conn = get_connection()
         cursor = conn.cursor()
         
@@ -53,7 +53,7 @@ class InventoryService:
 
         shop_title = merchant.get("shop_name") or "Sharma Kirana Store"
         shop_address = merchant.get("address") or "Main Market, Delhi"
-        merchant_email = merchant.get("email") or "orders@kirana.mock"
+        merchant_email = merchant.get("email") or "ramesh.kirana@paytm.com"
         merchant_phone = merchant.get("phone") or "+91 9811223344"
 
         # Unique PO Number with millisecond and random entropy
@@ -70,11 +70,28 @@ class InventoryService:
         smtp_pass = (os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD") or "").replace(" ", "").strip()
         from_name = os.getenv("SMTP_FROM_NAME", "Vyapar Saathi")
 
+        # Determine verified destination email to prevent unresolvable .mock domain bounce-backs
+        raw_vendor_email = (custom_vendor_email or item["supplier_email"] or "").strip()
+        is_mock_domain = (
+            not raw_vendor_email or 
+            ".mock" in raw_vendor_email.lower() or 
+            ".example" in raw_vendor_email.lower() or 
+            "@" not in raw_vendor_email
+        )
+
+        if is_mock_domain:
+            # Route to merchant's real email (or smtp_user) so live test delivery succeeds without bouncing!
+            destination_email = merchant_email if (merchant_email and "@" in merchant_email and ".mock" not in merchant_email) else (smtp_user or "orders@directexample.com")
+            subject_prefix = f"[TEST PO COPY] "
+        else:
+            destination_email = raw_vendor_email
+            subject_prefix = ""
+
         msg = EmailMessage()
-        msg["Subject"] = f"URGENT RESTOCK PO #{po_num} - {shop_title}, {shop_address.split(',')[0]}"
+        msg["Subject"] = f"{subject_prefix}URGENT RESTOCK PO #{po_num} - {shop_title}, {shop_address.split(',')[0]}"
         msg["From"] = f"{from_name} <{smtp_user}>" if smtp_user else merchant_email
         msg["Reply-To"] = merchant_email
-        msg["To"] = item["supplier_email"]
+        msg["To"] = destination_email
         
         body_text = (
             f"====================================================\n"
@@ -89,7 +106,8 @@ class InventoryService:
             f"Email: {merchant_email}\n\n"
             f"SUPPLIER / VENDOR DETAILS:\n"
             f"Vendor: {item['supplier_name']}\n"
-            f"Email: {item['supplier_email']}\n\n"
+            f"Target Supplier Address: {raw_vendor_email}\n"
+            f"Dispatched To: {destination_email}\n\n"
             f"ORDER SPECIFICATION:\n"
             f"• Item Name: {item['item_name']}\n"
             f"• Category: {item['category']}\n"
@@ -116,7 +134,7 @@ class InventoryService:
                 server.send_message(msg)
                 server.quit()
                 email_status = "SENT_VIA_SMTP"
-                smtp_note = f"Dispatched live via SMTP server {smtp_host} to {item['supplier_email']}."
+                smtp_note = f"Dispatched live via SMTP server {smtp_host} to {destination_email}."
             except Exception as smtp_err:
                 email_status = "FAILED_SMTP_FALLBACK_OUTBOX"
                 smtp_note = f"SMTP live dispatch failed ({smtp_err}); safely persisted in Outbox."
@@ -129,14 +147,15 @@ class InventoryService:
             status, sent_at, expected_delivery_date, delivery_status, email_status, email_raw
         )
         VALUES (?, ?, ?, ?, ?, ?, 'PO_DISPATCHED_PENDING_DELIVERY', datetime('now'), ?, 'PENDING', ?, ?)
-        """, (po_num, item["supplier_name"], item["supplier_email"], item["item_name"], quantity, total_cost, expected_delivery, email_status, str(msg)))
+        """, (po_num, item["supplier_name"], destination_email, item["item_name"], quantity, total_cost, expected_delivery, email_status, str(msg)))
 
         po_id = cursor.lastrowid
         conn.commit()
         conn.close()
 
         email_preview = {
-            "to": item["supplier_email"],
+            "to": destination_email,
+            "target_vendor": raw_vendor_email,
             "from": merchant_email,
             "subject": msg["Subject"],
             "body": body_text,

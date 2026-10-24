@@ -27,3 +27,21 @@ package-lock.json
 finding_project*
 finding_project plan.md
 
+# Hackathon Presentation Decks & Scratch Slides (Do not commit to git)
+*.pptx
+*.potx
+*.pdf
+downloaded_presentation*
+unpacked_presentation/
+slide_*.png
+slides_dump.txt
+slide_elements.txt
+update_presentation.py
+Paytm_Vyapar_Saathi_SheBuilds*
+create_architecture_diagram.py
+create_presentation_architecture.py
+create_*architecture*.py
+architecture.png
+architecture.svg
+assets/architecture.png
+

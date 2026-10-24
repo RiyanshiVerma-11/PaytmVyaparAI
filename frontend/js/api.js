@@ -76,6 +76,33 @@ const API = {
     return await res.json();
   },
 
+  async undoKhataEntry(entryId) {
+    const res = await fetch(endpoint('/api/khata/entry/undo'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ entry_id: parseInt(entryId) })
+    });
+    return await res.json();
+  },
+
+  async updateMerchantEmail(email, merchantId = 1) {
+    const res = await fetch(endpoint('/api/merchant/update-email'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: String(email).trim(), merchant_id: merchantId })
+    });
+    return await res.json();
+  },
+
+  async sendDailyProfitPulseEmail(customEmail = null, merchantId = 1) {
+    const res = await fetch(endpoint('/api/transactions/daily-pulse-email'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ custom_email: customEmail, merchant_id: merchantId })
+    });
+    return await res.json();
+  },
+
   // 3. Inventory & Smart Restock
   async getInventory() {
     const res = await fetch(endpoint('/api/inventory'));

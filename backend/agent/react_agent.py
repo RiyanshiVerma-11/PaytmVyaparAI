@@ -189,6 +189,22 @@ AGENT_TOOLS = [
                 "properties": {}
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "send_daily_profit_pulse_email",
+            "description": "Generate today's complete Kirana P&L and Profit Pulse summary and dispatch it via email to the merchant.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "custom_email": {
+                        "type": "string",
+                        "description": "Optional custom email to receive the report. If omitted, sends to merchant's registered store email."
+                    }
+                }
+            }
+        }
     }
 ]
 
@@ -416,11 +432,19 @@ class ReactAgent:
             return CreditService.disburse_loan(float(args.get("amount", 0)), merchant_id)
         elif func_name == "get_growth_campaigns":
             return GrowthService.get_campaigns()
+        elif func_name == "send_daily_profit_pulse_email":
+            from services.transaction_service import TransactionService
+            return TransactionService.send_daily_profit_pulse_email(merchant_id, args.get("custom_email"))
         return {"success": False, "message": f"Unknown tool: {func_name}"}
 
     @classmethod
     def _format_tool_response(cls, func_name: str, args: dict, res: dict) -> str:
-        if func_name == "record_khata_entry":
+        if func_name == "send_daily_profit_pulse_email":
+            rec = res.get("recipient_email", "")
+            vol = res.get("today_volume", 0)
+            prof = res.get("today_profit", 0)
+            return f"📊 **Paytm Daily P&L Email Bheja Gaya!**\n\n• **Bikri (Sales):** ₹{vol:,.0f}\n• **Gross Profit:** ₹{prof:,.0f}\n• **Sent To:** {rec}\n\n🔊 *Soundbox Audio Debrief announced!*"
+        elif func_name == "record_khata_entry":
             c_name = res.get("customer_name")
             amt = int(res.get("amount", 0))
             bal = int(res.get("new_pending_balance", 0))
@@ -790,8 +814,33 @@ class ReactAgent:
                 "reply": reply,
                 "soundbox_payload": {"chime": True, "speech_text": f"Dukan ke {len(at_risk)} purane grahakon ke liye Paytm offer tayyar hai."}
             }
+        # 5. Daily Profit Pulse & P&L Email Trigger
+        if (any(w in q for w in ["p&l", "profit", "kamai", "pulse", "munafa"]) and any(w in q for w in ["email", "report", "bhejo", "bhej do", "send"])) or "p&l email" in q or "profit report" in q:
+            from services.transaction_service import TransactionService
+            res = TransactionService.send_daily_profit_pulse_email(merchant_id)
+            reply = cls._format_tool_response("send_daily_profit_pulse_email", {}, res)
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = {
+                "action": "DAILY_P_AND_L_REPORT",
+                "action_label": "दैनिक मुनाफा रिपोर्ट (Daily P&L Report)",
+                "entity": res.get("recipient_email"),
+                "amount": res.get("today_profit", 0),
+                "date": now_str,
+                "status": res.get("email_status", "SENT_VIA_SMTP"),
+                "simulation": False,
+                "simulation_badge": "Daily Kirana P&L Pulse Email"
+            }
+            return {
+                "query": query,
+                "action_name": "SEND_DAILY_PROFIT_PULSE_EMAIL",
+                "thoughts": thoughts + [f"Generated and emailed Daily P&L report to {res.get('recipient_email')}."],
+                "result": res,
+                "reply": reply,
+                "confirmation_card": confirmation_card,
+                "soundbox_payload": res.get("soundbox_payload")
+            }
 
-        # 5. General Briefing
+        # 6. General Briefing
         reply = "Namaste! Main **Paytm Vyapar Saathi Copilot** hoon. Aap aawaz se Khata likh sakte hain, stock reorder kar sakte hain, ya credit loan check kar sakte hain."
         return {
             "query": query,

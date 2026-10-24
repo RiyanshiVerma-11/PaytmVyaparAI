@@ -33,7 +33,7 @@ class SpeechEngine {
       this.recognition.onresult = (event) => {
         if (event.results && event.results.length > 0 && event.results[0].length > 0) {
           const transcript = event.results[0][0].transcript;
-          console.log('🎤 Speech Recognized:', transcript);
+          console.log('Speech Recognized:', transcript);
           if (this.onResult) this.onResult(transcript);
         }
       };
@@ -63,7 +63,7 @@ class SpeechEngine {
         if (this.onError) {
           this.onError(msg, event.error);
         } else if (typeof window.showNotification === 'function') {
-          window.showNotification(`🎙️ ${msg}`, 'error');
+          window.showNotification(msg, 'error');
         }
       };
 
@@ -80,7 +80,7 @@ class SpeechEngine {
     if (window.location.protocol === 'file:') {
       const msg = 'Web Speech requires running via http://localhost:8000 (Chrome blocks mic on file://). Please open http://localhost:8000 or type your command in the search bar.';
       if (this.onError) this.onError(msg, 'not-allowed');
-      else if (typeof window.showNotification === 'function') window.showNotification(`🎙️ ${msg}`, 'error');
+      else if (typeof window.showNotification === 'function') window.showNotification(msg, 'error');
       else alert(msg);
       return;
     }
@@ -88,7 +88,7 @@ class SpeechEngine {
     if (!this.recognition) {
       const msg = 'Microphone speech recognition is not supported in this browser. Please use Google Chrome or type your command in the search bar.';
       if (this.onError) this.onError(msg, 'not-supported');
-      else if (typeof window.showNotification === 'function') window.showNotification(`🎙️ ${msg}`, 'error');
+      else if (typeof window.showNotification === 'function') window.showNotification(msg, 'error');
       else alert(msg);
       return;
     }

@@ -400,18 +400,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isListening) {
           micBtn.classList.add('listening');
           const span = micBtn.querySelector('span');
-          if (span) span.textContent = '🔴 Sun Rahe Hain...';
+          if (span) span.textContent = 'Sun Rahe Hain...';
         } else {
           micBtn.classList.remove('listening');
           const span = micBtn.querySelector('span');
-          if (span) span.textContent = '🎤 Bol Kar Likhein';
+          if (span) span.textContent = 'Bol Kar Likhein';
         }
       }
       if (desktopMicBtn) {
         if (isListening) {
           desktopMicBtn.classList.add('listening');
           const act = desktopMicBtn.querySelector('.desktop-voice-action');
-          if (act) act.textContent = '🔴 Sun Rahe Hain...';
+          if (act) act.textContent = 'Sun Rahe Hain...';
         } else {
           desktopMicBtn.classList.remove('listening');
           const act = desktopMicBtn.querySelector('.desktop-voice-action');
@@ -420,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     },
     (errMsg) => {
-      showNotification(`🎙️ ${errMsg}`, 'error');
+      showNotification(`${errMsg}`, 'error');
     }
   );
 
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (topSearchInput) {
       topSearchInput.value = cleanText;
     }
-    showNotification(`🎤 Processing: "${cleanText}"`, 'info');
+    showNotification(`Processing: "${cleanText}"`, 'info');
     try {
       const res = await API.sendQuery(cleanText);
 
@@ -476,10 +476,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const sp = res.soundbox_payload || (res.result && res.result.soundbox_payload) || (res.data && res.data.soundbox_payload);
       if (sp && window.paytmSoundbox) {
         window.paytmSoundbox.broadcast(sp.speech_text);
-        showNotification(`🔊 Soundbox: ${sp.speech_text}`, 'success');
+        showNotification(`Soundbox: ${sp.speech_text}`, 'success');
       } else if (res.reply) {
         const firstLine = res.reply.split('\n')[0].replace(/[#*]/g, '');
-        showNotification(`🤖 Copilot: ${firstLine}`, 'success');
+        showNotification(`Copilot: ${firstLine}`, 'success');
+      }
+
+      // Check for entry undo toast
+      const entryId = (res.result && res.result.entry_id) || (res.data && res.data.entry_id) || res.entry_id;
+      if (entryId && typeof window.showUndoToast === 'function') {
+        const custName = (res.result && (res.result.customer_name || res.result.customer)) || 'Customer';
+        const amt = (res.result && res.result.amount) || '';
+        window.showUndoToast(entryId, custName, amt);
       }
 
       // Immediately refresh all views
@@ -489,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (typeof loadHistoryView === 'function') await loadHistoryView();
 
     } catch (err) {
-      showNotification(`❌ Error: ${err.message}`, 'error');
+      showNotification(`Error: ${err.message}`, 'error');
     }
   }
 
@@ -581,14 +589,14 @@ document.addEventListener('DOMContentLoaded', () => {
         if (searchTerm) {
           listEl.innerHTML = `
             <div style="padding:1.2rem 1rem; color:#64748B; text-align:center; background:#F8FAFC; border:1px dashed #CBD5E1; border-radius:10px; margin:6px 0;">
-              <span style="font-size:1.2rem; display:block; margin-bottom:4px;">🔍</span>
+              <span style="font-size:0.9rem; display:block; margin-bottom:4px; font-weight:700;">Search</span>
               <strong style="font-size:0.88rem; color:#0F172A;">${isHindi ? 'कोई ग्राहक नहीं मिला:' : 'No matching customer:'} "${searchTerm}"</strong>
               <div style="font-size:0.75rem; color:#64748B; margin-top:2px;">${isHindi ? 'स्पेलिंग चेक करें या मोबाइल नंबर डालें' : 'Check spelling or enter phone number'}</div>
             </div>`;
         } else {
           listEl.innerHTML = `
             <div style="padding:1.4rem 1rem; color:#059669; text-align:center; background:#ECFDF5; border:1px solid #A7F3D0; border-radius:10px; margin:6px 0;">
-              <div style="font-size:1.6rem; margin-bottom:4px;">🎉</div>
+              <div style="font-size:1.2rem; margin-bottom:4px; font-weight:800; color:#059669;">Zero Due</div>
               <strong style="font-size:0.95rem; display:block; color:#065F46;">${isHindi ? 'कोई बाकी उधार नहीं है!' : 'No Pending Udhaar!'}</strong>
               <span style="font-size:0.8rem; color:#047857;">${isHindi ? 'सभी ग्राहकों का हिसाब चुकता है। पूरा खाता नीचे देखें।' : 'All customer accounts are clear & settled.'}</span>
             </div>`;
@@ -603,7 +611,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const whatsappUrl = buildWhatsAppUrl(c.phone, c.name, c.pending_udhaar);
 
-        const settleBtnText = isHindi ? '✓ पैसे मिले' : '✓ Paid';
+        const settleBtnText = isHindi ? 'पैसे मिले' : 'Paid';
 
         item.innerHTML = `
           <div class="pos-row-left">
@@ -626,12 +634,12 @@ document.addEventListener('DOMContentLoaded', () => {
                       style="cursor:pointer; font-weight:800;"
                       title="${isHindi ? 'ग्राहक का पर्सनल डिजिटल खाता QR और प्रिंट स्टैंडी' : 'Generate & Print Customer Digital Khata QR'}"
                       onclick="window.openDigitalKhataQRModal && window.openDigitalKhataQRModal(${c.id})">
-                📱 QR
+                QR
               </button>
               <a href="${whatsappUrl}" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" 
                  style="text-decoration:none; display:inline-flex; align-items:center; gap:2px;"
                  title="${isHindi ? 'व्हाट्सएप पर याद दिलाएं' : 'Send WhatsApp Reminder'}">
-                💬
+                WhatsApp
               </a>
             </div>
           </div>
@@ -653,7 +661,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
-    showNotification(isHindi ? `✅ ${customerName}: ₹${pendingAmount} हिसाब चुकता हो गया!` : `✅ ${customerName}: ₹${pendingAmount} settled!`, 'success');
+    showNotification(isHindi ? `${customerName}: ₹${pendingAmount} हिसाब चुकता हो गया!` : `${customerName}: ₹${pendingAmount} settled!`, 'success');
 
     try {
       const res = await API.settleKhataCustomer(customerId);
@@ -666,7 +674,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof renderKhataAuditList === 'function') renderKhataAuditList();
       }, 350);
     } catch(err) {
-      showNotification(`❌ Error: ${err.message}`, 'error');
+      showNotification(`Error: ${err.message}`, 'error');
       if (row) {
         row.style.opacity = '1';
         row.style.transform = 'none';
@@ -691,10 +699,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (offerBtn) {
           const discountText = c.suggested_discount || '10% Discount';
-          offerBtn.innerHTML = `<span>📲</span> ${isHindi ? `ऑफर भेजें (${discountText})` : `Offer Bhejo (${discountText})`}`;
+          offerBtn.innerHTML = `${isHindi ? `ऑफर भेजें (${discountText})` : `Offer Bhejo (${discountText})`}`;
           offerBtn.onclick = () => {
             window.location.href = c.sms_uri;
-            showNotification(isHindi ? `📲 ${c.customer_name} के लिए ${discountText} का एसएमएस तैयार` : `📲 Offer SMS prepared for ${c.customer_name}`, 'success');
+            showNotification(isHindi ? `${c.customer_name} के लिए ${discountText} का एसएमएस तैयार` : `Offer SMS prepared for ${c.customer_name}`, 'success');
           };
         }
       } else {
@@ -715,11 +723,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const names = growth.campaigns.slice(0, 2).map(c => c.customer_name).join(' aur ');
         const text = `Aapke grahak ${names} kaafi samay se nahi aaye. Churn risk hai.`;
         if (window.paytmSoundbox) window.paytmSoundbox.broadcast(text);
-        showNotification(`📢 Alert: ${text}`, 'info');
+        showNotification(`Alert: ${text}`, 'info');
       } else {
         const text = 'Sabhi grahak sakriya hain. Koi churn risk nahi hai.';
         if (window.paytmSoundbox) window.paytmSoundbox.broadcast(text);
-        showNotification(`✅ ${text}`, 'info');
+        showNotification(`${text}`, 'info');
       }
     } catch (err) {
       if (window.paytmSoundbox) window.paytmSoundbox.broadcast('Paytm Vyapar AI live sync active hai.');
@@ -740,7 +748,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isHindi = (localStorage.getItem('paytm_lang') || 'en') === 'hi';
 
       if (displayItems.length === 0) {
-        container.innerHTML = `<div style="padding:1rem; color:#00d26a; text-align:center;">${isHindi ? '✓ सारा सामान स्टॉक में मौजूद है!' : '✓ All inventory items well stocked!'}</div>`;
+        container.innerHTML = `<div style="padding:1rem; color:#00d26a; text-align:center;">${isHindi ? 'सारा सामान स्टॉक में मौजूद है!' : 'All inventory items well stocked!'}</div>`;
         return;
       }
 
@@ -756,7 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
         div.className = 'pos-stock-row';
         div.innerHTML = `
           <div class="pos-stock-meta">
-            <span class="pos-stock-icon">📦</span>
+            <span class="pos-stock-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#00BAF2" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></span>
             <div>
               <strong class="pos-stock-name">${item.item_name}</strong>
               <span class="pos-stock-sub">${isHindi ? 'थोक भाव' : 'Wholesale'}: ₹${item.wholesale_price || 50}/unit</span>
@@ -877,16 +885,19 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="color:var(--text-secondary); font-size:0.85rem;">${c.last_visit_date || 'Today'}</td>
         <td>${riskBadge}</td>
         <td style="text-align:right;">
-          <div style="display:inline-flex; gap:0.5rem; justify-content:flex-end;">
+          <div style="display:inline-flex; gap:0.5rem; justify-content:flex-end; align-items:center;">
+            <button type="button" class="pos-btn-action-sm" style="background:#EFF6FF; color:#002970; border:1px solid #BFDBFE;" onclick="window.openDigitalReceiptModal('${c.name.replace(/'/g, "\\'")}', '${c.phone || '+91 9810000000'}', ${c.pending_udhaar || 0})" title="Generate Customer E-Receipt">
+              ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'रसीद' : 'Receipt'}
+            </button>
             ${isPending ? `
               <a href="${whatsappUrl}" target="_blank" class="pos-btn-action-sm" style="text-decoration:none; display:inline-flex; align-items:center; gap:0.3rem;" title="Send WhatsApp Reminder">
-                💬 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'व्हाट्सएप भेजें' : 'WhatsApp Bhejo'}
+                WhatsApp ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'व्हाट्सएप भेजें' : 'WhatsApp Bhejo'}
               </a>
-              <button class="pos-btn-action-sm" style="background:#059669;" onclick="window.settleKhata(${c.id}, '${c.name}', ${c.pending_udhaar})">
-                ✓ ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'पैसा आया' : 'Paisa Aaya'}
+              <button class="pos-btn-action-sm" style="background:#059669;" onclick="window.settleKhata(${c.id}, '${c.name.replace(/'/g, "\\'")}', ${c.pending_udhaar})">
+                ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'पैसा आया' : 'Paisa Aaya'}
               </button>
             ` : `
-              <span style="color:#059669; font-weight:700; font-size:0.85rem;">✓ ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'चुकाया गया' : 'All Clear'}</span>
+              <span style="color:#059669; font-weight:700; font-size:0.85rem;">${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'चुकाया गया' : 'All Clear'}</span>
             `}
           </div>
         </td>
@@ -935,7 +946,7 @@ document.addEventListener('DOMContentLoaded', () => {
     try {
       const res = await API.settleKhataCustomer(customerId);
       if (res.success) {
-        showNotification(`✅ Balance settled for ${customerName}!`, 'success');
+        showNotification(`Balance settled for ${customerName}!`, 'success');
         if (res.soundbox_payload && window.paytmSoundbox) {
           window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
         }
@@ -943,7 +954,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadDashboardData();
       }
     } catch(err) {
-      showNotification(`❌ Error: ${err.message}`, 'error');
+      showNotification(`Error: ${err.message}`, 'error');
     }
   };
 
@@ -999,7 +1010,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.success) {
           closeKhataModal();
           formAddKhata.reset();
-          showNotification(`✅ Entry recorded for ${res.customer_name}!`, 'success');
+          showNotification(`Entry recorded for ${res.customer_name}!`, 'success');
+          if (res.entry_id && typeof window.showUndoToast === 'function') {
+            window.showUndoToast(res.entry_id, res.customer_name, res.amount);
+          }
           if (res.soundbox_payload && window.paytmSoundbox) {
             window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
           }
@@ -1007,7 +1021,7 @@ document.addEventListener('DOMContentLoaded', () => {
           loadDashboardData();
         }
       } catch(err) {
-        showNotification(`❌ Error: ${err.message}`, 'error');
+        showNotification(`Error: ${err.message}`, 'error');
       }
     });
   }
@@ -1134,7 +1148,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </td>
         <td class="inv-col-action" style="text-align:right;">
           <button class="pos-btn-action-sm inv-btn-reorder" onclick="window.reorderStock('${item.item_name}', Math.max(5, (${item.reorder_threshold || 10} * 2) - ${item.current_stock || 0}))">
-            📦 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर' : 'Order'} (${Math.max(5, ((item.reorder_threshold || 10) * 2) - (item.current_stock || 0))})
+            ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑर्डर' : 'Order'} (${Math.max(5, ((item.reorder_threshold || 10) * 2) - (item.current_stock || 0))})
           </button>
         </td>
       `;
@@ -1144,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 1-Click Wholesale Restock Reorder PO
   window.reorderStock = async function(itemName, quantity = 15) {
-    showNotification(`📦 Generating Wholesale PO for ${itemName}...`, 'info');
+    showNotification(`Generating Wholesale PO for ${itemName}...`, 'info');
     try {
       const res = await API.orderPO(itemName, quantity);
       if (res.success) {
@@ -1166,12 +1180,12 @@ document.addEventListener('DOMContentLoaded', () => {
           window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
         }
 
-        showNotification(`✅ PO #${res.po_number} emailed to supplier!`, 'success');
+        showNotification(`PO #${res.po_number} emailed to supplier!`, 'success');
         loadInventoryView();
         loadDashboardData();
       }
     } catch(err) {
-      showNotification(`❌ Error: ${err.message}`, 'error');
+      showNotification(`Error: ${err.message}`, 'error');
     }
   };
 
@@ -1243,7 +1257,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (res.success) {
           closeInvModal();
           formAddInventory.reset();
-          showNotification(`✅ ${res.item_name} added to inventory!`, 'success');
+          showNotification(`${res.item_name} added to inventory!`, 'success');
           if (res.soundbox_payload && window.paytmSoundbox) {
             window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
           }
@@ -1251,7 +1265,7 @@ document.addEventListener('DOMContentLoaded', () => {
           loadDashboardData();
         }
       } catch(err) {
-        showNotification(`❌ Error: ${err.message}`, 'error');
+        showNotification(`Error: ${err.message}`, 'error');
       }
     });
   }
@@ -1367,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!amount || amount <= 0) return;
 
       simulateTxnBtn.disabled = true;
-      simulateTxnBtn.textContent = '🔊 Broadasting Soundbox Chime...';
+      simulateTxnBtn.textContent = 'Broadcasting Soundbox Chime...';
 
       try {
         const res = await API.simulateTransaction(amount, phone, 'UPI_Soundbox');
@@ -1377,17 +1391,17 @@ document.addEventListener('DOMContentLoaded', () => {
             window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
           }
 
-          showNotification(`🔔 Soundbox Received: ₹${amount}!`, 'success');
+          showNotification(`Soundbox Received: ₹${amount}!`, 'success');
 
           // Reload and flash
           await loadHistoryView();
           await loadDashboardData();
         }
       } catch(err) {
-        showNotification(`❌ Error: ${err.message}`, 'error');
+        showNotification(`Error: ${err.message}`, 'error');
       } finally {
         simulateTxnBtn.disabled = false;
-        simulateTxnBtn.innerHTML = `<span>🔊</span> Trigger Soundbox Payment`;
+        simulateTxnBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg> Trigger Soundbox Payment`;
       }
     });
   }
@@ -1489,7 +1503,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
               </div>
               <a href="${c.sms_uri}" target="_blank" class="pos-btn-action-sm" style="text-decoration:none; padding:0.5rem 1rem; font-size:0.85rem;" onclick="window.paytmSoundbox.broadcast('Customer win-back offer sent to ${c.customer_name}')">
-                📲 ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑफर भेजें' : 'Offer Bhejo'}
+                ${(localStorage.getItem('paytm_lang') || 'en') === 'hi' ? 'ऑफर भेजें' : 'Offer Bhejo'}
               </a>
             `;
             campaignsList.appendChild(div);
@@ -1551,17 +1565,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const res = await API.disburseLoan(75000);
         if (res.success) {
           if (loanSuccessMsg) {
-            loanSuccessMsg.textContent = `🎉 ₹${res.loan_amount.toLocaleString()} Disbursed into ${res.bank_account}!`;
+            loanSuccessMsg.textContent = `₹${res.loan_amount.toLocaleString()} Disbursed into ${res.bank_account}!`;
             loanSuccessMsg.style.display = 'block';
           }
-          confirmLoanDisbursalBtn.textContent = '✓ Funds Transferred';
+          confirmLoanDisbursalBtn.textContent = 'Funds Transferred';
 
           // Play Soundbox Audio Announcement
           if (res.soundbox_payload && window.paytmSoundbox) {
             window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
           }
 
-          showNotification(`🚀 ₹${res.loan_amount.toLocaleString()} credited to Paytm Bank Account!`, 'success');
+          showNotification(`₹${res.loan_amount.toLocaleString()} credited to Paytm Bank Account!`, 'success');
 
           // Refresh state
           setTimeout(() => {
@@ -1571,7 +1585,7 @@ document.addEventListener('DOMContentLoaded', () => {
           }, 2000);
         }
       } catch(err) {
-        showNotification(`❌ Error: ${err.message}`, 'error');
+        showNotification(`Error: ${err.message}`, 'error');
         confirmLoanDisbursalBtn.disabled = false;
         confirmLoanDisbursalBtn.textContent = 'Accept & Disburse Now';
       }
@@ -1609,6 +1623,233 @@ document.addEventListener('DOMContentLoaded', () => {
     }, 3500);
   }
 
+  // ========================================================
+  // 5-SECOND FAIL-SAFE FLOATING UNDO TOAST
+  // ========================================================
+  function showUndoToast(entryId, customerName, amount) {
+    const existing = document.getElementById('paytmUndoToastContainer');
+    if (existing) existing.remove();
+
+    const toastWrap = document.createElement('div');
+    toastWrap.id = 'paytmUndoToastContainer';
+    toastWrap.style.cssText = `
+      position: fixed;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #002970;
+      color: #FFFFFF;
+      padding: 12px 18px;
+      border-radius: 14px;
+      box-shadow: 0 12px 35px rgba(0, 41, 112, 0.45);
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 330px;
+      max-width: 90vw;
+      border: 1.5px solid rgba(0, 186, 242, 0.4);
+      animation: slide-toast 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    `;
+
+    toastWrap.innerHTML = `
+      <div style="display:flex; align-items:center; justify-content:space-between; gap:12px;">
+        <div style="display:flex; align-items:center; gap:8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EF4444" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <div style="font-size:0.85rem; font-weight:700;">Recorded ₹${amount} for ${customerName}</div>
+            <div style="font-size:0.72rem; color:rgba(255,255,255,0.7);">Misheard voice? Click undo to rollback.</div>
+          </div>
+        </div>
+        <button id="btnUndoTransaction" style="background:#EF4444; color:#FFFFFF; border:none; border-radius:8px; padding:6px 12px; font-weight:800; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; gap:4px; box-shadow:0 3px 10px rgba(239,68,68,0.4); transition:transform 0.15s;">
+          <span>↩️</span> <span id="undoBtnTimer">Undo (5s)</span>
+        </button>
+      </div>
+      <div style="width:100%; height:4px; background:rgba(255,255,255,0.2); border-radius:2px; overflow:hidden;">
+        <div id="undoProgressBar" style="width:100%; height:100%; background:linear-gradient(90deg, var(--paytm-cyan), #00D26A); transition:width 0.1s linear;"></div>
+      </div>
+    `;
+
+    document.body.appendChild(toastWrap);
+
+    let secondsLeft = 5.0;
+    const intervalTime = 100;
+    const totalSteps = 50;
+    let currentStep = 0;
+
+    const undoBtn = toastWrap.querySelector('#btnUndoTransaction');
+    const timerLabel = toastWrap.querySelector('#undoBtnTimer');
+    const progressBar = toastWrap.querySelector('#undoProgressBar');
+
+    const countdown = setInterval(() => {
+      currentStep++;
+      const percent = Math.max(0, 100 - (currentStep / totalSteps) * 100);
+      progressBar.style.width = `${percent}%`;
+      const remSeconds = Math.max(0, Math.ceil((totalSteps - currentStep) / 10));
+      timerLabel.textContent = `Undo (${remSeconds}s)`;
+
+      if (currentStep >= totalSteps) {
+        clearInterval(countdown);
+        toastWrap.style.opacity = '0';
+        toastWrap.style.transition = 'opacity 0.3s';
+        setTimeout(() => toastWrap.remove(), 300);
+      }
+    }, intervalTime);
+
+    undoBtn.addEventListener('click', async () => {
+      clearInterval(countdown);
+      undoBtn.disabled = true;
+      undoBtn.innerHTML = 'Undoing...';
+      try {
+        const res = await API.undoKhataEntry(entryId);
+        if (res.success) {
+          showNotification(res.message || 'Transaction successfully rolled back!', 'success');
+          if (res.soundbox_speech && window.paytmSoundbox) {
+            window.paytmSoundbox.broadcast(res.soundbox_speech);
+          }
+          await loadKhataView();
+          await loadDashboardData();
+        } else {
+          showNotification(`${res.message}`, 'error');
+        }
+      } catch (err) {
+        showNotification(`Error: ${err.message}`, 'error');
+      } finally {
+        toastWrap.remove();
+      }
+    });
+  }
+
+  // ========================================================
+  // 1-TAP DIGITAL E-RECEIPT MODAL (WhatsApp & SMS Deep Link)
+  // ========================================================
+  function openDigitalReceiptModal(customerName, phone, pendingUdhaar) {
+    let modal = document.getElementById('modalDigitalReceipt');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'modalDigitalReceipt';
+      modal.className = 'vyapar-modal-overlay';
+      modal.style.cssText = 'display:flex; position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:10001; align-items:center; justify-content:center; padding:1rem;';
+      document.body.appendChild(modal);
+    } else {
+      modal.style.display = 'flex';
+    }
+
+    const shopName = localStorage.getItem('paytm_shop_name') || 'Sharma Kirana Store';
+    const merchantPhone = localStorage.getItem('paytm_merchant_phone') || '+91 9811223344';
+    const upiId = 'sharmakirana@paytm';
+    const cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+    const validPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : (cleanPhone.length === 12 ? cleanPhone : '919810000000');
+    const billDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    const receiptNo = `REC-${Date.now().toString().slice(-6)}`;
+
+    const receiptText = `*${shopName.toUpperCase()} — DIGITAL RECEIPT*\\n` +
+      `Date: ${billDate}\\n` +
+      `Receipt: #${receiptNo}\\n` +
+      `Customer: ${customerName}\\n` +
+      `--------------------------------\\n` +
+      `Current Khata Balance: *₹${(pendingUdhaar || 0).toLocaleString('en-IN')}*\\n` +
+      `--------------------------------\\n` +
+      `Pay instantly via Paytm UPI:\\n` +
+      `https://paytm.me/pay?pa=${upiId}&am=${pendingUdhaar || 100}\\n\\n` +
+      `_Powered by Paytm Vyapar Saathi_`;
+
+    const waUrl = `https://wa.me/${validPhone}?text=${encodeURIComponent(receiptText)}`;
+    const smsUrl = `sms:${validPhone}?body=${encodeURIComponent(receiptText)}`;
+
+    modal.innerHTML = `
+      <div class="vyapar-modal-card" style="background:#FFFFFF; border-radius:18px; max-width:440px; width:100%; box-shadow:0 20px 50px rgba(0,0,0,0.3); overflow:hidden; border:1px solid #E2E8F0; font-family:'Plus Jakarta Sans', sans-serif;">
+        <div style="background:linear-gradient(135deg, #002970, #00BAF2); color:white; padding:18px 20px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:38px; height:38px; border-radius:10px; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+            <div>
+              <div style="font-weight:800; font-size:1.05rem;">Digital E-Receipt</div>
+              <div style="font-size:0.75rem; opacity:0.85;">1-Tap WhatsApp & SMS Bill</div>
+            </div>
+          </div>
+          <button type="button" onclick="document.getElementById('modalDigitalReceipt').style.display='none'" style="background:rgba(255,255,255,0.2); border:none; color:white; width:30px; height:30px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center;">&times;</button>
+        </div>
+
+        <div style="padding:20px; background:#F8FAFC;">
+          <div style="background:#FFFFFF; border:1px dashed #CBD5E1; border-radius:12px; padding:16px; box-shadow:0 4px 12px rgba(0,0,0,0.03);">
+            <div style="text-align:center; border-bottom:1px dashed #E2E8F0; padding-bottom:12px; margin-bottom:12px;">
+              <div style="font-weight:900; font-size:1.1rem; color:#002970;">${shopName}</div>
+              <div style="font-size:0.75rem; color:#64748B;">Paytm Smart Merchant Partner • Ph: ${merchantPhone}</div>
+              <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:#94A3B8; margin-top:6px;">
+                <span>Bill: #${receiptNo}</span>
+                <span>${billDate}</span>
+              </div>
+            </div>
+
+            <div style="margin-bottom:12px; font-size:0.82rem;">
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="color:#64748B;">Customer:</span>
+                <strong style="color:#0F172A;">${customerName}</strong>
+              </div>
+              <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+                <span style="color:#64748B;">Mobile:</span>
+                <strong style="color:#0F172A;">${phone || '+91 9810000000'}</strong>
+              </div>
+            </div>
+
+            <div style="border-top:1px dashed #E2E8F0; border-bottom:1px dashed #E2E8F0; padding:10px 0; margin-bottom:12px;">
+              <div style="display:flex; justify-content:space-between; font-weight:800; font-size:1.05rem; color:#002970;">
+                <span>Total Balance Due:</span>
+                <span style="color:#E11D48;">₹${(pendingUdhaar || 0).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+
+            <div style="background:rgba(0,186,242,0.08); border-radius:8px; padding:8px 10px; display:flex; align-items:center; justify-content:space-between; font-size:0.75rem;">
+              <div style="display:flex; align-items:center; gap:6px;">
+                
+                <span style="color:#002970; font-weight:600;">Paytm UPI Intent Attached</span>
+              </div>
+              <strong style="color:#00BAF2;">${upiId}</strong>
+            </div>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:8px; margin-top:16px;">
+            <a href="${waUrl}" target="_blank" style="background:#25D366; color:white; text-decoration:none; padding:10px 14px; border-radius:10px; font-weight:800; font-size:0.88rem; display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 4px 14px rgba(37,211,102,0.35);">
+              Send WhatsApp Digital Receipt
+            </a>
+            <div style="display:flex; gap:8px;">
+              <a href="${smsUrl}" style="flex:1; background:#002970; color:white; text-decoration:none; padding:9px 12px; border-radius:10px; font-weight:700; font-size:0.8rem; display:flex; align-items:center; justify-content:center; gap:6px;">
+                Send SMS
+              </a>
+              <button onclick="window.print()" style="flex:1; background:#F1F5F9; color:#334155; border:1px solid #CBD5E1; padding:9px 12px; border-radius:10px; font-weight:700; font-size:0.8rem; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                Print PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  // ========================================================
+  // DAILY PROFIT PULSE & P&L EMAIL DISPATCH
+  // ========================================================
+  async function triggerDailyProfitEmail(customEmail) {
+    const emailToUse = customEmail || localStorage.getItem('paytm_merchant_email') || '';
+    showNotification("Compiling today's Profit Pulse & P&L report...", 'info');
+    try {
+      const res = await API.sendDailyProfitPulseEmail(emailToUse);
+      if (res.success) {
+        showNotification(`${res.message || 'Daily P&L report dispatched to your email!'}`, 'success');
+        if (res.soundbox_speech && window.paytmSoundbox) {
+          window.paytmSoundbox.broadcast(res.soundbox_speech);
+        }
+      } else {
+        showNotification(`${res.message || 'Failed to dispatch report'}`, 'error');
+      }
+    } catch (err) {
+      showNotification(`Error: ${err.message}`, 'error');
+    }
+  }
+
+  window.showUndoToast = showUndoToast;
+  window.openDigitalReceiptModal = openDigitalReceiptModal;
+  window.triggerDailyProfitEmail = triggerDailyProfitEmail;
   window.showToast = showNotification;
 
   // Initial Load with Saved or Default Language

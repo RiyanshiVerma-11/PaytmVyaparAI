@@ -240,8 +240,8 @@ function DigitalKhataQRSection({ isHindi }) {
       if (res && res.success) {
         setSettleSuccessBanner(
           isHindi
-            ? `🎉 धन्यवाद ${cust.name} जी! ₹${cust.pending_udhaar} का बही-खाता UPI से चुकता हो गया।`
-            : `🎉 Thank you ${cust.name}! ₹${cust.pending_udhaar} Khata balance settled via UPI.`
+            ? `धन्यवाद ${cust.name} जी! ₹${cust.pending_udhaar} का बही-खाता UPI से चुकता हो गया।`
+            : `Thank you ${cust.name}! ₹${cust.pending_udhaar} Khata balance settled via UPI.`
         );
         if (res.soundbox_payload && window.paytmSoundbox) {
           window.paytmSoundbox.broadcast(res.soundbox_payload.speech_text);
@@ -321,8 +321,8 @@ function DigitalKhataQRSection({ isHindi }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
                 {isHindi
-                  ? '📱 डिजिटल बही-खाता QR जनरेटर और प्रिंट स्टैंडी (Digital Khata QR)'
-                  : '📱 Personalized Digital Khata QR Generator & Print Standee'}
+                  ? 'डिजिटल बही-खाता QR जनरेटर और प्रिंट स्टैंडी (Digital Khata QR)'
+                  : 'Personalized Digital Khata QR Generator & Print Standee'}
               </h2>
               <span style={{ fontSize: '0.75rem', color: '#0284C7', fontWeight: 700 }}>
                 · UPI ID: {merchant.upi_id || '8171008964@ptaxis'}
@@ -351,7 +351,7 @@ function DigitalKhataQRSection({ isHindi }) {
                 whiteSpace: 'nowrap'
               }}
             >
-              {isHindi ? '👁️ ग्राहक स्कैन व्यू देखें (Customer Preview)' : '👁️ Preview Customer Scan View'}
+              {isHindi ? 'ग्राहक स्कैन व्यू देखें (Customer Preview)' : 'Preview Customer Scan View'}
             </button>
 
             <button
@@ -370,7 +370,7 @@ function DigitalKhataQRSection({ isHindi }) {
                 boxShadow: '0 4px 12px rgba(0, 41, 112, 0.2)'
               }}
             >
-              {isHindi ? '🖨️ QR स्टैंडी प्रिंट करें (Print QR)' : '🖨️ Print Digital Khata QR'}
+              {isHindi ? 'QR स्टैंडी प्रिंट करें (Print QR)' : 'Print Digital Khata QR'}
             </button>
           </div>
         </div>
@@ -421,8 +421,8 @@ function DigitalKhataQRSection({ isHindi }) {
                 >
                   <option value="store_all">
                     {isHindi
-                      ? `🏪 दुकान काउंटर मास्टर QR — सभी ग्राहक (कुल बकाया: ₹${totalPendingStore.toLocaleString('en-IN')})`
-                      : `🏪 Store Counter Master QR — All Customers (Total Pending: ₹${totalPendingStore.toLocaleString('en-IN')})`}
+                      ? `दुकान काउंटर मास्टर QR — सभी ग्राहक (कुल बकाया: ₹${totalPendingStore.toLocaleString('en-IN')})`
+                      : `Store Counter Master QR — All Customers (Total Pending: ₹${totalPendingStore.toLocaleString('en-IN')})`}
                   </option>
                   {customers.map((c) => (
                     <option key={c.id} value={String(c.id)}>
@@ -448,7 +448,7 @@ function DigitalKhataQRSection({ isHindi }) {
                     color: selectedCustId === 'store_all' ? '#FFFFFF' : '#334155'
                   }}
                 >
-                  {isHindi ? '🏪 काउंटर स्टैंडी' : '🏪 Store Counter Standee'}
+                  {isHindi ? 'काउंटर स्टैंडी' : 'Store Counter Standee'}
                 </button>
                 {customers
                   .filter((c) => Number(c.pending_udhaar) > 0)
@@ -496,7 +496,7 @@ function DigitalKhataQRSection({ isHindi }) {
                     }}
                   >
                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#002970' }}>
-                      {isHindi ? '📒 पासबुक + UPI पेमेंट' : '📒 Khata Passbook + UPI'}
+                      {isHindi ? 'पासबुक + UPI पेमेंट' : 'Khata Passbook + UPI'}
                     </div>
                     <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>
                       {isHindi ? 'पूरा हिसाब देखें और 1-Tap में चुकाएं' : 'View itemized bill & settle via UPI'}
@@ -517,7 +517,7 @@ function DigitalKhataQRSection({ isHindi }) {
                     }}
                   >
                     <div style={{ fontSize: '0.78rem', fontWeight: 800, color: '#059669' }}>
-                      {isHindi ? '⚡ डायरेक्ट UPI Auto-Amount' : '⚡ Direct UPI Auto-Amount'}
+                      {isHindi ? 'डायरेक्ट UPI Auto-Amount' : 'Direct UPI Auto-Amount'}
                     </div>
                     <div style={{ fontSize: '0.7rem', color: '#64748B', marginTop: '2px' }}>
                       {isHindi ? 'Paytm/GPay में बकाया रकम ऑटो-भरे' : 'Pre-fills exact pending ₹ in UPI app'}
@@ -538,7 +538,7 @@ function DigitalKhataQRSection({ isHindi }) {
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <strong style={{ fontSize: '0.88rem', color: '#0F172A' }}>
-                        👤 {selectedCustomer.name} ({selectedCustomer.phone})
+                        {selectedCustomer.name} ({selectedCustomer.phone})
                       </strong>
                       <span style={{
                         fontSize: '0.82rem',
@@ -569,7 +569,7 @@ function DigitalKhataQRSection({ isHindi }) {
                           textDecoration: 'none'
                         }}
                       >
-                        ⚡ {isHindi ? `UPI ऐप खोलें (₹${selectedCustomer.pending_udhaar})` : `Open UPI App (₹${selectedCustomer.pending_udhaar})`}
+                        {isHindi ? `UPI ऐप खोलें (₹${selectedCustomer.pending_udhaar})` : `Open UPI App (₹${selectedCustomer.pending_udhaar})`}
                       </a>
                       {Number(selectedCustomer.pending_udhaar) > 0 && (
                         <button
@@ -600,7 +600,7 @@ function DigitalKhataQRSection({ isHindi }) {
                   <>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
                       <strong style={{ fontSize: '0.86rem', color: '#0F172A' }}>
-                        🏪 {merchant.shop_name} — Universal Counter Khata QR
+                        {merchant.shop_name} — Universal Counter Khata QR
                       </strong>
                       <span style={{ fontSize: '0.8rem', fontWeight: 800, color: '#0284C7' }}>
                         {customers.filter((c) => Number(c.pending_udhaar) > 0).length} Active Accounts
@@ -633,7 +633,7 @@ function DigitalKhataQRSection({ isHindi }) {
                   cursor: 'pointer'
                 }}
               >
-                🖨️ {isHindi ? 'प्रिंट स्टैंडी' : 'Print Standee'}
+                {isHindi ? 'प्रिंट स्टैंडी' : 'Print Standee'}
               </button>
               <button
                 type="button"
@@ -650,7 +650,7 @@ function DigitalKhataQRSection({ isHindi }) {
                   cursor: 'pointer'
                 }}
               >
-                ⬇️ {isHindi ? 'QR डाउनलोड (SVG)' : 'Download QR (SVG)'}
+                {isHindi ? 'QR डाउनलोड (SVG)' : 'Download QR (SVG)'}
               </button>
               <button
                 type="button"
@@ -667,7 +667,7 @@ function DigitalKhataQRSection({ isHindi }) {
                   cursor: 'pointer'
                 }}
               >
-                📱 {isHindi ? 'कस्टमर व्यू खोलें' : 'Open Customer View'}
+                {isHindi ? 'कस्टमर व्यू खोलें' : 'Open Customer View'}
               </button>
             </div>
           </div>
@@ -750,7 +750,7 @@ function DigitalKhataQRSection({ isHindi }) {
                 Paytm · Google Pay · PhonePe · BHIM UPI Accepted
               </div>
               <div style={{ fontSize: '0.68rem', color: '#64748B', marginTop: '2px' }}>
-                🔊 Paytm Soundbox 4.0 Pro Instant Audio Confirmation
+                Paytm Soundbox 4.0 Pro Instant Audio Confirmation
               </div>
             </div>
           </div>
@@ -934,7 +934,7 @@ function DigitalKhataQRSection({ isHindi }) {
                     {/* Itemized Entries List */}
                     <div style={{ marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #E2E8F0' }}>
                       <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#334155', marginBottom: '6px' }}>
-                        {isHindi ? '🧾 सामान और लेन-देन का विवरण (Itemized Ledger):' : '🧾 Itemized Khata Statement:'}
+                        {isHindi ? 'सामान और लेन-देन का विवरण (Itemized Ledger):' : 'Itemized Khata Statement:'}
                       </div>
                       {customerEntries.length === 0 ? (
                         <div style={{ fontSize: '0.78rem', color: '#64748B' }}>
@@ -998,8 +998,8 @@ function DigitalKhataQRSection({ isHindi }) {
                             ? 'पेमेंट प्रोसेस हो रहा है...'
                             : 'Processing UPI Settlement...'
                           : isHindi
-                          ? `⚡ अभी ₹${Number(selectedCustomer.pending_udhaar).toLocaleString('en-IN')} UPI से चुकाएं (Instant Settle + Soundbox Chime)`
-                          : `⚡ Pay & Settle ₹${Number(selectedCustomer.pending_udhaar).toLocaleString('en-IN')} Now via UPI (Instant Soundbox Chime)`}
+                          ? `अभी ₹${Number(selectedCustomer.pending_udhaar).toLocaleString('en-IN')} UPI से चुकाएं (Instant Settle + Soundbox Chime)`
+                          : `Pay & Settle ₹${Number(selectedCustomer.pending_udhaar).toLocaleString('en-IN')} Now via UPI (Instant Soundbox Chime)`}
                       </button>
 
                       <a
@@ -1017,7 +1017,7 @@ function DigitalKhataQRSection({ isHindi }) {
                           textDecoration: 'none'
                         }}
                       >
-                        📱 {isHindi ? 'Paytm / GPay / PhonePe ऐप में खोलें' : 'Launch Installed UPI App (upi://pay)'}
+                        {isHindi ? 'Paytm / GPay / PhonePe ऐप में खोलें' : 'Launch Installed UPI App (upi://pay)'}
                       </a>
                     </div>
                   ) : (
@@ -1162,7 +1162,7 @@ function ProfitTrendsWidget() {
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <h2 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0F172A' }}>
-                {isHindi ? '📈 7-दिन का मुनाफा और छोटा गल्ला (Daily Profit Trends)' : '📈 7-Day Daily Profit Trends & Zero-Typing Micro-Sales'}
+                {isHindi ? '7-दिन का मुनाफा और छोटा गल्ला (Daily Profit Trends)' : '7-Day Daily Profit Trends & Zero-Typing Micro-Sales'}
               </h2>
               <span style={{ fontSize: '0.76rem', color: '#059669', fontWeight: 700 }}>
                 · {summary.dod_growth_pct >= 0 ? `+${summary.dod_growth_pct}%` : `${summary.dod_growth_pct}%`} {isHindi ? 'आज की ग्रोथ' : 'vs Yesterday'}
@@ -1325,7 +1325,7 @@ function ProfitTrendsWidget() {
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <strong style={{ fontSize: '0.88rem', color: '#0F172A' }}>
-                  {isHindi ? '⚡ 1-Tap छोटा कैश गल्ला (बिना नाम लिखे)' : '⚡ 1-Tap "Chhota Galla" (Zero Customer Name)'}
+                  {isHindi ? '1-Tap छोटा कैश गल्ला (बिना नाम लिखे)' : '1-Tap "Chhota Galla" (Zero Customer Name)'}
                 </strong>
                 <span style={{ fontSize: '0.72rem', color: '#0284C7', fontWeight: 700 }}>
                   {isHindi ? 'बोलें: "15 रुपये दही"' : 'Or Speak: "15 rupaye dahi"'}
@@ -1379,7 +1379,7 @@ function ProfitTrendsWidget() {
               lineHeight: 1.45
             }}>
               <div style={{ fontWeight: 800, color: '#002970', marginBottom: '4px' }}>
-                {isHindi ? '💡 दुकानदार के लिए 3 स्मार्ट तरीके (0 मैनुअल टाइपिंग):' : '💡 3 Smart Moves So You Never Type Every ₹15 Customer:'}
+                {isHindi ? 'दुकानदार के लिए 3 स्मार्ट तरीके (0 मैनुअल टाइपिंग):' : '3 Smart Moves So You Never Type Every ₹15 Customer:'}
               </div>
               <div>
                 <strong>1. Auto QR Stream:</strong> {isHindi ? '₹15/₹20 के UPI पेमेंट साउंडबॉक्स से अपने-आप जुड़ते हैं।' : 'Every ₹15/₹20 UPI Soundbox scan auto-logs with ~18% category margin.'}

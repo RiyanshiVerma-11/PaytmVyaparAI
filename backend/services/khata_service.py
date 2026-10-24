@@ -111,6 +111,7 @@ class KhataService:
         INSERT INTO khata_entries (customer_id, customer_name, amount, item_description, entry_type, created_at, status)
         VALUES (?, ?, ?, ?, ?, datetime('now'), 'pending')
         """, (cust_id, cust_name, amount, item_description, entry_type.lower()))
+        entry_id = cursor.lastrowid
 
         # Also log to transactions table with dynamic phone
         txn_id = f"TXN_{int(datetime.now().timestamp())}"
@@ -161,6 +162,7 @@ class KhataService:
 
         return {
             "success": True,
+            "entry_id": entry_id,
             "customer_name": cust_name,
             "customer_phone": cust_phone,
             "amount": amount,
@@ -207,6 +209,66 @@ class KhataService:
         }
 
     @staticmethod
+    def undo_entry(entry_id: int):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM khata_entries WHERE id = ?", (entry_id,))
+        entry = cursor.fetchone()
+        if not entry:
+            conn.close()
+            return {"success": False, "message": f"Ledger entry #{entry_id} not found."}
+
+        cust_id = entry["customer_id"]
+        amount = float(entry["amount"] or 0)
+        entry_type = (entry["entry_type"] or "udhaar").lower()
+        cust_name = entry["customer_name"]
+
+        # 1. Reverse customer's pending_udhaar balance
+        cursor.execute("SELECT pending_udhaar FROM customers WHERE id = ?", (cust_id,))
+        c = cursor.fetchone()
+        new_pending = 0.0
+        if c:
+            curr_pending = float(c["pending_udhaar"] or 0)
+            if entry_type == "udhaar":
+                new_pending = max(0.0, curr_pending - amount)
+            else:
+                new_pending = curr_pending + amount
+            cursor.execute("UPDATE customers SET pending_udhaar = ? WHERE id = ?", (new_pending, cust_id))
+
+        # 2. Restore decremented inventory if Kirana item was reduced
+        item_desc = entry["item_description"] or ""
+        restored_item = None
+        for item_key in ["butter", "oil", "tel", "maggi", "salt", "atta", "tea"]:
+            if item_key in item_desc.lower():
+                cursor.execute("SELECT id, item_name, current_stock FROM inventory WHERE item_name LIKE ?", (f"%{item_key}%",))
+                inv_item = cursor.fetchone()
+                if inv_item:
+                    cursor.execute("UPDATE inventory SET current_stock = current_stock + 1 WHERE id = ?", (inv_item["id"],))
+                    restored_item = inv_item["item_name"]
+                break
+
+        # 3. Delete the mistaken khata entry
+        cursor.execute("DELETE FROM khata_entries WHERE id = ?", (entry_id,))
+
+        conn.commit()
+        conn.close()
+
+        speech_text = f"Paytm alert: {cust_name} ji ki {int(amount)} rupaye ki entri cancel kar di gayi hai."
+        return {
+            "success": True,
+            "entry_id": entry_id,
+            "customer_name": cust_name,
+            "amount": amount,
+            "new_pending_balance": new_pending,
+            "restored_inventory": restored_item,
+            "message": f"Entry #{entry_id} undone successfully.",
+            "soundbox_payload": {
+                "chime": True,
+                "speech_text": speech_text
+            }
+        }
+
+    @staticmethod
     def get_all_entries():
         conn = get_connection()
         cursor = conn.cursor()
@@ -226,4 +288,58 @@ class KhataService:
             "total_pending_udhaar": round(total_pending, 2),
             "total_recovered": round(total_recovered, 2),
             "pending_customers_count": pending_count
+        }
+
+    @staticmethod
+    def undo_entry(entry_id: int):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT * FROM khata_entries WHERE id = ?", (entry_id,))
+        entry = cursor.fetchone()
+        if not entry:
+            conn.close()
+            return {"success": False, "message": "Transaction entry not found."}
+
+        cust_id = entry["customer_id"]
+        amt = float(entry["amount"] or 0)
+        etype = (entry["entry_type"] or "").lower()
+        cust_name = entry["customer_name"]
+        item_desc = entry["item_description"] or ""
+
+        # Reverse balance on customer
+        cursor.execute("SELECT pending_udhaar FROM customers WHERE id = ?", (cust_id,))
+        crow = cursor.fetchone()
+        if crow:
+            curr_pending = float(crow["pending_udhaar"] or 0)
+            if etype == "udhaar":
+                new_pending = max(0.0, curr_pending - amt)
+            else:
+                new_pending = curr_pending + amt
+            cursor.execute("UPDATE customers SET pending_udhaar = ? WHERE id = ?", (new_pending, cust_id))
+
+        # Restore decremented inventory if an item was mentioned
+        restored_stock = None
+        for item_key in ["butter", "oil", "tel", "maggi", "salt", "atta", "tea"]:
+            if item_key in item_desc.lower():
+                cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ?", (f"%{item_key}%",))
+                item = cursor.fetchone()
+                if item:
+                    new_stock = item["current_stock"] + 1
+                    cursor.execute("UPDATE inventory SET current_stock = ? WHERE id = ?", (new_stock, item["id"]))
+                    restored_stock = item["item_name"]
+                break
+
+        # Delete entry from khata_entries
+        cursor.execute("DELETE FROM khata_entries WHERE id = ?", (entry_id,))
+        conn.commit()
+        conn.close()
+
+        speech = f"Paytm par {cust_name} ji ka {int(amt)} rupaye ka hisaab cancel ho gaya."
+        return {
+            "success": True,
+            "message": f"Transaction of ₹{int(amt)} for {cust_name} successfully rolled back / cancel ho gaya.",
+            "customer_name": cust_name,
+            "amount": amt,
+            "restored_stock": restored_stock,
+            "soundbox_speech": speech
         }

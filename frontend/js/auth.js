@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   if (demoQuickBtn) {
     demoQuickBtn.addEventListener('click', async () => {
       demoQuickBtn.disabled = true;
-      demoQuickBtn.innerHTML = '<span>⏳</span> Entering Sharma Kirana Store...';
+      demoQuickBtn.innerHTML = 'Entering Sharma Kirana Store...';
       try {
         let res;
         if (window.API && window.API.loginMerchant) {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }, true);
       } finally {
         demoQuickBtn.disabled = false;
-        demoQuickBtn.innerHTML = '<span>🚀</span> Continue as Demo Merchant (Sharma Kirana Store)';
+        demoQuickBtn.innerHTML = 'Continue as Demo Merchant (Sharma Kirana Store)';
       }
     });
   }
@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } catch (err) {
         if (errBox) {
-          errBox.textContent = `❌ ${err.message || 'Login failed. Please check your credentials.'}`;
+          errBox.textContent = `${err.message || 'Login failed. Please check your credentials.'}`;
           errBox.style.display = 'block';
         }
       } finally {
@@ -202,13 +202,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (data && data.success && data.merchant) {
         if (window.showNotification) {
-          window.showNotification(`🎉 Shop '${shopName}' registered successfully!`, 'success');
+          window.showNotification(`Shop '${shopName}' registered successfully!`, 'success');
         }
         saveSessionAndEnter(data.merchant, false);
       }
     } catch (err) {
       if (errBox) {
-        errBox.textContent = `❌ ${err.message || 'Registration failed.'}`;
+        errBox.textContent = `${err.message || 'Registration failed.'}`;
         errBox.style.display = 'block';
       }
     } finally {
@@ -267,18 +267,18 @@ document.addEventListener('DOMContentLoaded', () => {
           inputOtp.focus();
         }
         if (window.showNotification) {
-          window.showNotification(`📨 6-digit OTP code sent to ${res.email}!`, 'success');
+          window.showNotification(`6-digit OTP code sent to ${res.email}!`, 'success');
         }
       }
     } catch (err) {
       if (errBox) {
-        errBox.textContent = `❌ ${err.message || 'Failed to send OTP.'}`;
+        errBox.textContent = `${err.message || 'Failed to send OTP.'}`;
         errBox.style.display = 'block';
       }
     } finally {
       if (sendBtn) {
         sendBtn.disabled = false;
-        sendBtn.innerHTML = '<span>📨</span> Send Login OTP via Email';
+        sendBtn.innerHTML = 'Send Login OTP via Email';
       }
     }
   };
@@ -323,19 +323,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (res && res.success && res.merchant) {
         if (window.showNotification) {
-          window.showNotification(`🔓 OTP Verified! Welcome back, ${res.merchant.name}!`, 'success');
+          window.showNotification(`OTP Verified! Welcome back, ${res.merchant.name}!`, 'success');
         }
         saveSessionAndEnter(res.merchant, res.merchant.id === 1);
       }
     } catch (err) {
       if (errBox) {
-        errBox.textContent = `❌ ${err.message || 'Invalid or expired OTP code.'}`;
+        errBox.textContent = `${err.message || 'Invalid or expired OTP code.'}`;
         errBox.style.display = 'block';
       }
     } finally {
       if (verifyBtn) {
         verifyBtn.disabled = false;
-        verifyBtn.innerHTML = '<span>🚀</span> Verify OTP & Enter Cockpit';
+        verifyBtn.innerHTML = 'Verify OTP & Enter Cockpit';
       }
     }
   };
@@ -481,6 +481,15 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     localStorage.setItem('paytm_merchant_session', JSON.stringify(session));
 
+    // Persist new email to backend database so PO dispatches & Daily P&L emails use verified real inbox
+    if (newEmail && typeof API !== 'undefined' && API.updateMerchantEmail) {
+      API.updateMerchantEmail(newEmail).then(res => {
+        if (window.showNotification && res.success) {
+          window.showNotification(`Merchant email updated to ${newEmail}`, 'success');
+        }
+      }).catch(e => console.warn('Could not sync email to backend:', e));
+    }
+
     // Show feedback
     const successMsg = document.getElementById('profileSaveSuccess');
     if (successMsg) {
@@ -541,7 +550,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.paytmSoundbox.broadcast("Paytm Vyapar Saathi demo data safalta-purvak reset ho gaya hai.");
           }
           if (window.showNotification) {
-            window.showNotification("✅ Demo data reset successfully to Sharma Kirana baseline!", "success");
+            window.showNotification("Demo data reset successfully to Sharma Kirana baseline!", "success");
           }
           if (window.closeMerchantProfileModal) {
             window.closeMerchantProfileModal();
@@ -563,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (err) {
       console.error("Failed to reset demo data:", err);
       if (window.showNotification) {
-        window.showNotification(`❌ Reset failed: ${err.message}`, "error");
+        window.showNotification(`Reset failed: ${err.message}`, "error");
       }
     }
   };
@@ -603,7 +612,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (amountLabel) amountLabel.textContent = 'उधार राशि / Amount';
       if (submitBtn) {
         submitBtn.className = 'btn-modal-submit-khata';
-        submitBtn.innerHTML = '<span>💾</span> खाताबही में दर्ज करें (Save Entry)';
+        submitBtn.innerHTML = 'खाताबही में दर्ज करें (Save Entry)';
       }
     } else {
       if (udhaarBtn) udhaarBtn.className = 'type-pill-btn';
@@ -612,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (amountLabel) amountLabel.textContent = 'जमा राशि / Amount';
       if (submitBtn) {
         submitBtn.className = 'btn-modal-submit-khata is-jama';
-        submitBtn.innerHTML = '<span>📗</span> जमा राशि दर्ज करें (Save Payment)';
+        submitBtn.innerHTML = 'जमा राशि दर्ज करें (Save Payment)';
       }
     }
   };

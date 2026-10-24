@@ -56,9 +56,21 @@ class KhataEntryRequest(BaseModel):
 class KhataSettleRequest(BaseModel):
     customer_id: int
 
+class KhataUndoRequest(BaseModel):
+    entry_id: int
+
 class PORequest(BaseModel):
     item_name: str
     quantity: int = None
+    merchant_id: int = 1
+    custom_vendor_email: str = None
+
+class UpdateMerchantEmailRequest(BaseModel):
+    email: str
+    merchant_id: int = 1
+
+class DailyPulseEmailRequest(BaseModel):
+    custom_email: str = None
     merchant_id: int = 1
 
 class ReceivePORequest(BaseModel):
@@ -198,13 +210,48 @@ async def settle_khata_customer(req: KhataSettleRequest):
     res = KhataService.settle_customer(req.customer_id)
     return JSONResponse(content=res)
 
+@app.post("/api/khata/entry/undo")
+async def undo_khata_entry(req: KhataUndoRequest):
+    res = KhataService.undo_entry(req.entry_id)
+    return JSONResponse(content=res)
+
+@app.post("/api/merchant/update-email")
+async def update_merchant_email(req: UpdateMerchantEmailRequest):
+    from database import get_connection
+    clean_email = req.email.strip()
+    if not clean_email or "@" not in clean_email:
+        return JSONResponse(status_code=400, content={"success": False, "message": "Invalid email address."})
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("UPDATE merchants SET email = ? WHERE id = ?", (clean_email, req.merchant_id))
+    if cur.rowcount == 0:
+        cur.execute("UPDATE merchants SET email = ?", (clean_email,))
+    conn.commit()
+    cur.execute("SELECT * FROM merchants WHERE id = ?", (req.merchant_id,))
+    m = cur.fetchone()
+    if not m:
+        cur.execute("SELECT * FROM merchants LIMIT 1")
+        m = cur.fetchone()
+    conn.close()
+    return JSONResponse(content={
+        "success": True,
+        "email": clean_email,
+        "merchant": dict(m) if m else {},
+        "message": f"Merchant email updated to {clean_email}."
+    })
+
 @app.get("/api/inventory")
 async def get_inventory():
     return JSONResponse(content=InventoryService.get_inventory())
 
 @app.post("/api/inventory/po")
 async def create_po(req: PORequest):
-    res = InventoryService.create_supplier_po(req.item_name, req.quantity, req.merchant_id)
+    res = InventoryService.create_supplier_po(req.item_name, req.quantity, req.merchant_id, req.custom_vendor_email)
+    return JSONResponse(content=res)
+
+@app.post("/api/transactions/daily-pulse-email")
+async def send_daily_pulse_email(req: DailyPulseEmailRequest):
+    res = TransactionService.send_daily_profit_pulse_email(req.merchant_id, req.custom_email)
     return JSONResponse(content=res)
 
 @app.post("/api/inventory/po/receive")
