@@ -268,12 +268,70 @@ class ReactAgent:
                 "speech_text": reply_text.split("\n")[0].replace("*", "").replace("#", "")
             }
 
+            now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+            confirmation_card = None
+            if func_name == "record_khata_entry":
+                etype = args.get("entry_type", "udhaar")
+                confirmation_card = {
+                    "action": "UDHAAR_CREDIT" if etype == "udhaar" else "JAMA_PAYMENT",
+                    "action_label": "खाता उधार दर्ज (Credit Entry)" if etype == "udhaar" else "खाता जमा दर्ज (Payment Received)",
+                    "entity": args.get("customer_name") or exec_res.get("customer_name"),
+                    "item_description": args.get("item_description", "Kirana Items"),
+                    "item": args.get("item_description", "Kirana Items"),
+                    "amount": float(args.get("amount", 0)),
+                    "date": now_str,
+                    "status": "SAVED_TO_DATABASE",
+                    "simulation": False,
+                    "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                    "notice": "Saved to live Paytm Bahi-Khata ledger"
+                }
+            elif func_name == "create_supplier_po":
+                confirmation_card = {
+                    "action": "SUPPLIER_PURCHASE_ORDER",
+                    "action_label": "सप्लायर रीऑर्डर PO (Wholesale Restock)",
+                    "entity": args.get("item_name"),
+                    "item": f"Qty: {exec_res.get('quantity', args.get('quantity'))}",
+                    "amount": exec_res.get("total_cost", 0),
+                    "date": now_str,
+                    "status": exec_res.get("email_status", "DISPATCHED_TO_OUTBOX"),
+                    "simulation": True,
+                    "simulation_badge": "PO created and queued for supplier email (Demo Mode)",
+                    "notice": "PO created and queued for supplier email (Demo Mode)"
+                }
+            elif func_name == "disburse_loan":
+                confirmation_card = {
+                    "action": "LOAN_DISBURSAL",
+                    "action_label": "वर्किंग कैपिटल लोन डिसबर्सल (Working Capital Loan)",
+                    "entity": exec_res.get("bank_account", "Paytm Payments Bank"),
+                    "item": f"Interest: {exec_res.get('interest_rate', '1.2% / mo')}",
+                    "amount": float(args.get("amount", 0)),
+                    "date": now_str,
+                    "status": "APPROVED_IN_SIMULATION",
+                    "simulation": True,
+                    "simulation_badge": "Loan approved in simulation. No real funds disbursed.",
+                    "notice": "Loan approved in simulation. No real funds disbursed."
+                }
+            elif func_name == "settle_khata_customer":
+                confirmation_card = {
+                    "action": "JAMA_PAYMENT",
+                    "action_label": "खाता चुकता (Full Settlement)",
+                    "entity": args.get("customer_name") or exec_res.get("customer_name"),
+                    "item": "Poora Hisab Chukta",
+                    "amount": exec_res.get("cleared_amount", 0),
+                    "date": now_str,
+                    "status": "SAVED_TO_DATABASE",
+                    "simulation": False,
+                    "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                    "notice": "Full ledger balance settled"
+                }
+
             return {
                 "query": query,
                 "action_name": func_name.upper(),
                 "thoughts": thoughts,
                 "result": exec_res,
                 "reply": reply_text,
+                "confirmation_card": confirmation_card,
                 "soundbox_payload": soundbox_payload
             }
         else:
