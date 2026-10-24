@@ -78,12 +78,26 @@ const API = {
     return await res.json();
   },
 
-  async orderPO(itemName, quantity = 15) {
+  async orderPO(itemName, quantity = null) {
     const res = await fetch(endpoint('/api/inventory/po'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ item_name: itemName, quantity: parseInt(quantity) })
+      body: JSON.stringify({ item_name: itemName, quantity: quantity ? parseInt(quantity) : null })
     });
+    return await res.json();
+  },
+
+  async receivePO(poIdentifier) {
+    const res = await fetch(endpoint('/api/inventory/po/receive'), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ po_identifier: poIdentifier })
+    });
+    return await res.json();
+  },
+
+  async getMerchantProfile(merchantId = 1) {
+    const res = await fetch(endpoint(`/api/merchant/profile?merchant_id=${merchantId}`));
     return await res.json();
   },
 

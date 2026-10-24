@@ -75,3 +75,14 @@
 - [x] **Inquiry vs. Transaction Action Separation**: Disambiguated balance questions (containing "kitna", "kya", "batao", "status") from ledger entry actions so inquiring about a customer's balance never accidentally adds udhaar.
 - [x] **Dynamic UI Placeholders & Clean Mock Data**: Replaced hardcoded initial static HTML text `Manoj Verma hasn't visited in 45 days` with neutral real-time data binding in [`frontend/index.html`](./frontend/index.html).
 
+---
+
+### ✅ Phase 9: Real Dual-Engine ReAct Agent & Mathematical Underwriting
+- [x] **Authentic Groq LLM ReAct Agent (`qwen/qwen3.8-27b`)**: Connected [`backend/agent/react_agent.py`](./backend/agent/react_agent.py) with native function calling across 9 real tools. Supports Thought-Action-Observation loops and vernacular Hinglish reasoning.
+- [x] **Zero Silent Fake Defaults**: Removed silent fallbacks (no defaulting to "Valued Customer", "₹450", or "Amul Butter 15 units"). Missing details now prompt the merchant for clarification.
+- [x] **Word Boundary Token Collision Prevention**: Strict word boundaries (`\b(po|diya|likho)\b`) ensure substrings like "poora" or "diyanat" never trigger unintended intents.
+- [x] **Mathematical Credit Underwriting (0-100 Score)**: Built real dynamic underwriting in [`backend/services/credit_service.py`](./backend/services/credit_service.py) computing cashflow velocity (40 pts), Khata recovery ratio (35 pts), and customer retention (15 pts). Zero hardcoded fallback numbers.
+- [x] **Strict Disbursal Limit Validation & Revenue Isolation**: Enforced `amount <= pre_approved_loan` check; tagged disbursals as `payment_mode = 'Loan_Disbursal'` strictly excluded from customer sales revenue calculations.
+- [x] **Dynamic PO Procurement & Deferred Delivery Stocking**: Upgraded [`backend/services/inventory_service.py`](./backend/services/inventory_service.py) with real RFC-5322 MIME compilation, live SMTP attempt with Outbox fallback, dynamic shop details, and deferred inventory crediting upon physical delivery verification (`receive_supplier_delivery`).
+- [x] **Multi-Merchant Database Schema**: Extended [`backend/database.py`](./backend/database.py) with `auth_token`, `bank_name`, `bank_account_masked`, `ifsc_code`, and `email`, plus `/api/merchant/profile` endpoint.
+

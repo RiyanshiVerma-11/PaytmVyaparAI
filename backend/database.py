@@ -21,8 +21,13 @@ def init_db():
         name TEXT,
         shop_name TEXT,
         phone TEXT,
+        email TEXT DEFAULT 'sharma.kirana@paytm.mock',
         upi_id TEXT,
         address TEXT,
+        bank_name TEXT DEFAULT 'Paytm Payments Bank',
+        bank_account_masked TEXT DEFAULT '•••• 4519',
+        ifsc_code TEXT DEFAULT 'PYTM0123456',
+        auth_token TEXT DEFAULT 'merchant_sec_9811223344',
         credit_health_score INTEGER DEFAULT 88,
         pre_approved_loan_amount INTEGER DEFAULT 75000,
         loan_runway_days INTEGER DEFAULT 45
@@ -74,7 +79,7 @@ def init_db():
     )
     """)
 
-    # 5. Supplier Purchase Orders (Email POs)
+    # 5. Supplier Purchase Orders (Email POs & Real Delivery Tracking)
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS supplier_pos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,8 +89,13 @@ def init_db():
         item_name TEXT,
         quantity INTEGER,
         total_cost REAL,
-        status TEXT, -- 'Drafted', 'Sent_via_Email', 'Delivered'
-        sent_at TEXT
+        status TEXT DEFAULT 'PO_DISPATCHED_PENDING_DELIVERY',
+        sent_at TEXT,
+        expected_delivery_date TEXT,
+        delivery_received_at TEXT,
+        delivery_status TEXT DEFAULT 'PENDING', -- 'PENDING', 'DELIVERED', 'CANCELLED'
+        email_status TEXT DEFAULT 'DISPATCHED_TO_OUTBOX', -- 'SENT_VIA_SMTP', 'DISPATCHED_TO_OUTBOX'
+        email_raw TEXT
     )
     """)
 
@@ -96,11 +106,33 @@ def init_db():
         txn_id TEXT,
         amount REAL,
         customer_phone TEXT,
-        payment_mode TEXT, -- 'UPI_Soundbox', 'Cash'
+        payment_mode TEXT, -- 'UPI_Soundbox', 'Cash', 'Loan_Disbursal'
         timestamp TEXT,
         status TEXT DEFAULT 'SUCCESS'
     )
     """)
+
+    # Safe Schema Migrations for existing database
+    def add_col_if_missing(table, col, col_def):
+        cursor.execute(f"PRAGMA table_info({table})")
+        cols = [c["name"] for c in cursor.fetchall()]
+        if col not in cols:
+            try:
+                cursor.execute(f"ALTER TABLE {table} ADD COLUMN {col} {col_def}")
+            except Exception as e:
+                print(f"Migration notice ({table}.{col}): {e}")
+
+    add_col_if_missing("merchants", "email", "TEXT DEFAULT 'sharma.kirana@paytm.mock'")
+    add_col_if_missing("merchants", "bank_name", "TEXT DEFAULT 'Paytm Payments Bank'")
+    add_col_if_missing("merchants", "bank_account_masked", "TEXT DEFAULT '•••• 4519'")
+    add_col_if_missing("merchants", "ifsc_code", "TEXT DEFAULT 'PYTM0123456'")
+    add_col_if_missing("merchants", "auth_token", "TEXT DEFAULT 'merchant_sec_9811223344'")
+
+    add_col_if_missing("supplier_pos", "expected_delivery_date", "TEXT")
+    add_col_if_missing("supplier_pos", "delivery_received_at", "TEXT")
+    add_col_if_missing("supplier_pos", "delivery_status", "TEXT DEFAULT 'PENDING'")
+    add_col_if_missing("supplier_pos", "email_status", "TEXT DEFAULT 'DISPATCHED_TO_OUTBOX'")
+    add_col_if_missing("supplier_pos", "email_raw", "TEXT")
 
     conn.commit()
 
@@ -116,8 +148,8 @@ def seed_data(conn):
 
     # Seed Merchant
     cursor.execute("""
-    INSERT INTO merchants (name, shop_name, phone, upi_id, address, credit_health_score, pre_approved_loan_amount, loan_runway_days)
-    VALUES ('Ramesh Sharma', 'Sharma Kirana & General Store', '+91 9811223344', 'paytm@sharmakirana', 'Shop #14, Main Market, Chandni Chowk, Delhi', 88, 75000, 45)
+    INSERT INTO merchants (name, shop_name, phone, email, upi_id, address, bank_name, bank_account_masked, ifsc_code, auth_token, credit_health_score, pre_approved_loan_amount, loan_runway_days)
+    VALUES ('Ramesh Sharma', 'Sharma Kirana & General Store', '+91 9811223344', 'sharma.kirana@paytm.mock', 'paytm@sharmakirana', 'Shop #14, Main Market, Chandni Chowk, Delhi', 'Paytm Payments Bank', '•••• 4519', 'PYTM0123456', 'merchant_sec_9811223344', 88, 75000, 45)
     """)
 
     # Seed Customers

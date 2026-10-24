@@ -247,99 +247,15 @@ class VyaparAgentService:
     # Autonomous ReAct Agent Loop: Natural Language Reasoner
     # ----------------------------------------------------
     def process_query(self, query):
-        q = query.lower().strip()
-        thoughts = []
-        action_taken = None
-        tool_result = None
-
-        # Scenario 1: Udhaar / Khata Entry
-        # e.g., "Ramesh bhai ko ₹450 ka refine tel udhaar diya, note karlo"
-        if any(w in q for w in ["udhaar", "diya", "likho", "likh lo", "khata", "jama", "baaki"]):
-            thoughts.append(f"Intent recognized: LEDGER_ACTION (Query: '{query}')")
-            
-            # Extract Amount
-            amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+)', q)
-            amount = float(amt_match.group(1)) if amt_match else 250.0
-
-            # Extract Customer Name dynamically from DB
-            name = None
-            try:
-                from database import get_connection
-                _conn = get_connection()
-                _cur = _conn.cursor()
-                _cur.execute("SELECT name FROM customers")
-                for _row in _cur.fetchall():
-                    _cname = _row["name"]
-                    parts = [_cname.lower()] + [p.lower() for p in _cname.split() if len(p) > 2]
-                    if any(p in q for p in parts):
-                        name = _cname
-                        break
-                _conn.close()
-            except Exception:
-                pass
-            if not name:
-                name = "Valued Customer"
-
-            # Extract Item
-            item_desc = "Kirana Items"
-            for item in ["refine tel", "butter", "maggi", "oil", "salt", "atta", "tea", "doodh", "milk"]:
-                if item in q:
-                    item_desc = item.title()
-                    break
-
-            entry_type = "jama" if "jama" in q else "udhaar"
-
-            thoughts.append(f"Executing Tool: record_khata_entry(customer='{name}', amount={amount}, item='{item_desc}', type='{entry_type}')")
-            tool_result = self.record_khata_entry(name, amount, item_desc, entry_type)
-            action_taken = "RECORD_KHATA_ENTRY"
-
-        # Scenario 2: Stock Check & Supplier PO
-        # e.g., "Amul butter kitna bacha hai aur restock kar do"
-        elif any(w in q for w in ["stock", "khatam", "kitna bacha", "supplier", "order", "reorder", "po"]):
-            thoughts.append(f"Intent recognized: INVENTORY_REORDER_ACTION (Query: '{query}')")
-            item = "Amul Butter 100g"
-            for it in ["butter", "oil", "maggi", "salt", "atta", "tea"]:
-                if it in q:
-                    item = it
-                    break
-
-            thoughts.append(f"Executing Tool: send_supplier_po_email(item='{item}', quantity=15)")
-            tool_result = self.send_supplier_po_email(item, 15)
-            action_taken = "SEND_SUPPLIER_EMAIL_PO"
-
-        # Scenario 3: Customer Churn / Growth Offers
-        # e.g., "Puraane grahak ko discount offer bhejo"
-        elif any(w in q for w in ["grahak", "customer", "offer", "discount", "churn", "growth", "sms"]):
-            thoughts.append(f"Intent recognized: MERCHANT_GROWTH_AI (Query: '{query}')")
-            thoughts.append("Executing Tool: get_growth_campaigns()")
-            tool_result = self.get_growth_campaigns()
-            action_taken = "CUSTOMER_GROWTH_CAMPAIGN"
-
-        # Scenario 4: Loan / Credit Health Check
-        # e.g., "Mera credit score aur loan eligibility kya hai"
-        elif any(w in q for w in ["loan", "credit", "score", "capital", "paise"]):
-            thoughts.append(f"Intent recognized: CREDIT_HEALTH_SCORING (Query: '{query}')")
-            thoughts.append("Executing Tool: get_credit_health()")
-            tool_result = self.get_credit_health()
-            action_taken = "CALCULATE_CREDIT_HEALTH"
-
-        # Scenario 5: Default General Pulse
-        else:
-            thoughts.append(f"Intent recognized: BUSINESS_PULSE_REPORT")
-            tool_result = {
-                "message": "Paytm Vyapar Saathi active. Aap aawaz se Udhaar likh sakte hain, stock check kar sakte hain, ya wholesale PO bhej sakte hain.",
-                "soundbox_payload": {
-                    "chime": True,
-                    "speech_text": "Paytm Vyapar Saathi taiyaar hai. Kahiye, kya madad karu?"
-                }
-            }
-            action_taken = "BUSINESS_PULSE"
-
+        from agent.react_agent import ReactAgent
+        res = ReactAgent.process_query(query)
         return {
             "query": query,
-            "action_taken": action_taken,
-            "thoughts": thoughts,
-            "result": tool_result
+            "action_taken": res.get("action_name"),
+            "thoughts": res.get("thoughts", []),
+            "result": res.get("result"),
+            "reply": res.get("reply"),
+            "soundbox_payload": res.get("soundbox_payload")
         }
 
 agent_service = VyaparAgentService()

@@ -57,7 +57,11 @@ class KhataSettleRequest(BaseModel):
 
 class PORequest(BaseModel):
     item_name: str
-    quantity: int = 15
+    quantity: int = None
+    merchant_id: int = 1
+
+class ReceivePORequest(BaseModel):
+    po_identifier: str
 
 class InventoryItemRequest(BaseModel):
     item_name: str
@@ -76,13 +80,27 @@ class SimulateTxnRequest(BaseModel):
     payment_mode: str = "UPI_Soundbox"
 
 class LoanDisburseRequest(BaseModel):
-    amount: float = 75000.0
+    amount: float = 50000.0
+    merchant_id: int = 1
 
 class ChatbotMessageRequest(BaseModel):
     message: str
     session_id: str = "default_merchant"
 
 # Routes
+@app.get("/api/merchant/profile")
+async def get_merchant_profile(merchant_id: int = 1):
+    from database import get_connection
+    conn = get_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM merchants WHERE id = ?", (merchant_id,))
+    m = cur.fetchone()
+    if not m:
+        cur.execute("SELECT * FROM merchants LIMIT 1")
+        m = cur.fetchone()
+    conn.close()
+    return JSONResponse(content=dict(m) if m else {})
+
 @app.post("/api/chatbot/message")
 async def chatbot_message(req: ChatbotMessageRequest):
     res = ChatbotService.handle_message(req.message, req.session_id)
@@ -98,7 +116,7 @@ async def chatbot_clear(req: ChatbotMessageRequest):
 
 @app.post("/api/agent/chat")
 async def chat_with_agent(req: ChatQuery):
-    response = ChatbotService.handle_message(req.query)
+    response = ReactAgent.process_query(req.query)
     return JSONResponse(content=response)
 
 @app.get("/api/khata")
@@ -121,7 +139,12 @@ async def get_inventory():
 
 @app.post("/api/inventory/po")
 async def create_po(req: PORequest):
-    res = InventoryService.create_supplier_po(req.item_name, req.quantity)
+    res = InventoryService.create_supplier_po(req.item_name, req.quantity, req.merchant_id)
+    return JSONResponse(content=res)
+
+@app.post("/api/inventory/po/receive")
+async def receive_po(req: ReceivePORequest):
+    res = InventoryService.receive_supplier_delivery(req.po_identifier)
     return JSONResponse(content=res)
 
 @app.post("/api/inventory/item")
@@ -137,12 +160,12 @@ async def get_growth():
     return JSONResponse(content=GrowthService.get_campaigns())
 
 @app.get("/api/credit")
-async def get_credit():
-    return JSONResponse(content=CreditService.get_merchant_credit_health())
+async def get_credit(merchant_id: int = 1):
+    return JSONResponse(content=CreditService.get_merchant_credit_health(merchant_id))
 
 @app.post("/api/credit/disburse")
 async def disburse_credit_loan(req: LoanDisburseRequest):
-    res = CreditService.disburse_loan(req.amount)
+    res = CreditService.disburse_loan(req.amount, req.merchant_id)
     return JSONResponse(content=res)
 
 @app.get("/api/transactions")

@@ -43,11 +43,15 @@ class ChatbotService:
         inventory = [dict(r) for r in cursor.fetchall()]
         low_stock_items = [i for i in inventory if i["current_stock"] <= i["reorder_threshold"]]
 
-        # 4. Transactions & Telemetry
-        cursor.execute("SELECT COUNT(*) as cnt, SUM(amount) as total_vol FROM transactions")
-        tx_summary = dict(cursor.fetchone())
+        # 4. Transactions & Telemetry (Excluding loan disbursals so merchant revenue volume is pure)
+        cursor.execute("""
+        SELECT COUNT(*) as cnt, COALESCE(SUM(amount), 0) as total_vol 
+        FROM transactions 
+        WHERE payment_mode != 'Loan_Disbursal' AND status = 'SUCCESS'
+        """)
+        tx_summary = dict(cursor.fetchone() or {"cnt": 0, "total_vol": 0})
         
-        cursor.execute("SELECT * FROM transactions ORDER BY id DESC LIMIT 5")
+        cursor.execute("SELECT * FROM transactions WHERE payment_mode != 'Loan_Disbursal' ORDER BY id DESC LIMIT 5")
         recent_txns = [dict(r) for r in cursor.fetchall()]
 
         # 5. Supplier POs
@@ -55,6 +59,9 @@ class ChatbotService:
         recent_pos = [dict(r) for r in cursor.fetchall()]
 
         conn.close()
+
+        # 6. Live Underwriting & Credit Health (Direct mathematical calculation)
+        credit_data = CreditService.get_merchant_credit_health(merchant.get("id", 1))
 
         return {
             "merchant": merchant,
@@ -83,12 +90,13 @@ class ChatbotService:
                 ]
             },
             "credit": {
-                "score": merchant["credit_health_score"],
-                "tier": "Tier-1 Prime Low Risk",
-                "pre_approved_amount": merchant["pre_approved_loan_amount"],
-                "interest_rate": "1.1% per month flat",
-                "daily_edi": round((merchant["pre_approved_loan_amount"] * 1.10) / 360, 2),
-                "runway_days": merchant["loan_runway_days"]
+                "score": credit_data["credit_health_score"],
+                "tier": credit_data["rating"],
+                "pre_approved_amount": credit_data["pre_approved_loan"],
+                "interest_rate": credit_data["interest_rate"],
+                "monthly_emi": credit_data["monthly_emi"],
+                "daily_edi": credit_data["daily_edi"],
+                "runway_days": credit_data["working_capital_runway_days"]
             },
             "growth": {
                 "at_risk_count": len(at_risk_customers),
@@ -96,8 +104,8 @@ class ChatbotService:
                 "upcoming_festive": "Navratri & Diwali (3.4x Expected Surge in 6 Days)"
             },
             "telemetry": {
-                "total_transactions": tx_summary.get("cnt") or 75,
-                "total_volume": tx_summary.get("total_vol") or 38400,
+                "total_transactions": tx_summary.get("cnt", 0),
+                "total_volume": round(float(tx_summary.get("total_vol", 0)), 2),
                 "recent_payments": [
                     {"id": t.get("txn_id"), "amount": t.get("amount"), "time": t.get("timestamp")}
                     for t in recent_txns
@@ -461,19 +469,24 @@ class ChatbotService:
                             break
 
                 session["last_mentioned_item"] = target_item
-                po_res = InventoryService.create_supplier_po(target_item, 15)
+                qty_match = re.search(r'\b(\d+)\s*(?:packet|pack|unit|piece|pouch|dibba|kg|litre|l)?\b', q)
+                quantity = int(qty_match.group(1)) if qty_match else None
+                po_res = InventoryService.create_supplier_po(target_item, quantity)
                 action_taken = "SUPPLIER_PO_SENT"
                 data_payload = po_res
                 soundbox_payload = po_res.get("soundbox_payload")
                 session["last_action"] = f"Created {po_res.get('po_number')} for {target_item}"
 
+                po_qty = po_res.get("quantity")
+                po_unit = po_res.get("unit", "units")
                 reply = f"📦 **Supplier Purchase Order Dispatched!**\n\n" \
                         f"• **PO Number:** `{po_res.get('po_number')}`\n" \
                         f"• **Item:** {target_item}\n" \
-                        f"• **Quantity:** 15 units\n" \
+                        f"• **Quantity:** {po_qty} {po_unit}\n" \
                         f"• **Supplier:** {po_res.get('supplier_name')}\n" \
                         f"• **Total PO Value:** ₹{int(po_res.get('total_cost', 0))}\n" \
-                        f"• **Status:** Email PO sent autonomously via Paytm B2B Rail.\n\n" \
+                        f"• **Expected Delivery:** {po_res.get('expected_delivery_date')} (Stock will credit on delivery)\n" \
+                        f"• **Status:** Email PO sent via Paytm B2B Rail ({po_res.get('email_preview', {}).get('email_status')}).\n\n" \
                         f"🔊 *Soundbox Audio Chime Triggered!*"
                 suggestions = ["Low stock list dekhein", "Khata udhaar check karo", "Credit health score"]
 

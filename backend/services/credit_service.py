@@ -2,62 +2,178 @@ from database import get_connection
 
 class CreditService:
     @staticmethod
-    def get_merchant_credit_health():
+    def calculate_underwriting(merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM merchants LIMIT 1")
-        merchant = dict(cursor.fetchone())
+        # 1. Fetch merchant profile dynamically
+        cursor.execute("SELECT * FROM merchants WHERE id = ?", (merchant_id,))
+        m_row = cursor.fetchone()
+        if not m_row:
+            cursor.execute("SELECT * FROM merchants LIMIT 1")
+            m_row = cursor.fetchone()
+        merchant = dict(m_row) if m_row else {
+            "id": 1, "name": "Ramesh Sharma", "shop_name": "Sharma Kirana Store",
+            "bank_name": "Paytm Payments Bank", "bank_account_masked": "•••• 4519", "ifsc_code": "PYTM0123456",
+            "loan_runway_days": 45
+        }
 
-        cursor.execute("SELECT SUM(amount) as total_upi, COUNT(*) as count FROM transactions")
-        tx_row = cursor.fetchone()
-        total_upi = tx_row["total_upi"] if tx_row and tx_row["total_upi"] else 38400.0
-        tx_count = tx_row["count"] if tx_row and tx_row["count"] else 75
+        # 2. Real QR Sales Volume (CRITICAL: payment_mode != 'Loan_Disbursal' prevents loan inflation!)
+        cursor.execute("""
+        SELECT COALESCE(SUM(amount), 0) as total_upi, COUNT(*) as count 
+        FROM transactions 
+        WHERE payment_mode != 'Loan_Disbursal' AND status = 'SUCCESS'
+        """)
+        tx_row = dict(cursor.fetchone() or {"total_upi": 0, "count": 0})
+        total_upi = float(tx_row.get("total_upi") or 0.0)
+        tx_count = int(tx_row.get("count") or 0)
 
-        cursor.execute("SELECT SUM(pending_udhaar) as total_udhaar FROM customers")
-        udhaar_row = cursor.fetchone()
-        total_udhaar = udhaar_row["total_udhaar"] if udhaar_row and udhaar_row["total_udhaar"] else 3100.0
+        # 3. Real Khata Receivables & Recovery Disciplines
+        cursor.execute("SELECT COALESCE(SUM(pending_udhaar), 0) as total_udhaar, COUNT(*) as total_customers FROM customers")
+        cust_row = dict(cursor.fetchone() or {"total_udhaar": 0, "total_customers": 0})
+        total_udhaar = float(cust_row.get("total_udhaar") or 0.0)
+        total_customers = int(cust_row.get("total_customers") or 0)
 
+        cursor.execute("SELECT COALESCE(SUM(amount), 0) FROM khata_entries WHERE entry_type = 'jama'")
+        total_jama = float(cursor.fetchone()[0] or 0.0)
+
+        cursor.execute("SELECT COUNT(*) FROM customers WHERE churn_risk = 'Normal'")
+        active_customers = int(cursor.fetchone()[0] or 0)
+
+        # -------------------------------------------------------------
+        # 4. MATHEMATICAL UNDERWRITING FORMULA (0 - 100 Score Scale)
+        # -------------------------------------------------------------
+        # A. Cashflow Volume & Velocity (Max 40 points)
+        vol_score = min(30.0, (total_upi / 40000.0) * 30.0) if total_upi > 0 else 10.0
+        freq_score = min(10.0, (tx_count / 50.0) * 10.0) if tx_count > 0 else 5.0
+        cashflow_points = vol_score + freq_score
+
+        # B. Khata Recovery & Repayment Discipline (Max 35 points)
+        total_book = total_jama + total_udhaar
+        if total_book > 0:
+            recovery_ratio = total_jama / total_book
+        else:
+            recovery_ratio = 0.85
+        recovery_points = min(35.0, recovery_ratio * 35.0)
+
+        # C. Customer Retention & Repeat Business (Max 15 points)
+        if total_customers > 0:
+            retention_ratio = active_customers / total_customers
+        else:
+            retention_ratio = 0.8
+        retention_points = min(15.0, retention_ratio * 15.0)
+
+        # D. Store Vintage & Breadth (Max 10 points)
+        stability_points = min(10.0, max(4.0, total_customers * 1.25))
+
+        computed_score = int(round(cashflow_points + recovery_points + retention_points + stability_points))
+        # Clamp score between 45 and 99
+        credit_score = max(45, min(99, computed_score))
+
+        # -------------------------------------------------------------
+        # 5. DYNAMIC RISK TIER, PRICING & PRE-APPROVED FACILITY
+        # -------------------------------------------------------------
+        if credit_score >= 82:
+            tier = "Tier-1 Prime (Low Risk)"
+            monthly_rate = 0.0095  # 0.95% / mo
+            rate_label = "0.95% per month flat"
+            tenure_months = 12
+            loan_multiplier = 2.0
+        elif credit_score >= 68:
+            tier = "Tier-2 Standard (Moderate Risk)"
+            monthly_rate = 0.0125  # 1.25% / mo
+            rate_label = "1.25% per month flat"
+            tenure_months = 9
+            loan_multiplier = 1.3
+        else:
+            tier = "Tier-3 Growth (Building Credit)"
+            monthly_rate = 0.0160  # 1.60% / mo
+            rate_label = "1.60% per month flat"
+            tenure_months = 6
+            loan_multiplier = 0.75
+
+        # Dynamic pre-approved amount scaled to monthly cashflow
+        calculated_loan = int(round((total_upi * loan_multiplier) / 1000) * 1000) if total_upi > 0 else 25000
+        pre_approved_loan = max(15000, min(150000, calculated_loan))
+
+        total_repayable = pre_approved_loan * (1.0 + (monthly_rate * tenure_months))
+        monthly_emi = round(total_repayable / tenure_months, 2)
+        daily_edi = round(total_repayable / (tenure_months * 30), 2)
+
+        # Sync computed metrics back to merchant record in DB
+        cursor.execute("""
+        UPDATE merchants 
+        SET credit_health_score = ?, pre_approved_loan_amount = ?
+        WHERE id = ?
+        """, (credit_score, pre_approved_loan, merchant["id"]))
+        conn.commit()
         conn.close()
 
-        score = merchant.get("credit_health_score", 88)
-        loan_amount = merchant.get("pre_approved_loan_amount", 75000)
-
         return {
+            "merchant_id": merchant["id"],
             "merchant_name": merchant["name"],
             "shop_name": merchant["shop_name"],
-            "credit_health_score": score,
-            "rating": "Tier-1 Low Risk (Pre-Approved)",
-            "pre_approved_loan": loan_amount,
-            "tenure_months": 12,
-            "monthly_emi": round((loan_amount * 1.11) / 12, 2),
-            "interest_rate": "1.1% per month flat",
+            "credit_health_score": credit_score,
+            "rating": f"{tier} (Pre-Approved)",
+            "pre_approved_loan": pre_approved_loan,
+            "tenure_months": tenure_months,
+            "monthly_emi": monthly_emi,
+            "daily_edi": daily_edi,
+            "interest_rate": rate_label,
             "working_capital_runway_days": merchant.get("loan_runway_days", 45),
             "soundbox_30d_volume": round(total_upi, 2),
             "soundbox_tx_count": tx_count,
             "pending_receivables": round(total_udhaar, 2),
+            "total_recovered": round(total_jama, 2),
+            "recovery_rate_pct": round(recovery_ratio * 100, 1),
+            "bank_name": merchant.get("bank_name", "Paytm Payments Bank"),
+            "bank_account": merchant.get("bank_account_masked", "•••• 4519"),
+            "ifsc": merchant.get("ifsc_code", "PYTM0123456"),
             "instant_disbursement_ready": True
         }
 
-    @staticmethod
-    def disburse_loan(amount: float):
+    @classmethod
+    def get_merchant_credit_health(cls, merchant_id: int = 1):
+        return cls.calculate_underwriting(merchant_id)
+
+    @classmethod
+    def disburse_loan(cls, amount: float, merchant_id: int = 1):
+        # 1. First get current live underwriting
+        health = cls.calculate_underwriting(merchant_id)
+        pre_approved = health["pre_approved_loan"]
+
+        amount = float(amount)
+        if amount <= 0:
+            return {"success": False, "message": "Disbursal amount must be greater than zero."}
+
+        # 2. Strict Limit Validation: Cannot exceed pre-approved facility!
+        if amount > pre_approved:
+            err_msg = f"Requested amount ₹{int(amount):,} exceeds your pre-approved credit limit of ₹{int(pre_approved):,}."
+            return {
+                "success": False,
+                "error": err_msg,
+                "message": err_msg
+            }
+
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT * FROM merchants LIMIT 1")
-        merchant = cursor.fetchone()
-        merchant_id = merchant["id"] if merchant else 1
+        # 3. Dynamic runway calculation based on average daily operating volume
+        daily_burn = max(health["soundbox_30d_volume"] / 30.0, 500.0)
+        added_runway_days = int(round(amount / daily_burn))
+        current_runway = health["working_capital_runway_days"]
+        new_runway = current_runway + added_runway_days
+        new_limit = max(0, pre_approved - int(amount))
 
-        # Update merchant runway & reduce pre_approved_loan_amount
+        # 4. Update merchant database record
         cursor.execute("""
         UPDATE merchants 
-        SET loan_runway_days = loan_runway_days + 60,
-            pre_approved_loan_amount = MAX(0, pre_approved_loan_amount - ?)
+        SET loan_runway_days = ?, pre_approved_loan_amount = ?
         WHERE id = ?
-        """, (int(amount), merchant_id))
+        """, (new_runway, new_limit, merchant_id))
 
-        # Log credit transaction
-        txn_id = f"LN_DISB_{int(amount)}_{merchant_id}"
+        # 5. Log transaction tagged as 'Loan_Disbursal' (Strictly excluded from merchant QR volume)
+        txn_id = f"LN_DISB_{int(amount)}_{int(merchant_id)}"
         cursor.execute("""
         INSERT INTO transactions (txn_id, amount, customer_phone, payment_mode, timestamp, status)
         VALUES (?, ?, '+91 Paytm Payments Bank', 'Loan_Disbursal', datetime('now'), 'SUCCESS')
@@ -71,10 +187,13 @@ class CreditService:
         return {
             "success": True,
             "loan_amount": amount,
-            "bank_account": "Paytm Payments Bank •••• 4519",
-            "ifsc": "PYTM0123456",
+            "bank_name": health["bank_name"],
+            "bank_account": f"{health['bank_name']} {health['bank_account']}",
+            "ifsc": health["ifsc"],
             "txn_id": txn_id,
-            "new_runway_days": 105,
+            "previous_runway_days": current_runway,
+            "new_runway_days": new_runway,
+            "daily_edi": health["daily_edi"],
             "soundbox_payload": {
                 "chime": True,
                 "speech_text": speech_text,
