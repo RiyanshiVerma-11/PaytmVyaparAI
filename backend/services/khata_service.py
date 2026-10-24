@@ -32,39 +32,40 @@ class KhataService:
         clean_name = (customer_name or "").strip()
 
         # Fetch all existing customers for precise matching
+        customer = None
         cursor.execute("SELECT * FROM customers")
         all_customers = [dict(r) for r in cursor.fetchall()]
 
-        customer = None
-
-        # 1. Match by phone number first if provided (highest precision in retail CRM)
-        if phone_10:
-            for c in all_customers:
-                c_10 = get_phone_last10(c["phone"])
-                if c_10 and c_10 == phone_10:
-                    customer = c
-                    break
-
-        # 2. Match by exact full name (case-insensitive) if not matched by phone
-        if not customer and clean_name:
+        # 1. Match by exact full name (case-insensitive) first
+        if clean_name:
             target_name_lower = clean_name.lower()
             for c in all_customers:
                 if c["name"].strip().lower() == target_name_lower:
                     customer = c
                     break
 
-        # 3. Match by exact first name if clean_name is a single word and matches exactly one customer
+        # 2. Match by exact first name if clean_name is a single word and matches exactly one customer
         if not customer and clean_name and " " not in clean_name:
             matching_first_names = [c for c in all_customers if c["name"].strip().lower().split()[0] == clean_name.lower()]
             if len(matching_first_names) == 1:
                 customer = matching_first_names[0]
 
+        # 3. Match by phone number ONLY if no name given or if name is compatible with existing customer
+        if not customer and phone_10:
+            for c in all_customers:
+                c_10 = get_phone_last10(c["phone"])
+                if c_10 and c_10 == phone_10:
+                    # Do not hijack a different customer's account if names are completely different!
+                    if not clean_name or clean_name.lower() in c["name"].lower() or c["name"].lower() in clean_name.lower() or c["name"].lower() == "valued customer":
+                        customer = c
+                        break
+
         if customer:
             cust_id = customer["id"]
-            # If a new phone is provided, dynamically update it! Otherwise keep existing
+            # If a new phone is provided, dynamically update it; otherwise keep existing
             cust_phone = norm_phone or customer["phone"]
-            cust_name = clean_name.title() if (clean_name and len(clean_name) >= len(customer["name"])) else customer["name"]
-            curr_pending = customer["pending_udhaar"]
+            cust_name = clean_name.title() if clean_name else customer["name"]
+            curr_pending = float(customer["pending_udhaar"] or 0)
         else:
             cust_name = clean_name.title() if clean_name else "Valued Customer"
             cust_phone = norm_phone or "+91 9810000000"
@@ -73,7 +74,7 @@ class KhataService:
             VALUES (?, ?, 0, date('now'), 1, 'Normal')
             """, (cust_name, cust_phone))
             cust_id = cursor.lastrowid
-            curr_pending = 0
+            curr_pending = 0.0
 
         amount = float(amount)
         new_pending = (curr_pending + amount) if entry_type.lower() == "udhaar" else max(0.0, curr_pending - amount)

@@ -162,20 +162,31 @@ class ChatbotService:
             conn = get_connection()
             cur = conn.cursor()
             cur.execute("SELECT id, name, phone FROM customers")
-            for row in cur.fetchall():
-                c_name = row["name"]
-                c_lower = c_name.lower().strip()
+            rows = [dict(r) for r in cur.fetchall()]
+            conn.close()
+
+            # First calculate first-name frequencies so we only index unique first names
+            first_name_freq = {}
+            for row in rows:
+                c_name = row["name"].strip()
+                c_lower = c_name.lower()
                 customer_alias_map[c_lower] = c_name
                 parts = c_lower.split()
-                if len(parts) > 0 and len(parts[0]) > 2:
+                if parts and len(parts[0]) >= 3:
+                    first_name_freq[parts[0]] = first_name_freq.get(parts[0], 0) + 1
+
+            for row in rows:
+                c_name = row["name"].strip()
+                c_lower = c_name.lower()
+                parts = c_lower.split()
+                # ONLY index first name if it uniquely identifies this single customer!
+                # NEVER index generic surnames ('verma', 'sharma', 'gupta', 'kumar', 'singh') alone!
+                if parts and len(parts[0]) >= 3 and first_name_freq.get(parts[0], 0) == 1:
                     customer_alias_map[parts[0]] = c_name
-                if len(parts) > 1 and len(parts[-1]) > 2:
-                    customer_alias_map[parts[-1]] = c_name
                 if row["phone"]:
                     digits = ''.join(ch for ch in str(row["phone"]) if ch.isdigit())
                     if len(digits) >= 10:
                         customer_alias_map[digits[-10:]] = c_name
-            conn.close()
         except Exception as e:
             print("Dynamic customer indexing error:", e)
 
@@ -184,86 +195,125 @@ class ChatbotService:
         # ========================================================
         has_amount = bool(re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\d+(?:\.\d+)?)', q))
         is_jama_phrase = any(w in q for w in [
-            # Hinglish / English
+            # Hinglish / English - Chutta / Chukta / Settle / Clear
+            "chutta", "chutta kar", "chutta karo", "chutta kar do", "chutta kardo",
+            "chutta kar rahi", "chutta kar rahe", "chutta karna", "chutta kiya", "chutta ho gaya", "chutta kar dijiye",
+            "chuta", "chuta kar", "chuta karo", "chuta kar do",
+            "chukta", "chukta kar", "chukta karo", "chukta kar do", "chukta kardo",
+            "chukta kar rahi", "chukta kar rahe", "chukta karna", "chuka diya", "chuka diye", "chuka do",
+            "hisab chutta", "hisab chukta", "udhaar chutta", "udhaar chukta",
             "aa gaye", "aa gaya", "aagye", "aagaya", "aaye", "aaya", "aagayi", "aa gayi",
             "mil gaye", "mil gaya", "mila", "mile", "received", "receive", "rcvd", "recvd",
-            "jama", "jama kar", "jama ho", "settle", "settled", "clear", "cleared",
+            "jama", "jama kar", "jama karo", "jama kar do", "jama kardo", "jama ho", "settle", "settled", "clear", "cleared",
             "pay kar", "paid", "pad", "pay", "payed", "pe", "payment",
             "de diya", "de diye", "de gaya", "diya", "diye", "dia",
-            "chuka diya", "chuka diye", "prapt", "bhar diya", "bhar diye",
+            "prapt", "bhar diya", "bhar diye",
             "bhi aa gaye", "bhi aa gaya",
             "wapas", "wapas aa gaye", "wapas aa gaya", "wapas mil gaye", "paisa aaya", "paise aa gaye",
-            # Devanagari Hindi
+            # Devanagari Hindi - छुट्टा / चुकता / जमा / सेटल
+            "छुट्टा", "छुट्टा कर", "छुट्टा करो", "छुट्टा कर दो", "छुट्टा कर रही", "छुट्टा कर रहे", "छुट्टा करना",
+            "छुट्टा हुआ", "छुट्टा हो गया", "छुट्टा कर दीजिए", "हिसाब छुट्टा", "उधार छुट्टा",
+            "चुकता", "हिसाब चुकता", "उधार चुकता", "चुकता कर", "चुकता करो", "चुकता कर दो", "चुकता कर रही", "चुकता कर रहे", "चुकता करना",
+            "निपटा दिया", "क्लियर", "सेटल", "सैटल", "सेटल कर", "सेटल करो", "सेटल कर दो",
             "पैड", "पेड", "पेड़", "पे", "पेमेंट", "पे कर", "पे किया", "पे कर दिया", "पे हुआ", "पे हो गए", "पे हो गया",
             "आ गए", "आ गया", "आ गई", "आगए", "आगया", "आए", "आया", "आये",
             "मिल गए", "मिल गया", "मिला", "मिले",
-            "जमा", "जमा कर", "जमा करो", "जमा कर लो", "जमा हो गए", "जमा हुआ",
+            "जमा", "जमा कर", "जमा करो", "जमा कर लो", "जमा कर दो", "जमा हो गए", "जमा हुआ",
             "प्राप्त", "प्राप्त हुए", "प्राप्त हुआ",
             "दे दिए", "दे दिया", "दे गया", "दिए", "दिया", "दिये",
             "चुका दिया", "चुका दिए", "चुकाया", "चुकाए",
             "भर दिया", "भर दिए", "भुगतान", "भुगतान किया", "भुगतान हुआ",
-            "चुकता", "हिसाब चुकता", "चुकता कर", "चुकता करो", "निपटा दिया", "क्लियर", "सेटल", "सैटल", "सेटल कर", "सेटल करो", "सेटल कर दो",
+            "पूरा चुकता", "खाता चुकता",
             "वापस", "वापस आ गए", "वापस मिल गए", "पैसे आ गए", "पैसा आया"
         ])
+        is_inquiry = any(w in q for w in [
+            "kitna", "kitne", "kitni", "kya", "batao", "bataiye", "bata do", "check", "dekho", "dekhein", "dikhao", "status", "summary",
+            "कितना", "कितने", "कितनी", "क्या", "बताओ", "बताइए", "बता दो", "चेक", "देखो", "दिखाओ", "स्थिति"
+        ])
         is_udhaar_action = any(w in q for w in [
-            # Hinglish / English
-            "likho", "likh lo", "likh do", "likh", "udhaar", "de do",
-            "add kar", "jod do", "le gaya", "udhari",
+            # Hinglish / English - action verbs for writing/giving udhaar
+            "likho", "likh lo", "likh do", "likh", "likhiye",
+            "udhaar diya", "udhaar de do", "udhaar likho", "udhaar likh", "udhari likho",
+            "add kar", "jod do", "le gaya", "le gaye",
             # Devanagari Hindi
             "लिखो", "लिख लो", "लिख दो", "लिख लेना", "लिखिये", "लिखिए",
-            "उधार", "उधारी", "दे दो", "जोड़ दो", "जोड़ो",
-            "ले गया", "ले गए"
-        ])
+            "उधार दिया", "उधार दे दो", "उधार लिखो", "उधार लिख", "उधारी लिखो",
+            "जोड़ दो", "जोड़ो", "ले गया", "ले गए"
+        ]) and not is_inquiry
         is_khata_general = any(w in q for w in [
-            "khata", "baaki", "bahi", "ledger", "balance", "udhaar", "jama",
-            "खाता", "बही", "बाकी", "बैलेंस", "हिसाब", "उधार", "कितना बाकी"
-        ])
+            "khata", "baaki", "bahi", "ledger", "balance", "udhaar", "jama", "hisab", "kitna", "kitne",
+            "खाता", "बही", "बाकी", "बैलेंस", "हिसाब", "उधार", "कितना बाकी", "कितना"
+        ]) or is_inquiry
 
         # Customer presence check
         has_known_customer = any(k in q for k in customer_alias_map) or any(c["name"].lower().split()[0] in q for c in context["khata"]["all_customers"])
 
-        # Check if it's a direct ledger action (Jama / Udhaar entry)
-        if (is_jama_phrase or is_udhaar_action) and (has_amount or has_known_customer):
+        # Check if it's a direct ledger action (Jama / Udhaar entry / Settle) - Never record on pure inquiries!
+        if (is_jama_phrase or is_udhaar_action) and not (is_inquiry and not is_jama_phrase) and (has_amount or has_known_customer or any(w in q for w in ["chutta", "chukta", "settle", "clear", "छुट्टा", "चुकता"])):
             thoughts.append("Action detected: Record real-time Khata ledger transaction")
-            # Customer name extraction
             customer_name = None
+            all_custs = context["khata"]["all_customers"]
             
-            # 1. Check known alias mapping (Hindi + English)
-            for alias, official_name in customer_alias_map.items():
-                if alias in q:
-                    customer_name = official_name
+            # 1. Exact full-name match from DB customers (sorted descending by length so "Riyanshi Verma" matches before single words)
+            sorted_customers = sorted(all_custs, key=lambda c: len(c["name"]), reverse=True)
+            for c in sorted_customers:
+                c_full = c["name"].lower().strip()
+                if c_full and re.search(r'(?<![a-zA-Z0-9])' + re.escape(c_full) + r'(?![a-zA-Z0-9])', q):
+                    customer_name = c["name"]
                     break
 
-            # 2. Check DB customer list
+            # 2. Check known alias mapping (sorted longest alias first, with word boundaries)
             if not customer_name:
-                for c in context["khata"]["all_customers"]:
-                    full_name = c["name"].lower()
-                    first_name = full_name.split()[0]
-                    last_name = full_name.split()[-1] if len(full_name.split()) > 1 else ""
-                    if full_name in q or first_name in q or (last_name and len(last_name) > 3 and last_name in q):
-                        customer_name = c["name"]
+                sorted_aliases = sorted(customer_alias_map.items(), key=lambda x: len(x[0]), reverse=True)
+                for alias, official_name in sorted_aliases:
+                    if re.search(r'(?<![a-zA-Z0-9])' + re.escape(alias) + r'(?![a-zA-Z0-9])', q):
+                        customer_name = official_name
                         break
 
-            # 3. Hindi phrase parsing: "रमेश कुमार के ₹450" or "सुनील से 500"
+            # 3. First-name unique match against DB customers
+            if not customer_name:
+                first_name_freq = {}
+                for c in sorted_customers:
+                    first = c["name"].lower().strip().split()[0]
+                    first_name_freq[first] = first_name_freq.get(first, 0) + 1
+                for c in sorted_customers:
+                    first = c["name"].lower().strip().split()[0]
+                    if len(first) >= 3 and first_name_freq.get(first, 0) == 1:
+                        if re.search(r'(?<![a-zA-Z0-9])' + re.escape(first) + r'(?![a-zA-Z0-9])', q):
+                            customer_name = c["name"]
+                            break
+
+            # 4. Hindi Devanagari phrase parsing: e.g. "रमेश कुमार के ₹450" or "सुनील से 500" or "रियांशी का उधार छुट्टा"
             if not customer_name:
                 hi_match = re.search(r'([^\s,₹\d।]+(?:\s+[^\s,₹\d।]+)?)\s*(?:के|का|की|ने|को|से|भी)', msg)
                 if hi_match:
                     cand = hi_match.group(1).strip()
                     if cand in customer_alias_map:
                         customer_name = customer_alias_map[cand]
-                    elif len(cand) > 1 and cand not in ["आज", "कल", "भाई", "साउंडबॉक्स", "पेटीएम", "खाता", "उधार"]:
+                    elif len(cand) > 1 and cand not in ["आज", "कल", "भाई", "साउंडबॉक्स", "पेटीएम", "खाता", "उधार", "नया", "पुराना", "सबका"]:
                         customer_name = cand
 
-            # 4. English phrase parsing
+            # 5. English / Hinglish phrase parsing: "...<Name> ka/ke/ki/ko/se/ne..." anywhere in query
             if not customer_name:
-                name_match = re.match(r'^\s*([a-zA-Z\s]+?)(?:,|\ska\b|\ske\b|\sne\b|\sko\b|\sse\b|\s*(?:rs\.?|inr|₹)?\s*\d+)', message, re.IGNORECASE)
+                name_match = re.search(r'(?:ab\s+|maine\s+|main\s+|kisi\s+ka\s+)?\b([a-zA-Z]{3,}(?:\s+[a-zA-Z]{3,})?)\s*(?:ka\b|ke\b|ki\b|ko\b|se\b|ne\b)', message, re.IGNORECASE)
                 if name_match:
-                    ext = name_match.group(1).strip()
-                    if len(ext) > 2 and ext.lower() not in ["aaj", "kal", "bhai", "soundbox", "paytm", "khata", "udhaar"]:
-                        customer_name = ext.title()
+                    cand = name_match.group(1).strip()
+                    cand_lower = cand.lower()
+                    stop_words = {"aaj", "kal", "bhai", "soundbox", "paytm", "khata", "udhaar", "naya", "new", "purana", "sabka", "poora", "pura", "aajka", "abhi", "kisi", "usi", "uska", "unki", "mera", "meri"}
+                    if cand_lower not in stop_words:
+                        for c in sorted_customers:
+                            if cand_lower == c["name"].lower() or c["name"].lower().startswith(cand_lower):
+                                customer_name = c["name"]
+                                break
+                        if not customer_name:
+                            customer_name = cand.title()
 
+            # 6. Fallback: session last mentioned, or first pending customer
             if not customer_name:
-                customer_name = session.get("last_mentioned_customer") or "Ramesh Kumar"
+                customer_name = session.get("last_mentioned_customer")
+            if not customer_name:
+                pending_custs = [c["name"] for c in context["khata"]["customers_with_udhaar"]]
+                customer_name = pending_custs[0] if pending_custs else "Valued Customer"
 
             session["last_mentioned_customer"] = customer_name
 
@@ -275,9 +325,14 @@ class ChatbotService:
 
             # Check if this is a full settlement request without an explicit amount
             is_full_settlement = any(w in q for w in [
-                "pura chukta", "poora chukta", "hisab chukta", "hisab clear", 
+                "chutta", "chutta kar", "chutta karo", "chutta kar do", "chutta kardo",
+                "chutta kar rahi", "chutta kar rahe", "chutta karna", "chuta",
+                "chukta", "chukta kar", "chukta karo", "chukta kar do", "chukta kardo",
+                "chukta kar rahi", "chukta kar rahe", "chukta karna",
+                "pura chukta", "poora chukta", "hisab chukta", "hisab clear", "hisab chutta",
                 "sab chukta", "pura clear", "poora clear", "full settle", "pura settle", 
-                "settle", "चुकता", "हिसाब चुकता", "पूरा चुकता", "खाता चुकता", "सेटल", "क्लियर"
+                "settle", "चुकता", "हिसाब चुकता", "पूरा चुकता", "खाता चुकता", "सेटल", "क्लियर",
+                "छुट्टा", "छुट्टा कर", "छुट्टा करो", "छुट्टा कर दो", "छुट्टा कर रही", "छुट्टा करना", "हिसाब छुट्टा"
             ]) and not re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,6}(?:\.\d+)?\b)', q)
 
             if is_full_settlement:
@@ -311,7 +366,8 @@ class ChatbotService:
                 amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रुपया|रू)?\s*(\b\d{1,6}(?:\.\d+)?\b)', q)
                 amount = float(amt_match.group(1)) if amt_match else (cust_pending if cust_pending > 0 else 250.0)
 
-            entry_type = "jama" if is_jama_phrase else "udhaar"
+            # Settle or Jama phrases are always JAMA; only pure udhaar actions are UDHAAR
+            entry_type = "jama" if (is_jama_phrase or is_full_settlement) else "udhaar"
             
             item_desc = "Kirana Items"
             for it in ["oil", "butter", "maggi", "salt", "atta", "tea", "tel", "doodh", "biscuit", "sugar", "तेल", "मक्खन", "आटा", "मैगी", "नमक"]:
@@ -330,7 +386,7 @@ class ChatbotService:
 
             reply = f"✅ **Entry Darj Ho Gayi Hai!**\n\n" \
                     f"• **Grahak:** {customer_name}\n" \
-                    f"• **Type:** {entry_type.upper()} ({'Prapt Hue (Jama)' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
+                    f"• **Type:** {entry_type.upper()} ({'Prapt Hue (Hisab Chukta / Jama)' if entry_type == 'jama' else 'Udhaar Diya'})\n" \
                     f"• **Raqam:** ₹{int(amount):,}\n" \
                     f"• **Naya Pending Udhaar:** ₹{int(new_bal):,}\n\n" \
                     f"🔊 *Soundbox Chime broadcasted:* \"{soundbox_payload.get('speech_text') if soundbox_payload else ''}\""
@@ -342,21 +398,36 @@ class ChatbotService:
             thoughts.append("Intent detected: Khata / Udhaar status inquiry")
             total_pending = context["khata"]["total_pending_udhaar"]
             udhaar_list = context["khata"]["customers_with_udhaar"]
+            all_custs = context["khata"]["all_customers"]
             
-            # Check for specific customer
+            # Check for specific customer with robust longest-first lookup
             specific_cust = None
-            for alias, official_name in customer_alias_map.items():
-                if alias in q:
-                    specific_cust = next((c for c in context["khata"]["all_customers"] if c["name"] == official_name), None)
-                    if specific_cust:
-                        break
+            sorted_customers = sorted(all_custs, key=lambda c: len(c["name"]), reverse=True)
+            for c in sorted_customers:
+                c_full = c["name"].lower().strip()
+                if c_full and re.search(r'(?<![a-zA-Z0-9])' + re.escape(c_full) + r'(?![a-zA-Z0-9])', q):
+                    specific_cust = c
+                    break
 
             if not specific_cust:
-                for c in context["khata"]["all_customers"]:
-                    first_name = c["name"].lower().split()[0]
-                    if first_name in q:
-                        specific_cust = c
-                        break
+                first_name_freq = {}
+                for c in sorted_customers:
+                    first = c["name"].lower().strip().split()[0]
+                    first_name_freq[first] = first_name_freq.get(first, 0) + 1
+                for c in sorted_customers:
+                    first = c["name"].lower().strip().split()[0]
+                    if len(first) >= 3 and first_name_freq.get(first, 0) == 1:
+                        if re.search(r'(?<![a-zA-Z0-9])' + re.escape(first) + r'(?![a-zA-Z0-9])', q):
+                            specific_cust = c
+                            break
+
+            if not specific_cust:
+                sorted_aliases = sorted(customer_alias_map.items(), key=lambda x: len(x[0]), reverse=True)
+                for alias, official_name in sorted_aliases:
+                    if re.search(r'(?<![a-zA-Z0-9])' + re.escape(alias) + r'(?![a-zA-Z0-9])', q):
+                        specific_cust = next((c for c in all_custs if c["name"] == official_name), None)
+                        if specific_cust:
+                            break
 
             if specific_cust:
                 session["last_mentioned_customer"] = specific_cust["name"]
@@ -373,7 +444,8 @@ class ChatbotService:
                         f"Aapka kul **₹{int(total_pending):,}** udhaar market me pending hai across **{len(udhaar_list)} grahak**:\n\n" \
                         f"{cust_str}\n\n" \
                         f"💡 *Tip: Kisi bhi grahak ka naam lekar bol sakte hain unka udhaar jama ya darj karne ke liye.*"
-                suggestions = ["Manoj Verma ka balance", "Pooja Gupta ka balance", "Udhaar darj karein", "Low stock check"]
+                dynamic_sugg = [f"{c['name'].split()[0]} ka balance" for c in udhaar_list[:2]]
+                suggestions = dynamic_sugg + ["Udhaar darj karein", "Low stock check"]
 
         # ========================================================
         # INTENT 2: INVENTORY & SUPPLIER RESTOCK

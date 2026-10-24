@@ -66,3 +66,12 @@
 - [x] **Removed Static Mock Rows & Prefilled Dummy Values**: Cleared static mock customer HTML rows and hardcoded `value="+91 98101 12233"` from [`frontend/index.html`](./frontend/index.html), ensuring form resets and live feeds are 100% dynamic.
 - [x] **Dynamic AI Growth Engine & Churn Alerts**: Made [`loadGrowthCard`](./frontend/js/app.js) and soundbox notifications dynamically reflect real at-risk customers from the live database.
 
+---
+
+### ✅ Phase 8: Production-Grade Customer Disambiguation & "Chutta" Settlement Intent
+- [x] **Eliminated Generic Surname Hijacking**: Removed single surname (`parts[-1]`) alias mapping in [`backend/services/chatbot_service.py`](./backend/services/chatbot_service.py) and [`backend/agent/react_agent.py`](./backend/agent/react_agent.py) so multiple customers sharing common Indian surnames (e.g., *Verma*, *Sharma*, *Gupta*, *Kumar*) never override or redirect to Manoj Verma.
+- [x] **Longest-Match-First Customer Resolution**: Prioritized exact full-name matching sorted by length descending before checking single first names, preventing partial matches from stealing priority.
+- [x] **Universal Vernacular "Chutta" (छुट्टा / चुकता) Intent**: Added exhaustive Hinglish and Devanagari settlement phrasing ("chutta kar", "chutta kar do", "chutta kar rahi", "chuta", "chukta", "छुट्टा कर") into `is_jama_phrase` and `is_full_settlement`, ensuring balance clearing is accurately booked as **JAMA (Prapt Hue)** instead of being mistakenly added as new udhaar.
+- [x] **Inquiry vs. Transaction Action Separation**: Disambiguated balance questions (containing "kitna", "kya", "batao", "status") from ledger entry actions so inquiring about a customer's balance never accidentally adds udhaar.
+- [x] **Dynamic UI Placeholders & Clean Mock Data**: Replaced hardcoded initial static HTML text `Manoj Verma hasn't visited in 45 days` with neutral real-time data binding in [`frontend/index.html`](./frontend/index.html).
+
