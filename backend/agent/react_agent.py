@@ -2,11 +2,22 @@ import os
 import re
 import json
 from datetime import datetime
-from dotenv import load_dotenv
-
-# Ensure environment variables are loaded
-load_dotenv()
-load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+except ImportError:
+    for _env_candidate in [
+        os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
+        os.path.join(os.path.dirname(__file__), "..", ".env"),
+    ]:
+        if os.path.isfile(_env_candidate):
+            with open(_env_candidate, "r", encoding="utf-8") as _ef:
+                for _line in _ef:
+                    _line = _line.strip()
+                    if _line and not _line.startswith("#") and "=" in _line:
+                        _k, _v = _line.split("=", 1)
+                        os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
 
 from database import get_connection
 from services.khata_service import KhataService

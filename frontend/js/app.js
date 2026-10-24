@@ -614,6 +614,12 @@ document.addEventListener('DOMContentLoaded', () => {
                       onclick="window.settleKhataDirect(${c.id}, '${c.name}', ${c.pending_udhaar}, this)">
                 ${settleBtnText}
               </button>
+              <button type="button" class="pos-btn-action-sm pos-btn-reminder-blue"
+                      style="cursor:pointer; font-weight:800;"
+                      title="${isHindi ? 'ग्राहक का पर्सनल डिजिटल खाता QR और प्रिंट स्टैंडी' : 'Generate & Print Customer Digital Khata QR'}"
+                      onclick="window.openDigitalKhataQRModal && window.openDigitalKhataQRModal(${c.id})">
+                📱 QR
+              </button>
               <a href="${whatsappUrl}" target="_blank" class="pos-btn-action-sm pos-btn-reminder-blue" 
                  style="text-decoration:none; display:inline-flex; align-items:center; gap:2px;"
                  title="${isHindi ? 'व्हाट्सएप पर याद दिलाएं' : 'Send WhatsApp Reminder'}">
