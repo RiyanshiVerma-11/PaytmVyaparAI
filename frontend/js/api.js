@@ -4,9 +4,12 @@
  */
 const RENDER_BACKEND_URL = 'https://paytmvyaparai.onrender.com';
 
+const isFile = typeof window !== 'undefined' && window.location.protocol === 'file:';
 const isLocalhost = typeof window !== 'undefined' && Boolean(
+  isFile ||
   window.location.hostname === 'localhost' ||
   window.location.hostname === '127.0.0.1' ||
+  window.location.hostname === '' ||
   window.location.hostname === '[::1]' ||
   window.location.hostname.endsWith('.run.app')
 );
@@ -14,7 +17,7 @@ const isLocalhost = typeof window !== 'undefined' && Boolean(
 const API_BASE = (
   (typeof window !== 'undefined' && window.PAYTM_API_BASE) || 
   (typeof localStorage !== 'undefined' && localStorage.getItem('PAYTM_API_BASE')) || 
-  (isLocalhost && (window.location.port === '8000' || window.location.port === '3000' || !window.location.port) ? '' : (isLocalhost ? 'http://127.0.0.1:8000' : RENDER_BACKEND_URL))
+  (isFile ? 'http://127.0.0.1:8000' : (isLocalhost && (window.location.port === '8000' || !window.location.port) ? '' : (isLocalhost ? 'http://127.0.0.1:8000' : RENDER_BACKEND_URL)))
 ).replace(/\/$/, '');
 
 function endpoint(path) {

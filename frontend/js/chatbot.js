@@ -194,6 +194,11 @@
                 this.micBtn.classList.remove('listening');
               }
             }
+          },
+          (errMsg) => {
+            if (typeof window.showNotification === 'function') {
+              window.showNotification(`🎙️ ${errMsg}`, 'error');
+            }
           }
         );
 

@@ -196,10 +196,13 @@ SYSTEM_PROMPT = """You are Paytm Vyapar Saathi Copilot, an autonomous AI partner
 You have real-time tools for Bahi-Khata ledger, Supplier POs, Inventory receiving, Credit underwriting, and Customer churn.
 
 CORE BEHAVIOR RULES:
-1. NEVER invent fake numbers or dummy customers.
-   - If the merchant wants to write udhaar or jama, but customer name or amount is missing, do NOT default to 'Valued Customer' or '450'. Instead, politely ask for the missing details.
+1. CUSTOMER NAME & AMOUNT EXTRACTION:
+   - When a merchant says "Prachi, ₹500 aata udhaar darj karein" or "प्राची 500 रुपये आटा उधार दर्ज करें", the customer name is "Prachi" (or "प्राची"), amount is 500, item is "Atta (Flour)", and entry_type is "udhaar".
+   - Immediately call tool `record_khata_entry` with customer_name="Prachi", amount=500, entry_type="udhaar", item_description="Atta (Flour)".
+   - NEVER substitute with another customer (do NOT pick Pooja or Ramesh if the merchant explicitly specified Prachi). Even if Prachi is a new customer, pass customer_name="Prachi".
+2. NEVER invent fake numbers or dummy customers.
+   - If customer name or amount is completely missing (e.g. just "Udhaar likh lo"), do NOT default to 'Valued Customer' or '450'. Politely ask for the missing details.
    - If the merchant wants to reorder inventory but doesn't name the item, ask which item they need.
-2. Surnames in India (Verma, Sharma, Gupta, Kumar, Singh) are shared by many customers. Never assume one customer based solely on surname. Always match exact full name or unique first name.
 3. Vernacular Settlement: 'chutta', 'chutta kar do', 'chukta', 'settle', 'hisab clear' without an explicit amount means full settlement of whatever balance the customer owes. Call 'settle_khata_customer'.
 4. Inquiries ('kitna hai', 'kya status hai', 'check karo') are purely informational. Never record transactions on inquiries. Call 'get_khata_details' or 'get_inventory_health'.
 5. Always respond in warm, professional Hindi/Hinglish suitable for a Kirana shopkeeper."""
@@ -417,10 +420,10 @@ class ReactAgent:
 
         is_inquiry = bool(re.search(r'\b(kitna|kitne|kitni|kya|batao|bataiye|bata do|check|dekho|dekhein|dikhao|status|summary)\b', q))
 
-        # 1. Udhaar / Jama / Chutta Settlement Intent
-        is_settle = bool(re.search(r'\b(chutta|chukta|settle|clear|poora hisab|pura chukta|sab chukta|chuka do)\b', q))
-        is_jama = bool(re.search(r'\b(jama|paid|pay|aa gaye|aa gaya|mil gaye|mil gaya|prapt|wapas|bhar diya)\b', q))
-        is_udhaar = bool(re.search(r'\b(udhaar|likho|likh lo|likh do|likh|likhiye|de do|jod do|add kar)\b', q)) and not is_inquiry
+        # 1. Udhaar / Jama / Chutta Settlement Intent (Supports Latin and Devanagari Hindi)
+        is_settle = bool(re.search(r'\b(chutta|chukta|settle|clear|poora hisab|pura chukta|sab chukta|chuka do)\b', q)) or any(w in query for w in ["चुकता", "छुट्टा", "पूरा हिसाब", "हिसाब चुकता", "सेटल", "चुका दो"])
+        is_jama = bool(re.search(r'\b(jama|paid|pay|aa gaye|aa gaya|mil gaye|mil gaya|prapt|wapas|bhar diya)\b', q)) or any(w in query for w in ["जमा", "प्राप्त", "वापस", "पैसे मिले", "भर दिया"])
+        is_udhaar = ((bool(re.search(r'\b(udhaar|likho|likh lo|likh do|likh|likhiye|darj|darj karein|de do|jod do|add kar)\b', q)) or any(w in query for w in ["उधार", "दर्ज", "लिखो", "लिखिए", "जोड़ दो", "खाता", "खाते"])) and not is_inquiry)
 
         if is_settle or is_jama or is_udhaar:
             thoughts.append("Deterministic Action: Ledger action detected with strict token boundaries.")
@@ -452,13 +455,36 @@ class ReactAgent:
                             matched_cust = c
                             break
 
-            # Candidate name before postpositions: "<name> ka/ke/se/ko"
+            # Candidate name extraction for new customers (Latin and Devanagari)
             if not matched_cust:
-                cand_match = re.search(r'(?:ab\s+|maine\s+|main\s+)?\b([a-zA-Z]{3,}(?:\s+[a-zA-Z]{3,})?)\s*(?:ka\b|ke\b|ki\b|ko\b|se\b)', query, re.IGNORECASE)
-                if cand_match:
-                    cand = cand_match.group(1).strip()
-                    if cand.lower() not in ["aaj", "kal", "bhai", "soundbox", "paytm", "khata", "udhaar", "naya", "purana"]:
-                        matched_cust = {"name": cand.title(), "pending_udhaar": 0.0}
+                STOPWORDS = {
+                    "aaj", "kal", "bhai", "soundbox", "paytm", "khata", "udhaar", "naya", "purana", "kripya", "entry",
+                    "aata", "atta", "oil", "tel", "namak", "salt", "chawal", "rice", "cheeni", "sugar", "doodh", "milk",
+                    "आटा", "तेल", "नमक", "चावल", "चीनी", "दूध", "उधार", "खाता", "पेटीएम", "रुपये", "दर्ज", "करें", "करो", "लिखो"
+                }
+
+                # Pattern A: Leading name at start of sentence (e.g. "Prachi, ₹500 aata..." or "प्राची, 500...")
+                cand_lead = re.search(r'^\s*([a-zA-Z\u0900-\u097F]{3,}(?:\s+[a-zA-Z\u0900-\u097F]{3,})?)\s*[,:\-]?\s*(?:rs\.?|inr|₹|रुपये|रु\.?|\d)', query.strip(), re.IGNORECASE)
+                if cand_lead:
+                    cand = cand_lead.group(1).strip()
+                    if cand.lower() not in STOPWORDS:
+                        matched_cust = {"name": cand.title() if not any('\u0900' <= ch <= '\u097F' for ch in cand) else cand, "pending_udhaar": 0.0}
+
+                # Pattern B: Name before postpositions (e.g. "Prachi ka 500...", "प्राची का...")
+                if not matched_cust:
+                    cand_match = re.search(r'(?:ab\s+|maine\s+|main\s+)?\b([a-zA-Z\u0900-\u097F]{3,}(?:\s+[a-zA-Z\u0900-\u097F]{3,})?)\s*(?:ka\b|ke\b|ki\b|ko\b|se\b|का|के|की|को|से)', query, re.IGNORECASE)
+                    if cand_match:
+                        cand = cand_match.group(1).strip()
+                        if cand.lower() not in STOPWORDS:
+                            matched_cust = {"name": cand.title() if not any('\u0900' <= ch <= '\u097F' for ch in cand) else cand, "pending_udhaar": 0.0}
+
+                # Pattern C: Name after action word (e.g. "Udhaar likho Prachi 500")
+                if not matched_cust:
+                    cand_action = re.search(r'(?:udhaar|jama|likho|likh lo|likh do|likhiye|darj|darj karein|उधार|जमा|दर्ज|लिखो)\s+([a-zA-Z\u0900-\u097F]{3,})', query, re.IGNORECASE)
+                    if cand_action:
+                        cand = cand_action.group(1).strip()
+                        if cand.lower() not in STOPWORDS:
+                            matched_cust = {"name": cand.title() if not any('\u0900' <= ch <= '\u097F' for ch in cand) else cand, "pending_udhaar": 0.0}
 
             # NO SILENT FAKE DEFAULTS: Ask for customer name if missing!
             if not matched_cust:
@@ -473,7 +499,7 @@ class ReactAgent:
                 }
 
             # Full settlement
-            if is_settle and not re.search(r'(?:rs\.?|inr|₹)?\s*(\d+(?:\.\d+)?)', q):
+            if is_settle and not re.search(r'(?:rs\.?|inr|₹|रुपये|रु\.?|रूपये)?\s*(\d+(?:\.\d+)?)', q):
                 res = cls._execute_tool("settle_khata_customer", {"customer_name": matched_cust["name"]}, merchant_id)
                 reply = cls._format_tool_response("settle_khata_customer", {"customer_name": matched_cust["name"]}, res)
                 return {
@@ -486,7 +512,7 @@ class ReactAgent:
                 }
 
             # Partial or explicit amount
-            amt_match = re.search(r'(?:rs\.?|inr|₹)?\s*(\d+(?:\.\d+)?)', q)
+            amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रु\.?|रूपये)?\s*(\d+(?:\.\d+)?)', q)
             if not amt_match:
                 reply = f"Kripya {matched_cust['name']} ji ke liye rashi (amount) batayein."
                 return {
@@ -500,10 +526,25 @@ class ReactAgent:
 
             amount = float(amt_match.group(1))
             entry_type = "jama" if (is_jama or is_settle) else "udhaar"
+
+            # Item detection (English & Devanagari)
+            ITEM_MAP = {
+                "aata": "Atta (Flour)", "atta": "Atta (Flour)", "आटा": "Atta (Flour)",
+                "tel": "Refined Oil", "oil": "Refined Oil", "refined": "Refined Oil", "तेल": "Refined Oil",
+                "namak": "Tata Salt", "salt": "Tata Salt", "नमक": "Tata Salt",
+                "makhan": "Amul Butter", "butter": "Amul Butter", "मक्खन": "Amul Butter",
+                "maggi": "Maggi Noodles", "noodles": "Maggi Noodles", "मैगी": "Maggi Noodles",
+                "doodh": "Fresh Milk", "milk": "Fresh Milk", "दूध": "Fresh Milk",
+                "cheeni": "Sugar", "sugar": "Sugar", "चीनी": "Sugar",
+                "chawal": "Rice", "rice": "Rice", "चावल": "Rice",
+                "dal": "Dal (Pulses)", "दाल": "Dal (Pulses)",
+                "chai": "Tea (Chai)", "tea": "Tea (Chai)", "चाय": "Tea (Chai)",
+                "sabun": "Soap / Detergent", "surf": "Surf Excel", "सर्फ": "Surf Excel"
+            }
             item_desc = "Kirana Items"
-            for it in ["oil", "butter", "maggi", "salt", "atta", "tea", "tel", "doodh"]:
-                if it in q:
-                    item_desc = it.title()
+            for k_item, v_desc in ITEM_MAP.items():
+                if k_item in q or k_item in query:
+                    item_desc = v_desc
                     break
 
             res = KhataService.record_entry(matched_cust["name"], amount, item_desc, entry_type)

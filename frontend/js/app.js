@@ -418,6 +418,9 @@ document.addEventListener('DOMContentLoaded', () => {
           if (act) act.textContent = 'Bol Kar Likhein (Mic)';
         }
       }
+    },
+    (errMsg) => {
+      showNotification(`🎙️ ${errMsg}`, 'error');
     }
   );
 
@@ -460,9 +463,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function executeVoiceQuery(queryText) {
-    showNotification(`🎤 Processing: "${queryText}"`, 'info');
+    if (!queryText || !queryText.trim()) return;
+    const cleanText = queryText.trim();
+    if (topSearchInput) {
+      topSearchInput.value = cleanText;
+    }
+    showNotification(`🎤 Processing: "${cleanText}"`, 'info');
     try {
-      const res = await API.sendQuery(queryText);
+      const res = await API.sendQuery(cleanText);
 
       // Play Soundbox Chime & Voice
       const sp = res.soundbox_payload || (res.result && res.result.soundbox_payload) || (res.data && res.data.soundbox_payload);
