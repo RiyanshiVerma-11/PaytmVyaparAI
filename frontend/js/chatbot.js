@@ -99,6 +99,7 @@
           <!-- Quick Suggestion Chips Bar -->
           <div class="chatbot-suggestions" id="chatbotSuggestions">
             <div class="chat-suggestion-chip" data-query="Kitna udhaar baaki hai?">Udhaar Status</div>
+            <div class="chat-suggestion-chip" data-query="Ramesh ₹200 aa gaya">Ramesh ₹200 aa gaya</div>
             <div class="chat-suggestion-chip" data-query="Kaun sa stock kam hai?">Low Stock</div>
             <div class="chat-suggestion-chip" data-query="Mera loan score aur limit kitna hai?">Loan Score</div>
             <div class="chat-suggestion-chip" data-query="Soundbox chime test karo">Test Soundbox</div>
@@ -106,7 +107,7 @@
 
           <!-- Input Bar with Voice Mic & Send -->
           <form class="chatbot-input-bar" id="chatbotForm">
-            <input type="text" id="chatbotInput" class="chatbot-text-input" placeholder="Ask in Hindi or English... (e.g. Ramesh ka ₹200 udhaar likho)" autocomplete="off" required>
+            <input type="text" id="chatbotInput" class="chatbot-text-input" placeholder="e.g. &quot;Ramesh ₹200 udhaar&quot; ya &quot;Ramesh ₹200 aa gaya&quot;" autocomplete="off" required>
             <button type="button" id="chatbotMicBtn" class="chatbot-mic-btn" title="Tap to speak">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
             </button>

@@ -168,6 +168,7 @@ class KhataService:
             "amount": amount,
             "new_pending_balance": new_pending,
             "item_description": item_description,
+            "entry_type": entry_type.lower(),
             "stock_decremented": stock_decremented,
             "sms_uri": sms_uri,
             "soundbox_payload": {

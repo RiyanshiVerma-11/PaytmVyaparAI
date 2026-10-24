@@ -1,6 +1,7 @@
 import os
 import re
 import json
+import requests
 from datetime import datetime
 try:
     from dotenv import load_dotenv
@@ -24,6 +25,115 @@ from services.khata_service import KhataService
 from services.inventory_service import InventoryService
 from services.growth_service import GrowthService
 from services.credit_service import CreditService
+
+# =============================================================
+# Hindi / Hinglish Number Word → Digit Converter
+# Handles speech recognition output like "sau", "do sau", "baarah sau", "ek hazaar do sau" etc.
+# =============================================================
+_HINDI_UNIT_WORDS = {
+    # Basic 1-19 (Latin + Devanagari)
+    "ek": 1, "एक": 1, "do": 2, "दो": 2, "teen": 3, "तीन": 3,
+    "char": 4, "चार": 4, "paanch": 5, "पांच": 5, "panch": 5, "पाँच": 5,
+    "chhah": 6, "chhe": 6, "छह": 6, "छ": 6, "saat": 7, "सात": 7,
+    "aath": 8, "आठ": 8, "nau": 9, "नौ": 9, "das": 10, "दस": 10,
+    "gyaarah": 11, "ग्यारह": 11, "baarah": 12, "बारह": 12,
+    "terah": 13, "तेरह": 13, "chaudah": 14, "चौदह": 14,
+    "pandrah": 15, "पंद्रह": 15, "solah": 16, "सोलह": 16,
+    "satrah": 17, "सत्रह": 17, "athaarah": 18, "अठारह": 18,
+    "unees": 19, "उन्नीस": 19,
+    # Tens (20-90)
+    "bees": 20, "बीस": 20, "tees": 30, "तीस": 30,
+    "chaalees": 40, "चालीस": 40, "pachaas": 50, "पचास": 50,
+    "saath": 60, "साठ": 60, "sattar": 70, "सत्तर": 70,
+    "assi": 80, "अस्सी": 80, "nabbe": 90, "नब्बे": 90,
+    # Common compound amounts (spoken as single words)
+    "pacchees": 25, "पच्चीस": 25, "pachees": 25,
+    "dedh": 1.5, "डेढ़": 1.5, "dhai": 2.5, "ढाई": 2.5, "ढाइ": 2.5,
+    "saadhe": 0, "साढ़े": 0,  # prefix: saadhe + X means X + 0.5 (handled specially)
+    "adha": 0.5, "आधा": 0.5,
+}
+
+_HINDI_SCALE_WORDS = {
+    "sau": 100, "सौ": 100, "so": 100,
+    "hazaar": 1000, "hazar": 1000, "hajar": 1000, "हज़ार": 1000, "हजार": 1000, "हज़ार": 1000,
+    "lakh": 100000, "lac": 100000, "लाख": 100000,
+}
+
+def _hindi_words_to_number(text: str) -> float | None:
+    """
+    Convert Hindi/Hinglish number words in text to a numeric value.
+    Examples:
+      'sau' → 100, 'do sau' → 200, 'dhai sau' → 250,
+      'ek hazaar do sau' → 1200, 'pachaas' → 50, 'dedh sau' → 150,
+      'baarah sau' → 1200, 'paanch hazaar' → 5000
+    Returns None if no Hindi number words found.
+    """
+    words = text.lower().split()
+    total = 0.0
+    current = 0.0
+    found_any = False
+    is_saadhe = False  # "saadhe teen sau" = 350
+
+    i = 0
+    while i < len(words):
+        w = words[i]
+
+        # Handle "saadhe" prefix (adds 0.5 to next multiplier)
+        if w in ("saadhe", "साढ़े", "sadhe"):
+            is_saadhe = True
+            found_any = True
+            i += 1
+            continue
+
+        # Handle "dedh" (1.5) — usually followed by sau/hazaar
+        if w in ("dedh", "डेढ़", "derh"):
+            current = 1.5
+            found_any = True
+            i += 1
+            continue
+
+        # Handle "dhai" (2.5) — usually followed by sau/hazaar
+        if w in ("dhai", "ढाई", "ढाइ", "dhaai"):
+            current = 2.5
+            found_any = True
+            i += 1
+            continue
+
+        # Check scale words (sau, hazaar, lakh)
+        if w in _HINDI_SCALE_WORDS:
+            scale = _HINDI_SCALE_WORDS[w]
+            multiplier = current if current > 0 else 1
+            if is_saadhe:
+                multiplier += 0.5
+                is_saadhe = False
+            total += multiplier * scale
+            current = 0.0
+            found_any = True
+            i += 1
+            continue
+
+        # Check unit words (ek, do, teen, ...)
+        if w in _HINDI_UNIT_WORDS:
+            val = _HINDI_UNIT_WORDS[w]
+            if val > 0:
+                current += val
+                found_any = True
+            i += 1
+            continue
+
+        # If we accumulated a partial number (like "pachaas" = 50 standalone)
+        if current > 0:
+            total += current
+            current = 0.0
+
+        is_saadhe = False
+        i += 1
+
+    # Flush remaining
+    if current > 0:
+        total += current
+
+    return total if found_any and total > 0 else None
 
 # Initialize Groq client
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
@@ -216,12 +326,18 @@ CORE BEHAVIOR RULES:
    - When a merchant says "Prachi, ₹500 aata udhaar darj karein" or "प्राची 500 रुपये आटा उधार दर्ज करें", the customer name is "Prachi" (or "प्राची"), amount is 500, item is "Atta (Flour)", and entry_type is "udhaar".
    - Immediately call tool `record_khata_entry` with customer_name="Prachi", amount=500, entry_type="udhaar", item_description="Atta (Flour)".
    - NEVER substitute with another customer (do NOT pick Pooja or Ramesh if the merchant explicitly specified Prachi). Even if Prachi is a new customer, pass customer_name="Prachi".
+   - Hindi number words MUST be converted: "sau" = 100, "do sau" = 200, "hazaar" = 1000, "dhai sau" = 250, "baarah sau" = 1200, "dedh hazaar" = 1500.
 2. NEVER invent fake numbers or dummy customers.
    - If customer name or amount is completely missing (e.g. just "Udhaar likh lo"), do NOT default to 'Valued Customer' or '450'. Politely ask for the missing details.
    - If the merchant wants to reorder inventory but doesn't name the item, ask which item they need.
 3. Vernacular Settlement: 'chutta', 'chutta kar do', 'chukta', 'settle', 'hisab clear' without an explicit amount means full settlement of whatever balance the customer owes. Call 'settle_khata_customer'.
-4. Inquiries ('kitna hai', 'kya status hai', 'check karo') are purely informational. Never record transactions on inquiries. Call 'get_khata_details' or 'get_inventory_health'.
-5. Always respond in warm, professional Hindi/Hinglish suitable for a Kirana shopkeeper."""
+4. PARTIAL PAYMENT (JAMA):
+   - When a customer pays back PART of their udhaar (e.g. "Manoj ne ₹1000 diye" or "Ramesh se 500 aa gaya"), this is a JAMA (payment received), NOT a full settlement.
+   - Call `record_khata_entry` with entry_type="jama" and the exact amount paid. The system will auto-subtract from pending balance.
+   - Example: If Manoj has ₹1200 udhaar and pays ₹1000 → call record_khata_entry(customer_name="Manoj", amount=1000, entry_type="jama"). Remaining balance becomes ₹200.
+   - Trigger words for jama: 'aa gaya', 'aa gaye', 'mil gaye', 'wapas', 'jama', 'paid', 'pay', 'diye', 'de diya', 'bhar diya'.
+5. Inquiries ('kitna hai', 'kya status hai', 'check karo') are purely informational. Never record transactions on inquiries. Call 'get_khata_details' or 'get_inventory_health'.
+6. Always respond in warm, professional Hindi/Hinglish suitable for a Kirana shopkeeper."""
 
 class ReactAgent:
     @classmethod
@@ -242,10 +358,21 @@ class ReactAgent:
                 if llm_res:
                     return llm_res
             except Exception as e:
-                thoughts.append(f"Groq LLM Engine notice: {e}. Seamlessly engaging High-Speed Vernacular Engine.")
+                thoughts.append(f"Groq LLM Engine notice: {e}. Attempting Gemini AI Engine.")
 
         # -------------------------------------------------------------
-        # ENGINE 2: High-Speed Deterministic Vernacular Engine (Fallback)
+        # ENGINE 2: Secondary Real AI Engine via Google Gemini 2.5 Flash
+        # -------------------------------------------------------------
+        if os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY"):
+            try:
+                gemini_res = cls._run_gemini_react(q_raw, merchant_id)
+                if gemini_res:
+                    return gemini_res
+            except Exception as e:
+                thoughts.append(f"Gemini AI Engine notice: {e}. Engaging Deterministic Vernacular Engine.")
+
+        # -------------------------------------------------------------
+        # ENGINE 3: High-Speed Deterministic Vernacular Engine (Fallback)
         # -------------------------------------------------------------
         return cls._run_deterministic_engine(q_raw, merchant_id, thoughts)
 
@@ -369,6 +496,139 @@ class ReactAgent:
             }
 
     @classmethod
+    def _run_gemini_react(cls, query: str, merchant_id: int = 1):
+        gemini_key = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
+        if not gemini_key:
+            return None
+
+        prompt = f"""You are Paytm Vyapar Saathi Copilot for Kirana merchants.
+Given the merchant query, choose the appropriate tool and arguments, or return null if it's general chat.
+
+Available Tools:
+1. record_khata_entry: {{"customer_name": str, "amount": float, "entry_type": "udhaar"|"jama", "item_description": str}}
+   - entry_type "udhaar" when giving credit (e.g. "Manoj, ₹100 udhaar", "Ramesh 200 udhaar likho")
+   - entry_type "jama" when receiving payment/repayment (e.g. "Manoj ne ₹1000 diye", "Ramesh ₹200 aa gaya", "Manoj 1000 de diya", "₹500 wapas mile")
+2. settle_khata_customer: {{"customer_name": str}}
+   - full clearance without specific amount (e.g. "Ramesh ka hisab chukta karo", "poora settle kar do")
+3. get_khata_details: {{"customer_name": str}}
+   - inquiries like "Ramesh ka kitna udhaar baaki hai", "total udhaar kitna hai"
+4. create_supplier_po: {{"item_name": str, "quantity": int}}
+   - supplier restock orders like "Tata Salt order karo", "10 packet tel manga lo"
+5. get_inventory_health: {{}}
+6. get_credit_health: {{}}
+7. disburse_loan: {{"amount": float}}
+
+Rules:
+- Hindi number words: "sau" = 100, "do sau" = 200, "hazaar" = 1000, "dhai sau" = 250, "dedh hazaar" = 1500, etc.
+- Return ONLY valid JSON:
+{{"tool": "record_khata_entry"|"settle_khata_customer"|"get_khata_details"|"create_supplier_po"|"get_inventory_health"|"get_credit_health"|"disburse_loan"|null, "args": {{...}}}}
+
+Query: "{query}"
+"""
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={gemini_key}"
+        payload = {
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {"response_mime_type": "application/json", "temperature": 0.1}
+        }
+        resp = requests.post(url, json=payload, timeout=6)
+        if resp.status_code != 200:
+            return None
+
+        data = resp.json()
+        candidates = data.get("candidates", [])
+        if not candidates:
+            return None
+
+        text = candidates[0].get("content", {}).get("parts", [{}])[0].get("text", "")
+        parsed = json.loads(text)
+        func_name = parsed.get("tool")
+        args = parsed.get("args") or {}
+
+        if not func_name:
+            return None
+
+        thoughts = [
+            f"Gemini AI Engine: Parsed merchant intent '{query}'",
+            f"Gemini Action: Selected tool `{func_name}` with parameters {args}"
+        ]
+
+        exec_res = cls._execute_tool(func_name, args, merchant_id)
+        thoughts.append(f"Gemini Observation: Tool executed with status: {exec_res.get('success', True)}")
+
+        reply_text = cls._format_tool_response(func_name, args, exec_res)
+        soundbox_payload = exec_res.get("soundbox_payload") or {
+            "chime": True,
+            "speech_text": reply_text.split("\n")[0].replace("*", "").replace("#", "")
+        }
+
+        now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
+        confirmation_card = None
+        if func_name == "record_khata_entry":
+            etype = args.get("entry_type", "udhaar")
+            confirmation_card = {
+                "action": "UDHAAR_CREDIT" if etype == "udhaar" else "JAMA_PAYMENT",
+                "action_label": "खाता उधार दर्ज (Credit Entry)" if etype == "udhaar" else "खाता जमा दर्ज (Payment Received)",
+                "entity": args.get("customer_name") or exec_res.get("customer_name"),
+                "item_description": args.get("item_description", "Kirana Items"),
+                "item": args.get("item_description", "Kirana Items"),
+                "amount": float(args.get("amount", 0)),
+                "date": now_str,
+                "status": "SAVED_TO_DATABASE",
+                "simulation": False,
+                "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                "notice": "Saved to live Paytm Bahi-Khata ledger"
+            }
+        elif func_name == "create_supplier_po":
+            confirmation_card = {
+                "action": "SUPPLIER_PURCHASE_ORDER",
+                "action_label": "सप्लायर रीऑर्डर PO (Wholesale Restock)",
+                "entity": args.get("item_name"),
+                "item": f"Qty: {exec_res.get('quantity', args.get('quantity'))}",
+                "amount": exec_res.get("total_cost", 0),
+                "date": now_str,
+                "status": exec_res.get("email_status", "DISPATCHED_TO_OUTBOX"),
+                "simulation": True,
+                "simulation_badge": "PO created and queued for supplier email (Demo Mode)",
+                "notice": "PO created and queued for supplier email (Demo Mode)"
+            }
+        elif func_name == "disburse_loan":
+            confirmation_card = {
+                "action": "LOAN_DISBURSAL",
+                "action_label": "वर्किंग कैपिटल लोन डिसबर्सल (Working Capital Loan)",
+                "entity": exec_res.get("bank_account", "Paytm Payments Bank"),
+                "item": f"Interest: {exec_res.get('interest_rate', '1.2% / mo')}",
+                "amount": float(args.get("amount", 0)),
+                "date": now_str,
+                "status": "APPROVED_IN_SIMULATION",
+                "simulation": True,
+                "simulation_badge": "Loan approved in simulation. No real funds disbursed.",
+                "notice": "Loan approved in simulation. No real funds disbursed."
+            }
+        elif func_name == "settle_khata_customer":
+            confirmation_card = {
+                "action": "JAMA_PAYMENT",
+                "action_label": "खाता चुकता (Full Settlement)",
+                "entity": args.get("customer_name") or exec_res.get("customer_name"),
+                "item": "Poora Hisab Chukta",
+                "amount": exec_res.get("cleared_amount", 0),
+                "date": now_str,
+                "status": "SAVED_TO_DATABASE",
+                "simulation": False,
+                "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                "notice": "Saved to live Paytm Bahi-Khata ledger"
+            }
+
+        return {
+            "query": query,
+            "action_name": func_name.upper(),
+            "thoughts": thoughts,
+            "result": exec_res,
+            "reply": reply_text,
+            "confirmation_card": confirmation_card,
+            "soundbox_payload": soundbox_payload
+        }
+
+    @classmethod
     def _execute_tool(cls, func_name: str, args: dict, merchant_id: int = 1):
         if func_name == "record_khata_entry":
             return KhataService.record_entry(
@@ -448,8 +708,14 @@ class ReactAgent:
             c_name = res.get("customer_name")
             amt = int(res.get("amount", 0))
             bal = int(res.get("new_pending_balance", 0))
-            etype = res.get("item_description", "")
-            return f"✅ **Entry Darj Ho Gayi Hai!**\n\n• **Grahak:** {c_name}\n• **Raqam:** ₹{amt:,}\n• **Naya Pending Udhaar:** ₹{bal:,}\n\n🔊 *Soundbox Chime Broadcasted!*"
+            etype = res.get("entry_type") or args.get("entry_type", "udhaar")
+            if etype == "jama":
+                if bal <= 0:
+                    return f"✅ **Hisab Poora Chukta! (Payment Received)**\n\n• **Grahak:** {c_name}\n• **Jama Raqam (Received):** ₹{amt:,}\n• **Baaki Pending Udhaar:** ₹0 (All Clear 🎉)\n\n🔊 *Soundbox Chime Broadcasted!*"
+                else:
+                    return f"✅ **Jama (Payment) Darj Ho Gayi Hai!**\n\n• **Grahak:** {c_name}\n• **Jama Raqam (Received):** ₹{amt:,}\n• **Baaki Pending Udhaar (Remaining):** ₹{bal:,}\n\n🔊 *Soundbox Chime Broadcasted!*"
+            else:
+                return f"✅ **Udhaar Entry Darj Ho Gayi Hai!**\n\n• **Grahak:** {c_name}\n• **Udhaar Raqam:** ₹{amt:,}\n• **Kul Pending Udhaar:** ₹{bal:,}\n\n🔊 *Soundbox Chime Broadcasted!*"
         elif func_name == "settle_khata_customer":
             c_name = res.get("customer_name")
             if res.get("already_cleared"):
@@ -499,13 +765,15 @@ class ReactAgent:
         q = query.lower()
         devanagari_digits = str.maketrans("०१२३४५६७८९", "0123456789")
         q = q.translate(devanagari_digits)
+        # Strip commas from numbers (e.g. "1,200" → "1200", "₹1,000" → "₹1000")
+        q = re.sub(r'(\d),(\d)', r'\1\2', q)
 
         is_inquiry = bool(re.search(r'\b(kitna|kitne|kitni|kya|batao|bataiye|bata do|check|dekho|dekhein|dikhao|status|summary)\b', q))
 
         # 1. Udhaar / Jama / Chutta Settlement Intent (Supports Latin and Devanagari Hindi)
         is_settle = bool(re.search(r'\b(chutta|chukta|settle|clear|poora hisab|pura chukta|sab chukta|chuka do)\b', q)) or any(w in query for w in ["चुकता", "छुट्टा", "पूरा हिसाब", "हिसाब चुकता", "सेटल", "चुका दो"])
-        is_jama = bool(re.search(r'\b(jama|paid|pay|aa gaye|aa gaya|mil gaye|mil gaya|prapt|wapas|bhar diya)\b', q)) or any(w in query for w in ["जमा", "प्राप्त", "वापस", "पैसे मिले", "भर दिया"])
-        is_udhaar = ((bool(re.search(r'\b(udhaar|likho|likh lo|likh do|likh|likhiye|darj|darj karein|de do|jod do|add kar)\b', q)) or any(w in query for w in ["उधार", "दर्ज", "लिखो", "लिखिए", "जोड़ दो", "खाता", "खाते"])) and not is_inquiry)
+        is_jama = bool(re.search(r'\b(jama|paid|pay|aa gaye|aa gaya|aaye|aaya|mil gaye|mil gaya|mile|mila|prapt|wapas|bhar diya|bhara|diye|diya|de diya|de diye|chuka diya|chuka diye|chukaye)\b', q)) or any(w in query for w in ["जमा", "प्राप्त", "वापस", "पैसे मिले", "भर दिया", "दिए", "दिया", "दे दिया", "दे दिए", "चुका दिया", "चुकाए", "आ गया", "आ गए", "आए", "मिले", "मिला"])
+        is_udhaar = ((bool(re.search(r'\b(udhaar|udhar|likho|likh lo|likh do|likh|likhiye|darj|darj karein|de do|jod do|add kar|credit|dena hai)\b', q)) or any(w in query for w in ["उधार", "दर्ज", "लिखो", "लिखिए", "जोड़ दो", "खाता", "खाते"])) and not is_inquiry)
 
         if is_settle or is_jama or is_udhaar:
             thoughts.append("Deterministic Action: Ledger action detected with strict token boundaries.")
@@ -594,9 +862,22 @@ class ReactAgent:
                 }
 
             # Partial or explicit amount
+            # Step A: Try standard digit-based regex (handles ₹100, Rs.500, 200 rupaye, 1200, etc.)
             amt_match = re.search(r'(?:rs\.?|inr|₹|रुपये|रु\.?|रूपये)?\s*(\d+(?:\.\d+)?)', q)
-            if not amt_match:
-                reply = f"Kripya {matched_cust['name']} ji ke liye rashi (amount) batayein."
+            amount = None
+            if amt_match:
+                amount = float(amt_match.group(1))
+
+            # Step B: If no digit amount found, try Hindi number word conversion
+            # This handles speech recognition output like "sau", "do sau", "dhai hazaar" etc.
+            if amount is None or amount <= 0:
+                hindi_amount = _hindi_words_to_number(q)
+                if hindi_amount and hindi_amount > 0:
+                    amount = hindi_amount
+                    thoughts.append(f"Hindi number words detected, converted to ₹{int(amount)}.")
+
+            if amount is None or amount <= 0:
+                reply = f"Kripya {matched_cust['name']} ji ke liye rashi (amount) batayein. Jaise: '{matched_cust['name']} 500 udhaar' ya '{matched_cust['name']} do sau jama'."
                 return {
                     "query": query,
                     "action_name": "CLARIFICATION_REQUIRED",
@@ -605,9 +886,12 @@ class ReactAgent:
                     "reply": reply,
                     "soundbox_payload": {"chime": False, "speech_text": reply}
                 }
+            is_repay_word = bool(re.search(r'\b(wapas|chuka\w*|chukta|jama|aa gay\w+|mil gay\w+|bhar diya|prapt|cleared|settle)\b', q)) or any(w in query for w in ["वापस", "चुका", "चुकता", "जमा", "आ गया", "आ गए", "भर दिया", "प्राप्त", "सेटल"])
 
-            amount = float(amt_match.group(1))
-            entry_type = "jama" if (is_jama or is_settle) else "udhaar"
+            if is_udhaar:
+                entry_type = "jama" if is_repay_word else "udhaar"
+            else:
+                entry_type = "jama" if (is_jama or is_settle) else "udhaar"
 
             # Item detection (English & Devanagari)
             ITEM_MAP = {
@@ -630,17 +914,20 @@ class ReactAgent:
                     break
 
             res = KhataService.record_entry(matched_cust["name"], amount, item_desc, entry_type)
-            reply = cls._format_tool_response("record_khata_entry", {"customer_name": matched_cust["name"], "amount": amount}, res)
+            reply = cls._format_tool_response("record_khata_entry", {"customer_name": matched_cust["name"], "amount": amount, "entry_type": entry_type}, res)
             now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
             confirmation_card = {
                 "action": "UDHAAR_CREDIT" if entry_type == "udhaar" else "JAMA_PAYMENT",
                 "action_label": "खाता उधार दर्ज (Credit Entry)" if entry_type == "udhaar" else "खाता जमा दर्ज (Payment Received)",
                 "entity": matched_cust["name"],
                 "item_description": item_desc,
+                "item": item_desc,
                 "amount": amount,
                 "date": now_str,
                 "status": "SAVED_TO_DATABASE",
-                "simulation_badge": "Live Paytm Bahi-Khata Ledger"
+                "simulation": False,
+                "simulation_badge": "Live Paytm Bahi-Khata Ledger",
+                "notice": "Saved to live Paytm Bahi-Khata ledger"
             }
             return {
                 "query": query,
