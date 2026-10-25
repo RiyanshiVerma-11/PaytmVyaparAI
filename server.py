@@ -10,17 +10,49 @@ BACKEND_DIR = os.path.join(ROOT_DIR, "backend")
 FRONTEND_DIR = os.path.join(ROOT_DIR, "frontend")
 ASSETS_DIR = os.path.join(ROOT_DIR, "assets")
 
+# Load environment variables (.env / Render secrets)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    load_dotenv(os.path.join(ROOT_DIR, ".env"))
+    load_dotenv("/etc/secrets/.env")
+except Exception:
+    pass
+
+for _env_path in [os.path.join(ROOT_DIR, ".env"), "/etc/secrets/.env"]:
+    if os.path.isfile(_env_path):
+        try:
+            with open(_env_path, "r", encoding="utf-8") as _ef:
+                for _line in _ef:
+                    _line = _line.strip()
+                    if _line and not _line.startswith("#") and "=" in _line:
+                        _k, _v = _line.split("=", 1)
+                        os.environ.setdefault(_k.strip(), _v.strip().strip('"').strip("'"))
+        except Exception:
+            pass
+
 sys.path.insert(0, BACKEND_DIR)
 
-from database import init_db, get_connection, reset_demo_data
-from services.khata_service import KhataService
-from services.inventory_service import InventoryService
-from services.growth_service import GrowthService
-from services.credit_service import CreditService
-from services.transaction_service import TransactionService
-from services.chatbot_service import ChatbotService
-from services.auth_service import AuthService
-from agent.react_agent import ReactAgent
+try:
+    from backend.database import init_db, get_connection, reset_demo_data
+    from backend.services.khata_service import KhataService
+    from backend.services.inventory_service import InventoryService
+    from backend.services.growth_service import GrowthService
+    from backend.services.credit_service import CreditService
+    from backend.services.transaction_service import TransactionService
+    from backend.services.chatbot_service import ChatbotService
+    from backend.services.auth_service import AuthService
+    from backend.agent.react_agent import ReactAgent
+except ImportError:
+    from database import init_db, get_connection, reset_demo_data
+    from services.khata_service import KhataService
+    from services.inventory_service import InventoryService
+    from services.growth_service import GrowthService
+    from services.credit_service import CreditService
+    from services.transaction_service import TransactionService
+    from services.chatbot_service import ChatbotService
+    from services.auth_service import AuthService
+    from agent.react_agent import ReactAgent
 
 init_db()
 
@@ -185,9 +217,9 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
             elif path == "/api/transactions/simulate":
                 res = TransactionService.simulate_payment(
                     float(body.get("amount", 250.0)),
-                    body.get("customer_phone", "+91 9810998877"),
-                    body.get("payment_mode", "UPI_Soundbox"),
-                    body.get("item_tag")
+                    str(body.get("customer_phone") or "+91 9810998877"),
+                    str(body.get("payment_mode") or "UPI_Soundbox"),
+                    str(body.get("item_tag")) if body.get("item_tag") else None
                 )
                 return self._send_json(res)
             elif path == "/api/auth/register":
@@ -197,8 +229,8 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
                     body.get("email", ""),
                     body.get("phone", ""),
                     body.get("password", ""),
-                    body.get("upi_id"),
-                    body.get("address")
+                    str(body["upi_id"]).strip() if body.get("upi_id") else None,
+                    str(body["address"]).strip() if body.get("address") else None
                 )
                 return self._send_json(res)
             elif path == "/api/auth/login":
@@ -221,7 +253,7 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
                     res = AuthService.verify_login_otp(
                         body.get("login_id", ""),
                         body.get("otp", ""),
-                        body.get("new_password")
+                        str(body["new_password"]).strip() if body.get("new_password") else None
                     )
                     return self._send_json(res)
                 except ValueError as ve:

@@ -3,14 +3,21 @@ import re
 import json
 import requests
 from datetime import datetime
+from typing import TYPE_CHECKING, cast, Any
+
+if TYPE_CHECKING:
+    from groq.types.chat import ChatCompletionMessageParam, ChatCompletionToolParam
 try:
     from dotenv import load_dotenv
     load_dotenv()
     load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+    load_dotenv(os.path.join(os.path.dirname(__file__), "..", "..", ".env"))
+    load_dotenv("/etc/secrets/.env")
 except ImportError:
     for _env_candidate in [
         os.path.join(os.path.dirname(__file__), "..", "..", ".env"),
         os.path.join(os.path.dirname(__file__), "..", ".env"),
+        "/etc/secrets/.env",
     ]:
         if os.path.isfile(_env_candidate):
             with open(_env_candidate, "r", encoding="utf-8") as _ef:
@@ -139,9 +146,15 @@ def _hindi_words_to_number(text: str) -> float | None:
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 try:
     from groq import Groq
+    from groq.types.chat import ChatCompletionMessageParam as _MsgParam, ChatCompletionToolParam as _ToolParam
     _groq_client = Groq(api_key=GROQ_API_KEY) if GROQ_API_KEY else None
+    _HAS_GROQ = True
 except Exception:
     _groq_client = None
+    _HAS_GROQ = False
+    # Dummy aliases so cast() calls below don't break when groq isn't installed
+    _MsgParam = Any  # type: ignore[assignment, misc]
+    _ToolParam = Any  # type: ignore[assignment, misc]
 
 AGENT_TOOLS = [
     {
@@ -378,15 +391,22 @@ class ReactAgent:
 
     @classmethod
     def _run_groq_react(cls, query: str, merchant_id: int = 1):
-        messages = [
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": query}
-        ]
+        if not _groq_client:
+            return None
+
+        typed_messages = cast(
+            list["_MsgParam"],  # type: ignore[type-arg]
+            [
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": query},
+            ]
+        )
+        typed_tools = cast(list["_ToolParam"], AGENT_TOOLS)  # type: ignore[type-arg]
 
         resp = _groq_client.chat.completions.create(
-            model="qwen/qwen3.8-27b",
-            messages=messages,
-            tools=AGENT_TOOLS,
+            model="llama-3.3-70b-versatile",
+            messages=typed_messages,
+            tools=typed_tools,
             tool_choice="auto",
             temperature=0.1
         )
@@ -631,14 +651,19 @@ Query: "{query}"
     @classmethod
     def _execute_tool(cls, func_name: str, args: dict, merchant_id: int = 1):
         if func_name == "record_khata_entry":
+            raw_cust = args.get("customer_name")
+            cust_name = str(raw_cust).strip() if raw_cust is not None else ""
+            if not cust_name:
+                return {"success": False, "message": "Grahak ka naam batana zaroori hai."}
             return KhataService.record_entry(
-                customer_name=args.get("customer_name"),
+                customer_name=cust_name,
                 amount=float(args.get("amount", 0)),
-                item_description=args.get("item_description", "General Kirana Items"),
-                entry_type=args.get("entry_type", "udhaar")
+                item_description=str(args.get("item_description") or "General Kirana Items"),
+                entry_type=str(args.get("entry_type") or "udhaar"),
+                merchant_id=merchant_id
             )
         elif func_name == "settle_khata_customer":
-            cust_name = args.get("customer_name")
+            cust_name = str(args.get("customer_name") or "")
             # Look up customer in DB
             conn = get_connection()
             cur = conn.cursor()
@@ -659,7 +684,7 @@ Query: "{query}"
                         "speech_text": f"Paytm par {c['name']} ji ka koi baaki udhaar nahi hai. Khata pehle se chukta hai."
                     }
                 }
-            return KhataService.record_entry(c["name"], pending, "Poora Hisab Chukta", "jama")
+            return KhataService.record_entry(c["name"], pending, "Poora Hisab Chukta", "jama", merchant_id=merchant_id)
         elif func_name == "get_khata_details":
             cust_name = args.get("customer_name")
             conn = get_connection()
@@ -677,15 +702,25 @@ Query: "{query}"
                 conn.close()
                 return {"success": True, "summary": summary}
         elif func_name == "create_supplier_po":
+            raw_item = args.get("item_name")
+            item_name = str(raw_item).strip() if raw_item is not None else ""
+            if not item_name:
+                return {"success": False, "message": "Item ka naam batana zaroori hai."}
+            raw_qty = args.get("quantity")
+            qty = int(raw_qty) if raw_qty is not None and str(raw_qty).isdigit() else None
             return InventoryService.create_supplier_po(
-                item_name=args.get("item_name"),
-                quantity=args.get("quantity"),
+                item_name=item_name,
+                quantity=qty,
                 merchant_id=merchant_id
             )
         elif func_name == "receive_supplier_delivery":
-            return InventoryService.receive_supplier_delivery(args.get("po_identifier"))
+            raw_po = args.get("po_identifier")
+            po_id = str(raw_po).strip() if raw_po is not None else ""
+            if not po_id:
+                return {"success": False, "message": "PO number ya ID batana zaroori hai."}
+            return InventoryService.receive_supplier_delivery(po_id, merchant_id)
         elif func_name == "get_inventory_health":
-            return InventoryService.get_inventory()
+            return InventoryService.get_inventory(merchant_id)
         elif func_name == "get_credit_health":
             return CreditService.get_merchant_credit_health(merchant_id)
         elif func_name == "disburse_loan":
@@ -694,7 +729,11 @@ Query: "{query}"
             return GrowthService.get_campaigns()
         elif func_name == "send_daily_profit_pulse_email":
             from services.transaction_service import TransactionService
-            return TransactionService.send_daily_profit_pulse_email(merchant_id, args.get("custom_email"))
+            custom_email = args.get("custom_email")
+            return TransactionService.send_daily_profit_pulse_email(
+                merchant_id,
+                str(custom_email).strip() if custom_email else None
+            )
         return {"success": False, "message": f"Unknown tool: {func_name}"}
 
     @classmethod
@@ -913,7 +952,7 @@ Query: "{query}"
                     item_desc = v_desc
                     break
 
-            res = KhataService.record_entry(matched_cust["name"], amount, item_desc, entry_type)
+            res = KhataService.record_entry(str(matched_cust["name"]), amount, item_desc, entry_type)
             reply = cls._format_tool_response("record_khata_entry", {"customer_name": matched_cust["name"], "amount": amount, "entry_type": entry_type}, res)
             now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
             confirmation_card = {
@@ -1011,7 +1050,7 @@ Query: "{query}"
 
             # Dynamic quantity extraction or dynamic buffer calculation
             qty_match = re.search(r'\b(\d+)\s*(?:packet|pack|unit|piece|pouch|dibba|kg|litre|l)?\b', q)
-            quantity = int(qty_match.group(1)) if qty_match else None
+            quantity: int | None = int(qty_match.group(1)) if qty_match else None
 
             res = InventoryService.create_supplier_po(target_item, quantity, merchant_id)
             reply = cls._format_tool_response("create_supplier_po", {"item_name": target_item}, res)

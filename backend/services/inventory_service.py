@@ -29,7 +29,7 @@ class InventoryService:
         }
 
     @staticmethod
-    def create_supplier_po(item_name: str, quantity: int = None, merchant_id: int = 1, custom_vendor_email: str = None):
+    def create_supplier_po(item_name: str, quantity: int | None = None, merchant_id: int = 1, custom_vendor_email: str | None = None):
         conn = get_connection()
         cursor = conn.cursor()
         

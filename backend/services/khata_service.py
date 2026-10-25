@@ -23,7 +23,7 @@ def get_phone_last10(raw_phone: str) -> str:
 
 class KhataService:
     @staticmethod
-    def record_entry(customer_name: str, amount: float, item_description: str = "General Items", entry_type: str = "udhaar", phone: str = None, merchant_id: int = 1):
+    def record_entry(customer_name: str, amount: float, item_description: str = "General Items", entry_type: str = "udhaar", phone: str | None = None, merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
 

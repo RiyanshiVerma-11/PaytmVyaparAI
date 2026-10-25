@@ -305,7 +305,7 @@ class TransactionService:
         }
 
     @staticmethod
-    def simulate_payment(amount: float, customer_phone: str = "+91 9810998877", payment_mode: str = "UPI_Soundbox", item_tag: str = None, merchant_id: int = 1):
+    def simulate_payment(amount: float, customer_phone: str = "+91 9810998877", payment_mode: str = "UPI_Soundbox", item_tag: str | None = None, merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -359,7 +359,7 @@ class TransactionService:
         }
 
     @staticmethod
-    def send_daily_profit_pulse_email(merchant_id: int = 1, custom_email: str = None):
+    def send_daily_profit_pulse_email(merchant_id: int = 1, custom_email: str | None = None):
         conn = get_connection()
         cursor = conn.cursor()
 

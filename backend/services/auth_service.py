@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 
 class AuthService:
     @staticmethod
-    def register_merchant(name: str, shop_name: str, email: str, phone: str, password: str, upi_id: str = None, address: str = None):
+    def register_merchant(name: str, shop_name: str, email: str, phone: str, password: str, upi_id: str | None = None, address: str | None = None):
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -204,7 +204,7 @@ class AuthService:
         }
 
     @staticmethod
-    def verify_login_otp(login_id: str, otp: str, new_password: str = None):
+    def verify_login_otp(login_id: str, otp: str, new_password: str | None = None):
         conn = get_connection()
         cursor = conn.cursor()
 
