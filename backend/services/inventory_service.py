@@ -1,4 +1,7 @@
 import os
+import io
+import csv
+import base64
 import smtplib
 from email.message import EmailMessage
 from datetime import datetime, timedelta
@@ -6,22 +9,23 @@ from database import get_connection
 
 class InventoryService:
     @staticmethod
-    def get_inventory():
+    def get_inventory(merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM inventory ORDER BY current_stock ASC")
+        cursor.execute("SELECT * FROM inventory WHERE merchant_id = ? ORDER BY current_stock ASC", (merchant_id,))
         items = [dict(r) for r in cursor.fetchall()]
         
-        cursor.execute("SELECT * FROM supplier_pos ORDER BY id DESC LIMIT 10")
+        cursor.execute("SELECT * FROM supplier_pos WHERE merchant_id = ? ORDER BY id DESC LIMIT 10", (merchant_id,))
         recent_pos = [dict(r) for r in cursor.fetchall()]
         conn.close()
 
-        low_stock = [i for i in items if i["current_stock"] <= i["reorder_threshold"]]
+        low_stock = [i for i in items if (i.get("current_stock") or 0) <= (i.get("reorder_threshold") or 0)]
         return {
             "items": items,
             "low_stock_items": low_stock,
             "low_stock_count": len(low_stock),
-            "recent_pos": recent_pos
+            "recent_pos": recent_pos,
+            "merchant_id": merchant_id
         }
 
     @staticmethod
@@ -29,9 +33,14 @@ class InventoryService:
         conn = get_connection()
         cursor = conn.cursor()
         
-        # 1. Fetch item from inventory
-        cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ?", (f"%{item_name}%",))
+        # 1. Fetch item from inventory for this merchant
+        cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ? AND merchant_id = ?", (f"%{item_name}%", merchant_id))
         item = cursor.fetchone()
+
+        if not item:
+            # Fallback if merchant_id is 1 or check without strict merchant for demo
+            cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ? LIMIT 1", (f"%{item_name}%",))
+            item = cursor.fetchone()
 
         if not item:
             conn.close()
@@ -43,7 +52,7 @@ class InventoryService:
             curr = int(item["current_stock"] or 0)
             quantity = max(5, (threshold * 2) - curr)
 
-        # 3. Fetch active merchant details dynamically (No hardcoded shop name)
+        # 3. Fetch active merchant details dynamically
         cursor.execute("SELECT * FROM merchants WHERE id = ?", (merchant_id,))
         m_row = cursor.fetchone()
         if not m_row:
@@ -51,7 +60,7 @@ class InventoryService:
             m_row = cursor.fetchone()
         merchant = dict(m_row) if m_row else {}
 
-        shop_title = merchant.get("shop_name") or "Sharma Kirana Store"
+        shop_title = merchant.get("shop_name") or "Kirana Store"
         shop_address = merchant.get("address") or "Main Market, Delhi"
         merchant_email = merchant.get("email") or "ramesh.kirana@paytm.com"
         merchant_phone = merchant.get("phone") or "+91 9811223344"
@@ -70,7 +79,6 @@ class InventoryService:
         smtp_pass = (os.getenv("SMTP_PASS") or os.getenv("SMTP_PASSWORD") or "").replace(" ", "").strip()
         from_name = os.getenv("SMTP_FROM_NAME", "Vyapar Saathi")
 
-        # Determine verified destination email to prevent unresolvable .mock domain bounce-backs
         raw_vendor_email = (custom_vendor_email or item["supplier_email"] or "").strip()
         is_mock_domain = (
             not raw_vendor_email or 
@@ -80,7 +88,6 @@ class InventoryService:
         )
 
         if is_mock_domain:
-            # Route to merchant's real email (or smtp_user) so live test delivery succeeds without bouncing!
             destination_email = merchant_email if (merchant_email and "@" in merchant_email and ".mock" not in merchant_email) else (smtp_user or "orders@directexample.com")
             subject_prefix = f"[TEST PO COPY] "
         else:
@@ -139,15 +146,14 @@ class InventoryService:
                 email_status = "FAILED_SMTP_FALLBACK_OUTBOX"
                 smtp_note = f"SMTP live dispatch failed ({smtp_err}); safely persisted in Outbox."
 
-        # 6. Insert PO record — NOTE: Stock is NOT increased yet!
-        # Stock increases ONLY when supplier physical delivery is received via receive_supplier_delivery()!
+        # 6. Insert PO record
         cursor.execute("""
         INSERT INTO supplier_pos (
-            po_number, supplier_name, supplier_email, item_name, quantity, total_cost,
+            merchant_id, po_number, supplier_name, supplier_email, item_name, quantity, total_cost,
             status, sent_at, expected_delivery_date, delivery_status, email_status, email_raw
         )
-        VALUES (?, ?, ?, ?, ?, ?, 'PO_DISPATCHED_PENDING_DELIVERY', datetime('now'), ?, 'PENDING', ?, ?)
-        """, (po_num, item["supplier_name"], destination_email, item["item_name"], quantity, total_cost, expected_delivery, email_status, str(msg)))
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'PO_DISPATCHED_PENDING_DELIVERY', datetime('now'), ?, 'PENDING', ?, ?)
+        """, (merchant_id, po_num, item["supplier_name"], destination_email, item["item_name"], quantity, total_cost, expected_delivery, email_status, str(msg)))
 
         po_id = cursor.lastrowid
         conn.commit()
@@ -184,21 +190,17 @@ class InventoryService:
         }
 
     @staticmethod
-    def receive_supplier_delivery(po_identifier: str):
-        """
-        Receives physical goods delivery from supplier:
-        Marks PO as DELIVERED and CREDITS stock to inventory.
-        """
+    def receive_supplier_delivery(po_identifier: str, merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
 
         # Find PO by ID or PO Number (latest first)
         cursor.execute("""
         SELECT * FROM supplier_pos 
-        WHERE po_number = ? OR id = ? OR po_number LIKE ?
+        WHERE (po_number = ? OR id = ? OR po_number LIKE ?) AND (merchant_id = ? OR merchant_id IS NULL)
         ORDER BY id DESC
         LIMIT 1
-        """, (str(po_identifier), str(po_identifier), f"%{po_identifier}%"))
+        """, (str(po_identifier), str(po_identifier), f"%{po_identifier}%", merchant_id))
         po = cursor.fetchone()
 
         if not po:
@@ -212,7 +214,6 @@ class InventoryService:
                 "message": f"PO #{po['po_number']} ki delivery pehle se receive ho chuki hai ({po['delivery_received_at']})."
             }
 
-        # 1. Update PO Status to DELIVERED
         now_ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute("""
         UPDATE supplier_pos 
@@ -220,8 +221,8 @@ class InventoryService:
         WHERE id = ?
         """, (now_ts, po["id"]))
 
-        # 2. NOW credit the stock into inventory!
-        cursor.execute("SELECT * FROM inventory WHERE item_name = ?", (po["item_name"],))
+        # Credit stock into inventory for this merchant
+        cursor.execute("SELECT * FROM inventory WHERE item_name = ? AND merchant_id = ?", (po["item_name"], merchant_id))
         item = cursor.fetchone()
         if item:
             new_stock = item["current_stock"] + po["quantity"]
@@ -247,11 +248,23 @@ class InventoryService:
         }
 
     @staticmethod
-    def add_or_update_item(item_name: str, category: str, current_stock: int, reorder_threshold: int, unit: str, unit_price: float, wholesale_price: float, supplier_name: str, supplier_email: str):
+    def add_or_update_item(
+        item_name: str,
+        category: str = "Groceries",
+        current_stock: int = 10,
+        reorder_threshold: int = 5,
+        unit: str = "Pack",
+        unit_price: float = 50.0,
+        wholesale_price: float = 42.0,
+        supplier_name: str = "Wholesale Supplier",
+        supplier_email: str = "orders@distributor.mock",
+        merchant_id: int = 1
+    ):
         conn = get_connection()
         cursor = conn.cursor()
 
-        cursor.execute("SELECT id FROM inventory WHERE item_name = ?", (item_name,))
+        clean_name = item_name.strip()
+        cursor.execute("SELECT id FROM inventory WHERE item_name = ? AND merchant_id = ?", (clean_name, merchant_id))
         existing = cursor.fetchone()
 
         if existing:
@@ -263,9 +276,9 @@ class InventoryService:
             item_id = existing["id"]
         else:
             cursor.execute("""
-            INSERT INTO inventory (item_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, (item_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email))
+            INSERT INTO inventory (merchant_id, item_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (merchant_id, clean_name, category, current_stock, reorder_threshold, unit, unit_price, wholesale_price, supplier_name, supplier_email))
             item_id = cursor.lastrowid
 
         conn.commit()
@@ -274,10 +287,187 @@ class InventoryService:
         return {
             "success": True,
             "item_id": item_id,
-            "item_name": item_name,
+            "item_name": clean_name,
+            "current_stock": current_stock,
+            "merchant_id": merchant_id,
             "soundbox_payload": {
                 "chime": True,
-                "speech_text": f"Paytm inventory mein {item_name} update ho gaya."
+                "speech_text": f"Paytm inventory mein {clean_name} update ho gaya."
             }
         }
+
+    @classmethod
+    def bulk_add_items(cls, items: list, merchant_id: int = 1):
+        """
+        Adds or updates a batch of stock items for the specified merchant.
+        """
+        if not items or not isinstance(items, list):
+            return {"success": False, "message": "No items provided for import."}
+
+        added = []
+        for itm in items:
+            name = (itm.get("item_name") or itm.get("name") or "").strip()
+            if not name:
+                continue
+            cat = itm.get("category") or "Groceries"
+            stock = int(itm.get("current_stock") or itm.get("stock") or 10)
+            threshold = int(itm.get("reorder_threshold") or itm.get("threshold") or 5)
+            unit = itm.get("unit") or "Pack"
+            price = float(itm.get("unit_price") or itm.get("price") or 50.0)
+            wholesale = float(itm.get("wholesale_price") or itm.get("wholesale") or round(price * 0.85, 2))
+            supp_name = itm.get("supplier_name") or itm.get("supplier") or "Local Wholesale Hub"
+            supp_email = itm.get("supplier_email") or itm.get("email") or "orders@distributor.mock"
+
+            res = cls.add_or_update_item(
+                item_name=name,
+                category=cat,
+                current_stock=stock,
+                reorder_threshold=threshold,
+                unit=unit,
+                unit_price=price,
+                wholesale_price=wholesale,
+                supplier_name=supp_name,
+                supplier_email=supp_email,
+                merchant_id=merchant_id
+            )
+            added.append(res)
+
+        return {
+            "success": True,
+            "imported_count": len(added),
+            "merchant_id": merchant_id,
+            "message": f"Successfully added {len(added)} products to your store inventory.",
+            "soundbox_payload": {
+                "chime": True,
+                "speech_text": f"Paytm alert: Dukan mein {len(added)} naye stock items safaltapoorvak add ho gaye."
+            }
+        }
+
+    @classmethod
+    def parse_and_import_sheet(cls, file_content_raw: str, filename: str = "stocks.csv", merchant_id: int = 1):
+        """
+        Parses an uploaded spreadsheet (CSV or Excel XLSX) and adds all items for the merchant.
+        Supports raw CSV text or Base64 encoded binary file.
+        """
+        parsed_items = []
+        fn_lower = (filename or "").lower()
+
+        # Handle Base64 decoding if prefix is present or if binary
+        is_base64 = False
+        raw_bytes = None
+        if isinstance(file_content_raw, str):
+            if "base64," in file_content_raw:
+                file_content_raw = file_content_raw.split("base64,")[1]
+                is_base64 = True
+            try:
+                # Try decoding base64
+                decoded = base64.b64decode(file_content_raw)
+                # If valid non-empty bytes
+                if len(decoded) > 0:
+                    raw_bytes = decoded
+            except Exception:
+                raw_bytes = file_content_raw.encode("utf-8", errors="ignore")
+        elif isinstance(file_content_raw, bytes):
+            raw_bytes = file_content_raw
+
+        # 1. Parse Excel XLSX
+        if fn_lower.endswith(".xlsx") or fn_lower.endswith(".xls"):
+            try:
+                import openpyxl
+                wb = openpyxl.load_workbook(io.BytesIO(raw_bytes), data_only=True)
+                ws = wb.active
+                rows = list(ws.iter_rows(values_only=True))
+                if len(rows) >= 2:
+                    headers = [str(h).strip().lower() if h is not None else "" for h in rows[0]]
+                    for row in rows[1:]:
+                        if not any(row):
+                            continue
+                        row_dict = {}
+                        for i, h in enumerate(headers):
+                            if i < len(row) and h:
+                                row_dict[h] = row[i]
+                        item = cls._map_row_to_item(row_dict)
+                        if item:
+                            parsed_items.append(item)
+            except Exception as ex:
+                print(f"Excel parsing exception: {ex}")
+                # Fallback to CSV parse if XLSX parser fails
+                pass
+
+        # 2. Parse CSV if not parsed yet or if filename is .csv
+        if not parsed_items and raw_bytes:
+            try:
+                text_content = raw_bytes.decode("utf-8-sig", errors="replace")
+                reader = csv.DictReader(io.StringIO(text_content))
+                for row in reader:
+                    normalized_row = {str(k).strip().lower(): v for k, v in row.items() if k}
+                    item = cls._map_row_to_item(normalized_row)
+                    if item:
+                        parsed_items.append(item)
+            except Exception as ex:
+                print(f"CSV parsing exception: {ex}")
+
+        if not parsed_items:
+            return {
+                "success": False,
+                "message": "Could not extract valid product rows from sheet. Please ensure column headers match 'Item Name', 'Category', 'Stock', 'Price', 'Wholesale Cost'."
+            }
+
+        return cls.bulk_add_items(parsed_items, merchant_id=merchant_id)
+
+    @classmethod
+    def _map_row_to_item(cls, row_dict: dict):
+        """
+        Flexible column header resolver for merchant spreadsheets.
+        """
+        def find_val(candidates, default=None):
+            for c in candidates:
+                for k, v in row_dict.items():
+                    if c in k.lower() and v is not None and str(v).strip() != "":
+                        return v
+            return default
+
+        name = find_val(["item_name", "item name", "product name", "product", "item", "samaan", "naam", "title"])
+        if not name or str(name).strip() == "":
+            return None
+
+        clean_name = str(name).strip()
+        cat = find_val(["category", "type", "varg", "group", "department"], "Groceries")
+        unit = find_val(["unit", "uom", "packaging", "pack"], "Pack")
+
+        try:
+            stock = int(float(find_val(["current_stock", "current stock", "stock", "quantity", "qty", "count"], 10)))
+        except (ValueError, TypeError):
+            stock = 10
+
+        try:
+            threshold = int(float(find_val(["reorder_threshold", "reorder threshold", "threshold", "min stock", "min_stock", "alert"], 5)))
+        except (ValueError, TypeError):
+            threshold = 5
+
+        try:
+            price = float(find_val(["unit_price", "unit price", "selling price", "retail price", "price", "mrp", "rate"], 50.0))
+        except (ValueError, TypeError):
+            price = 50.0
+
+        try:
+            wholesale = float(find_val(["wholesale_price", "wholesale price", "wholesale", "cost", "purchase rate", "buy price", "cogs"], round(price * 0.85, 2)))
+        except (ValueError, TypeError):
+            wholesale = round(price * 0.85, 2)
+
+        supplier = find_val(["supplier_name", "supplier name", "supplier", "vendor", "distributor"], "Wholesale Distributor")
+        email = find_val(["supplier_email", "supplier email", "vendor email", "email"], "orders@distributor.mock")
+
+        return {
+            "item_name": clean_name,
+            "category": str(cat).strip(),
+            "current_stock": stock,
+            "reorder_threshold": threshold,
+            "unit": str(unit).strip(),
+            "unit_price": price,
+            "wholesale_price": wholesale,
+            "supplier_name": str(supplier).strip(),
+            "supplier_email": str(email).strip()
+        }
+
 

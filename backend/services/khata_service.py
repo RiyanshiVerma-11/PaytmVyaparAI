@@ -23,7 +23,7 @@ def get_phone_last10(raw_phone: str) -> str:
 
 class KhataService:
     @staticmethod
-    def record_entry(customer_name: str, amount: float, item_description: str = "General Items", entry_type: str = "udhaar", phone: str = None):
+    def record_entry(customer_name: str, amount: float, item_description: str = "General Items", entry_type: str = "udhaar", phone: str = None, merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
 
@@ -52,9 +52,9 @@ class KhataService:
                 "message": "Valid transaction amount batana zaroori hai."
             }
 
-        # Fetch all existing customers for precise matching
+        # Fetch all existing customers for this merchant for precise matching
         customer = None
-        cursor.execute("SELECT * FROM customers")
+        cursor.execute("SELECT * FROM customers WHERE merchant_id = ?", (merchant_id,))
         all_customers = [dict(r) for r in cursor.fetchall()]
 
         # 1. Match by exact full name (case-insensitive) first
@@ -90,9 +90,9 @@ class KhataService:
             cust_name = clean_name.title()
             cust_phone = norm_phone or "+91 (Mobile Not Registered)"
             cursor.execute("""
-            INSERT INTO customers (name, phone, pending_udhaar, last_visit_date, visit_count, churn_risk)
-            VALUES (?, ?, 0, date('now'), 1, 'Normal')
-            """, (cust_name, cust_phone))
+            INSERT INTO customers (merchant_id, name, phone, pending_udhaar, last_visit_date, visit_count, churn_risk)
+            VALUES (?, ?, ?, 0, date('now'), 1, 'Normal')
+            """, (merchant_id, cust_name, cust_phone))
             cust_id = cursor.lastrowid
             curr_pending = 0.0
 
@@ -103,28 +103,28 @@ class KhataService:
         cursor.execute("""
         UPDATE customers 
         SET name = ?, phone = ?, pending_udhaar = ?, last_visit_date = date('now'), visit_count = visit_count + 1
-        WHERE id = ?
-        """, (cust_name, cust_phone, new_pending, cust_id))
+        WHERE id = ? AND merchant_id = ?
+        """, (cust_name, cust_phone, new_pending, cust_id, merchant_id))
 
         # Insert Khata record
         cursor.execute("""
-        INSERT INTO khata_entries (customer_id, customer_name, amount, item_description, entry_type, created_at, status)
-        VALUES (?, ?, ?, ?, ?, datetime('now'), 'pending')
-        """, (cust_id, cust_name, amount, item_description, entry_type.lower()))
+        INSERT INTO khata_entries (merchant_id, customer_id, customer_name, amount, item_description, entry_type, created_at, status)
+        VALUES (?, ?, ?, ?, ?, ?, datetime('now'), 'pending')
+        """, (merchant_id, cust_id, cust_name, amount, item_description, entry_type.lower()))
         entry_id = cursor.lastrowid
 
-        # Also log to transactions table with dynamic phone
+        # Also log to transactions table with dynamic phone and merchant_id
         txn_id = f"TXN_{int(datetime.now().timestamp())}"
         cursor.execute("""
-        INSERT INTO transactions (txn_id, amount, customer_phone, payment_mode, timestamp, status)
-        VALUES (?, ?, ?, ?, datetime('now'), 'SUCCESS')
-        """, (txn_id, amount, cust_phone, 'Udhaar' if entry_type.lower() == 'udhaar' else 'Cash'))
+        INSERT INTO transactions (merchant_id, txn_id, amount, customer_phone, payment_mode, timestamp, status)
+        VALUES (?, ?, ?, ?, ?, datetime('now'), 'SUCCESS')
+        """, (merchant_id, txn_id, amount, cust_phone, 'Udhaar' if entry_type.lower() == 'udhaar' else 'Cash'))
 
-        # Check and auto-decrement stock if specific Kirana item mentioned
+        # Check and auto-decrement stock if specific item mentioned in this merchant's inventory
         stock_decremented = None
         for item_key in ["butter", "oil", "tel", "maggi", "salt", "atta", "tea"]:
             if item_key in item_description.lower():
-                cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ?", (f"%{item_key}%",))
+                cursor.execute("SELECT * FROM inventory WHERE item_name LIKE ? AND merchant_id = ?", (f"%{item_key}%", merchant_id))
                 item = cursor.fetchone()
                 if item:
                     new_stock = max(0, item["current_stock"] - 1)
@@ -133,9 +133,12 @@ class KhataService:
                 break
 
         # Fetch dynamic merchant UPI ID & store details
-        cursor.execute("SELECT shop_name, upi_id FROM merchants LIMIT 1")
+        cursor.execute("SELECT shop_name, upi_id FROM merchants WHERE id = ?", (merchant_id,))
         m_row = cursor.fetchone()
-        shop_title = m_row["shop_name"] if m_row and m_row["shop_name"] else "Sharma Kirana Store"
+        if not m_row:
+            cursor.execute("SELECT shop_name, upi_id FROM merchants LIMIT 1")
+            m_row = cursor.fetchone()
+        shop_title = m_row["shop_name"] if m_row and m_row["shop_name"] else "Kirana Store"
         merchant_upi = m_row["upi_id"] if m_row and m_row["upi_id"] else "8171008964@ptaxis"
 
         conn.commit()
@@ -171,6 +174,7 @@ class KhataService:
             "entry_type": entry_type.lower(),
             "stock_decremented": stock_decremented,
             "sms_uri": sms_uri,
+            "merchant_id": merchant_id,
             "soundbox_payload": {
                 "chime": True,
                 "speech_text": speech_text,
@@ -180,21 +184,26 @@ class KhataService:
         }
 
     @staticmethod
-    def settle_customer(customer_id: int):
+    def settle_customer(customer_id: int, merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM customers WHERE id = ?", (customer_id,))
+        cursor.execute("SELECT * FROM customers WHERE id = ? AND merchant_id = ?", (customer_id, merchant_id))
         c = cursor.fetchone()
+        if not c:
+            # Fallback if merchant_id = 1
+            cursor.execute("SELECT * FROM customers WHERE id = ?", (customer_id,))
+            c = cursor.fetchone()
+
         if not c:
             conn.close()
             return {"success": False, "message": "Customer not found."}
 
         settled_amount = c["pending_udhaar"]
-        cursor.execute("UPDATE customers SET pending_udhaar = 0 WHERE id = ?", (customer_id,))
+        cursor.execute("UPDATE customers SET pending_udhaar = 0 WHERE id = ?", (c["id"],))
         cursor.execute("""
-        INSERT INTO khata_entries (customer_id, customer_name, amount, item_description, entry_type, created_at, status)
-        VALUES (?, ?, ?, 'Full Balance Settled', 'jama', datetime('now'), 'settled')
-        """, (customer_id, c["name"], settled_amount))
+        INSERT INTO khata_entries (merchant_id, customer_id, customer_name, amount, item_description, entry_type, created_at, status)
+        VALUES (?, ?, ?, ?, 'Full Balance Settled', 'jama', datetime('now'), 'settled')
+        """, (c.get("merchant_id", merchant_id), c["id"], c["name"], settled_amount))
 
         conn.commit()
         conn.close()
@@ -203,6 +212,7 @@ class KhataService:
             "success": True,
             "customer_name": c["name"],
             "settled_amount": settled_amount,
+            "merchant_id": merchant_id,
             "soundbox_payload": {
                 "chime": True,
                 "speech_text": f"Paytm par {c['name']} ji ka pura balance chukta ho gaya."
@@ -270,12 +280,12 @@ class KhataService:
         }
 
     @staticmethod
-    def get_all_entries():
+    def get_all_entries(merchant_id: int = 1):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM khata_entries ORDER BY id DESC LIMIT 50")
+        cursor.execute("SELECT * FROM khata_entries WHERE merchant_id = ? ORDER BY id DESC LIMIT 50", (merchant_id,))
         entries = [dict(r) for r in cursor.fetchall()]
-        cursor.execute("SELECT * FROM customers ORDER BY pending_udhaar DESC")
+        cursor.execute("SELECT * FROM customers WHERE merchant_id = ? ORDER BY pending_udhaar DESC", (merchant_id,))
         customers = [dict(r) for r in cursor.fetchall()]
         conn.close()
 
@@ -288,7 +298,8 @@ class KhataService:
             "customers": customers,
             "total_pending_udhaar": round(total_pending, 2),
             "total_recovered": round(total_recovered, 2),
-            "pending_customers_count": pending_count
+            "pending_customers_count": pending_count,
+            "merchant_id": merchant_id
         }
 
     @staticmethod

@@ -9,8 +9,8 @@ env/
 .env.*
 !.env.example
 
-# Database
-*.sqlite3
+# Database (vyapar.db is committed intentionally for Vercel deployment parity)
+*.db-journal
 backend/vyapar.db-journal
 
 # IDE & OS
