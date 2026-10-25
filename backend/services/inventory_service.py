@@ -354,7 +354,7 @@ class InventoryService:
 
         # Handle Base64 decoding if prefix is present or if binary
         is_base64 = False
-        raw_bytes = None
+        raw_bytes: bytes = b""
         if isinstance(file_content_raw, str):
             if "base64," in file_content_raw:
                 file_content_raw = file_content_raw.split("base64,")[1]
@@ -376,19 +376,20 @@ class InventoryService:
                 import openpyxl
                 wb = openpyxl.load_workbook(io.BytesIO(raw_bytes), data_only=True)
                 ws = wb.active
-                rows = list(ws.iter_rows(values_only=True))
-                if len(rows) >= 2:
-                    headers = [str(h).strip().lower() if h is not None else "" for h in rows[0]]
-                    for row in rows[1:]:
-                        if not any(row):
-                            continue
-                        row_dict = {}
-                        for i, h in enumerate(headers):
-                            if i < len(row) and h:
-                                row_dict[h] = row[i]
-                        item = cls._map_row_to_item(row_dict)
-                        if item:
-                            parsed_items.append(item)
+                if ws is not None:
+                    rows = list(ws.iter_rows(values_only=True))
+                    if len(rows) >= 2:
+                        headers = [str(h).strip().lower() if h is not None else "" for h in rows[0]]
+                        for row in rows[1:]:
+                            if not any(row):
+                                continue
+                            row_dict = {}
+                            for i, h in enumerate(headers):
+                                if i < len(row) and h:
+                                    row_dict[h] = row[i]
+                            item = cls._map_row_to_item(row_dict)
+                            if item:
+                                parsed_items.append(item)
             except Exception as ex:
                 print(f"Excel parsing exception: {ex}")
                 # Fallback to CSV parse if XLSX parser fails

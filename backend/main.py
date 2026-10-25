@@ -64,7 +64,7 @@ class KhataEntryRequest(BaseModel):
     amount: float
     item_description: str = "General Kirana Items"
     entry_type: str = "udhaar"
-    phone: str = None
+    phone: str | None = None
 
 class KhataSettleRequest(BaseModel):
     customer_id: int
@@ -74,16 +74,16 @@ class KhataUndoRequest(BaseModel):
 
 class PORequest(BaseModel):
     item_name: str
-    quantity: int = None
+    quantity: int | None = None
     merchant_id: int = 1
-    custom_vendor_email: str = None
+    custom_vendor_email: str | None = None
 
 class UpdateMerchantEmailRequest(BaseModel):
     email: str
     merchant_id: int = 1
 
 class DailyPulseEmailRequest(BaseModel):
-    custom_email: str = None
+    custom_email: str | None = None
     merchant_id: int = 1
 
 class ReceivePORequest(BaseModel):
@@ -104,7 +104,7 @@ class SimulateTxnRequest(BaseModel):
     amount: float
     customer_phone: str = "+91 9810998877"
     payment_mode: str = "UPI_Soundbox"
-    item_tag: str = None
+    item_tag: str | None = None
 
 class LoanDisburseRequest(BaseModel):
     amount: float = 50000.0
@@ -120,8 +120,8 @@ class RegisterMerchantRequest(BaseModel):
     email: str
     phone: str
     password: str
-    upi_id: str = None
-    address: str = None
+    upi_id: str | None = None
+    address: str | None = None
 
 class LoginMerchantRequest(BaseModel):
     login_id: str
@@ -133,7 +133,7 @@ class SendOtpRequest(BaseModel):
 class VerifyOtpRequest(BaseModel):
     login_id: str
     otp: str
-    new_password: str = None
+    new_password: str | None = None
 
 @app.get("/health")
 @app.get("/api/health")

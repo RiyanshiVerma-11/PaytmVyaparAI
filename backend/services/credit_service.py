@@ -41,7 +41,7 @@ class CreditService:
         active_customers = int(cursor.fetchone()[0] or 0)
 
         # Check for insufficient data
-        if total_upi == 0 and tx_count == 0 and total_customers == 0 and total_book == 0:
+        if total_upi == 0 and tx_count == 0 and total_customers == 0 and total_udhaar == 0:
             return {
                 "merchant_id": merchant["id"],
                 "merchant_name": merchant["name"],
