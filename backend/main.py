@@ -135,6 +135,11 @@ class VerifyOtpRequest(BaseModel):
     otp: str
     new_password: str = None
 
+@app.get("/health")
+@app.get("/api/health")
+async def health_check():
+    return {"status": "ok", "service": "Paytm Vyapar Saathi API", "version": "1.0.0"}
+
 # Routes: Merchant Authentication & Multi-Tenant Access
 @app.post("/api/auth/register")
 async def register_merchant(req: RegisterMerchantRequest):
