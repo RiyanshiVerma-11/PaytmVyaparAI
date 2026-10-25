@@ -128,8 +128,8 @@ class VyaparRequestHandler(SimpleHTTPRequestHandler):
                         "pin": "1234"
                     }
                 })
-            elif path == "/health":
-                return self._send_json({"status": "ok"})
+            elif path in ("/health", "/api/health"):
+                return self._send_json({"status": "ok", "service": "Paytm Vyapar Saathi API", "version": "1.0.0"})
         except Exception as e:
             return self._send_json({"error": str(e)}, status=500)
 
