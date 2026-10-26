@@ -1,5 +1,17 @@
 {
-  "extraPaths": [
-    "backend"
-  ]
+  "include": ["backend"],
+  "exclude": ["**/node_modules", "**/__pycache__", "**/.*"],
+  "extraPaths": ["backend"],
+  "pythonVersion": "3.11",
+  "pythonPlatform": "Linux",
+  "typeCheckingMode": "standard",
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none",
+  "reportUnusedImport": "none",
+  "reportAttributeAccessIssue": "error",
+  "reportUndefinedVariable": "error",
+  "reportOperatorIssue": "error",
+  "reportReturnType": "error",
+  "reportIndexIssue": "error"
 }
+

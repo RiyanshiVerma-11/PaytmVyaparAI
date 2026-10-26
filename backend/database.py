@@ -55,6 +55,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS khata_entries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        merchant_id INTEGER DEFAULT 1,
         customer_id INTEGER,
         customer_name TEXT,
         amount REAL,
@@ -70,7 +71,8 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS inventory (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        item_name TEXT UNIQUE,
+        merchant_id INTEGER DEFAULT 1,
+        item_name TEXT,
         category TEXT,
         current_stock INTEGER,
         reorder_threshold INTEGER,
@@ -78,7 +80,8 @@ def init_db():
         unit_price REAL,
         wholesale_price REAL,
         supplier_name TEXT,
-        supplier_email TEXT
+        supplier_email TEXT,
+        UNIQUE(merchant_id, item_name)
     )
     """)
 
@@ -106,6 +109,7 @@ def init_db():
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS transactions (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        merchant_id INTEGER DEFAULT 1,
         txn_id TEXT,
         amount REAL,
         customer_phone TEXT,
