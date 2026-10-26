@@ -4,7 +4,7 @@ from datetime import datetime
 def normalize_phone(raw_phone: str) -> str:
     if not raw_phone:
         return ""
-    digits = ''.join(c for c in str(raw_phone) if c.isdigit())
+    digits = ''.join(c for c in raw_phone if c.isdigit())
     if len(digits) == 10:
         return f"+91 {digits}"
     elif len(digits) == 11 and digits.startswith("0"):
@@ -12,13 +12,13 @@ def normalize_phone(raw_phone: str) -> str:
     elif len(digits) == 12 and digits.startswith("91"):
         return f"+91 {digits[2:]}"
     elif digits:
-        return f"+{digits}" if not str(raw_phone).startswith("+") else str(raw_phone).strip()
-    return str(raw_phone).strip()
+        return f"+{digits}" if not raw_phone.startswith("+") else raw_phone.strip()
+    return raw_phone.strip()
 
 def get_phone_last10(raw_phone: str) -> str:
     if not raw_phone:
         return ""
-    digits = ''.join(c for c in str(raw_phone) if c.isdigit())
+    digits = ''.join(c for c in raw_phone if c.isdigit())
     return digits[-10:] if len(digits) >= 10 else digits
 
 class KhataService:
@@ -200,10 +200,11 @@ class KhataService:
 
         settled_amount = c["pending_udhaar"]
         cursor.execute("UPDATE customers SET pending_udhaar = 0 WHERE id = ?", (c["id"],))
+        cust_dict = dict(c)
         cursor.execute("""
         INSERT INTO khata_entries (merchant_id, customer_id, customer_name, amount, item_description, entry_type, created_at, status)
         VALUES (?, ?, ?, ?, 'Full Balance Settled', 'jama', datetime('now'), 'settled')
-        """, (c.get("merchant_id", merchant_id), c["id"], c["name"], settled_amount))
+        """, (cust_dict.get("merchant_id", merchant_id), c["id"], c["name"], settled_amount))
 
         conn.commit()
         conn.close()
